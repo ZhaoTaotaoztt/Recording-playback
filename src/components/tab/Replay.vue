@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2022-02-08 11:16:03
- * @LastEditTime: 2022-02-09 15:34:49
+ * @LastEditTime: 2022-02-20 12:39:26
  * @LastEditors: Please set LastEditors
  * @Description: 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  * @FilePath: \admin\src\components\tab\replay.vue
@@ -134,6 +134,11 @@
 </template>
 
 <script>
+
+import $ from 'jquery'
+import 'jquery-ui-dist/jquery-ui'
+import 'jquery-ui-dist/jquery-ui.min.css'
+
 export default {
   data() {
     return {
