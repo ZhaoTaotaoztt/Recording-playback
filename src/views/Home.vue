@@ -1,11 +1,4 @@
-<!--
- * @Author: your name
- * @Date: 2022-01-18 16:13:35
- * @LastEditTime: 2022-02-21 16:09:48
- * @LastEditors: Please set LastEditors
- * @Description: 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
- * @FilePath: \admin\src\views\Home.vue
--->
+
 <template>
   <div class="home">
     <div class="hearder">
@@ -132,7 +125,7 @@ export default {
 }
 .hearder {
   width: 100%;
-  height: 12rem;
+  height: 10rem;
   background-color: rgb(245, 124, 0);
   display: flex;
   justify-content: space-around;
