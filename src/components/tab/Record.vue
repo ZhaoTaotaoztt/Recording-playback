@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2022-02-08 11:16:03
- * @LastEditTime: 2022-02-21 16:25:02
+ * @LastEditTime: 2022-02-21 17:19:19
  * @LastEditors: Please set LastEditors
  * @Description: 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  * @FilePath: \admin\src\components\tab\Record.vue
@@ -196,7 +196,7 @@ export default {
             // console.log(item.id);
             this.recordid.push(item.id);
             this.recordItem.push(item);
-            // console.log(item);
+            // console.log(item);0
           } else {
             item.checked = false;
             console.log(this["recordboolen" + item.ChanneIndex]);
@@ -211,7 +211,6 @@ export default {
               }
             );
           }
-          // return true
         });
       } else {
         this.recordboolen = false;
