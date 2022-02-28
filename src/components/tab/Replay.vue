@@ -54,7 +54,7 @@
             <el-checkbox
               class="select"
               v-model="item.checked"
-              @change="Checkedreplay(item.FileName, item.checked)"
+              @change="Checkedreplay(item.FileName,item.checked)"
             ></el-checkbox>
           </td>
           <!-- 复选框在这 -->
@@ -81,32 +81,47 @@
     <p>
       <el-button class="btn query" @click="StartPlay">Start Replay</el-button>
       <el-button class="btn query" @click="StopPlay">Stop Replay</el-button>
-      <el-button class="btn query">Stop Record</el-button>
+      <el-button class="btn query" @click="StopRecord">Stop Record</el-button>
     </p>
     <p>
       <el-button class="btn query" @click="StartSynPlay"
         >Start SynReplay</el-button
       >
-      <el-button class="btn query" @click="StopSynPlay">Stop SynReplay</el-button>
-      <el-button class="btn query">Stop SynRecord</el-button>
+      <el-button class="btn query" @click="StopSynPlay"
+        >Stop SynReplay</el-button
+      >
+      <el-button class="btn query" @click="StopSynRecord"
+        >Stop SynRecord</el-button
+      >
     </p>
 
     <!-- 嵌套的表单 -->
-    <el-dialog title="新建录制配置" :visible="dialogreplay" id="dialogreplay">
+    <el-dialog
+      title="新建录制配置"
+      :visible="dialogreplay"
+      id="dialogreplay"
+      :before-close="close"
+    >
       <el-form>
-        <el-form-item label="PlayBoardIndex" :label-width="formLabelWidth">
-          <el-select>
+        <el-form-item label="PlayChanneIIndex" :label-width="formLabelWidth">
+          <el-select v-model="replayIDForm.PlayChanneIIndex">
             <el-option label="0" value="0"></el-option>
             <el-option label="1" value="1"></el-option>
           </el-select>
         </el-form-item>
 
         <el-form-item label="PlatTXGain" :label-width="formLabelWidth">
-          <el-input autocomplete="off"></el-input>
+          <el-input
+            autocomplete="off"
+            v-model="replayIDForm.PlatTXGain"
+          ></el-input>
         </el-form-item>
 
         <el-form-item label="PlayTXFrequency" :label-width="formLabelWidth">
-          <el-input autocomplete="off"></el-input>
+          <el-input
+            autocomplete="off"
+            v-model="replayIDForm.PlayTXFrequency"
+          ></el-input>
         </el-form-item>
       </el-form>
 
@@ -176,7 +191,13 @@ export default {
       removeData: "",
       replayboolen: false,
       formLabelWidth: "120px",
-      isclick: true,
+      // isclick: true,
+
+      replayIDForm: {
+        PlayChanneIIndex: 1,
+        PlatTXGain: 50,
+        PlayTXFrequency: 1575420000,
+      },
     };
   },
   methods: {
@@ -192,7 +213,7 @@ export default {
       //socket请求----
       var ws = new WebSocket("ws://192.168.1.203:9001");
       ws.onopen = function (e) {
-        // console.log(ws.readyState);
+        console.log(ws.readyState);
         ws.send(
           JSON.stringify({
             cmd: {
@@ -212,7 +233,6 @@ export default {
       var that = this;
       ws.onmessage = function (e) {
         console.log(JSON.parse(e.data).cmd.FileInformations);
-        // that.replay=JSON.parse(e.data).cmd.FileInformations
         that.replay = JSON.parse(e.data).cmd.FileInformations;
       };
       ws.onclose = function (e) {
@@ -235,7 +255,7 @@ export default {
       }
       //提示不要频繁点击
     },
-    Checkedreplay(FileName, istrue) {
+    Checkedreplay(FileName,istrue) {
       //复选框选中的事件
       console.log(FileName);
       if (istrue == true) {
@@ -349,6 +369,9 @@ export default {
 
     Accept() {
       //配置（对话框）
+      this.dialogreplay = false;
+    },
+    close() {
       this.dialogreplay = false;
     },
     StartPlay() {
@@ -596,6 +619,119 @@ export default {
             break;
           case 1:
             that.$message.error("文件不存在!");
+            break;
+        }
+      };
+      ws.onclose = function (e) {
+        console.log(e);
+        ws.close(); //关闭TCP连接
+      };
+      //socket请求----
+
+      //提示不要频繁点击
+      if (this.isclick) {
+        this.isclick = false;
+        setTimeout(() => {
+          this.isclick = true;
+        }, 4000);
+      } else {
+        this.$message({
+          message: "请不要频繁点击！",
+          type: "warning",
+        });
+      }
+      //提示不要频繁点击
+    },
+    StopRecord() {
+      //下发停止录制StopRecord请求  单条数据下发
+
+      //socket请求----
+      var ws = new WebSocket("ws://192.168.1.203:9001");
+      ws.onopen = function (e) {
+        // console.log(ws.readyState);
+        ws.send(
+          JSON.stringify({
+            cmd: {
+              APIName: "StopRecord",
+              FileInformations: [
+                {
+                  FileName: "gnss_3345678683688856#0_20211227_103250_325.bin",
+                },
+                {
+                  FileName: "gnss_3345678683688856#1_20211227_103250_325.bin",
+                },
+              ],
+            },
+          })
+        );
+      };
+      var that = this;
+      ws.onmessage = function (e) {
+        var statu = JSON.parse(e.data).cmd.ResultCode;
+        switch (statu) {
+          case 0:
+            that.$message({
+              message: "成功",
+              type: "success",
+            });
+            break;
+          case 1:
+            that.$message.error("失败!");
+            break;
+        }
+      };
+      ws.onclose = function (e) {
+        console.log(e);
+        ws.close(); //关闭TCP连接
+      };
+      //socket请求----
+
+      //提示不要频繁点击
+      if (this.isclick) {
+        this.isclick = false;
+        setTimeout(() => {
+          this.isclick = true;
+        }, 4000);
+      } else {
+        this.$message({
+          message: "请不要频繁点击！",
+          type: "warning",
+        });
+      }
+      //提示不要频繁点击
+    },
+    StopSynRecord() {
+      //下发停止录制StopRecord请求  组合数据下发
+
+      //socket请求----
+      var ws = new WebSocket("ws://192.168.1.203:9001");
+      ws.onopen = function (e) {
+        // console.log(ws.readyState);
+        ws.send(
+          JSON.stringify({
+            cmd: {
+              APIName: "StopRecord",
+              FileInformations: [
+                {
+                  FileName: "gnss_3345678683688856_20211227_103250_325.bin",
+                },
+              ],
+            },
+          })
+        );
+      };
+      var that = this;
+      ws.onmessage = function (e) {
+        var statu = JSON.parse(e.data).cmd.ResultCode;
+        switch (statu) {
+          case 0:
+            that.$message({
+              message: "成功",
+              type: "success",
+            });
+            break;
+          case 1:
+            that.$message.error("失败!");
             break;
         }
       };

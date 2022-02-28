@@ -12,7 +12,10 @@
       <router-link to="/home/replay">Replay</router-link>
     </div>
 
-    <router-view />
+    <keep-alive>
+      <router-view/>
+    </keep-alive>
+    
   </div>
 </template>
 

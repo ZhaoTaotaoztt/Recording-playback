@@ -179,16 +179,7 @@ export default {
           RecordRXGain: "40",
           id: 8,
         },
-        {
-          ChanneIndex: "0",
-          FileSize: "154090653200",
-          BitNumber: "4",
-          SampleRate: "122880000",
-          RecordBandwidth: "10000000",
-          RecordRXFrequency: "1575420000",
-          RecordRXGain: "40",
-          id: 9,
-        },
+
       ],
       recordIndex: [],
       removeData: [],

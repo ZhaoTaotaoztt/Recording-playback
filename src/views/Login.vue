@@ -41,7 +41,7 @@
 // import { Component, Vue } from 'vue-property-decorator';
 // import HelloWorld from '@/components/HelloWorld.vue'; // @ is an alias to /src
 import { validUsername } from "@/utils/validate";
-// import ws from "../utils/websocket"
+import ws from "../utils/websocket"
 
 export default {
   name: "login",
@@ -80,8 +80,6 @@ export default {
   },
   methods: {
     handleLogin() {
-      // ws.initWebSocket("ws://192.168.1.203:9001")
-
       this.$refs.loginForm.validate((valid) => {
         if (valid) {
           this.$router.push("/home");
