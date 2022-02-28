@@ -17,13 +17,9 @@
 </template>
 
 <script>
-
-
-
 export default {
   data() {
     return {
-
       activeName: "first",
       boardinfo: [],
       record: [],
@@ -53,8 +49,6 @@ export default {
   },
   created() {},
   methods: {
-
-    
     //replay部分replay部分replay部分replay部分replay部分replay部分replay部分replay部分replay部分replay部分
     getReplay() {
       //获取replay数据
@@ -165,8 +159,8 @@ export default {
   line-height: 5rem;
   font-size: 1.5rem;
 }
-.home>>>.nav>a{
-    width: 33%;
+.home >>> .nav > a {
+  width: 33%;
   height: 5rem;
   /* background-color: aqua; */
   text-align: center;
@@ -175,8 +169,7 @@ export default {
   text-decoration: none;
   color: white;
 }
-.router-link-exact-active{
+.router-link-exact-active {
   border-bottom: 3px solid rgb(37, 141, 222) !important;
-
 }
 </style>

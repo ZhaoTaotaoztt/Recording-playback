@@ -21,12 +21,12 @@
         <th>BoardVersion</th>
         <th>temperature</th>
       </tr>
-      <tr v-for="item in boardinfo" :key="item.id">
-        <td>{{ item.ChannelInformations.ChannelIndex }}</td>
-        <td>{{ item.ChannelInformations.ChannelStatus }}</td>
-        <td>{{ item.ChannelInformations.BoardSN }}</td>
-        <td>{{ item.ChannelInformations.BoardVersion }}</td>
-        <td>{{ item.ChannelInformations.temperature }}</td>
+      <tr v-for="item in boardinfo" :key="item.index" @click="test(item)">
+        <td>{{ item.ChannelIndex }}</td>
+        <td>{{ item.ChannelStatus }}</td>
+        <td>{{ item.BoardSN }}</td>
+        <td>{{ item.BoardVersion }}</td>
+        <td>{{ item.temperature }}</td>
       </tr>
     </table>
     <p>
@@ -44,10 +44,10 @@
 </template>
 
 <script>
-// import $ from "jquery";
-// import "jquery-ui-dist/jquery-ui";
-// import "jquery-ui-dist/jquery-ui.min.css";
-
+// import ws from "../utils/websocket"
+// import {
+// websocketOpen,sendSock,websocketonmessage,websocketclose
+// } from "../../utils/websocket";
 export default {
   data() {
     return {
@@ -57,34 +57,53 @@ export default {
       showWarn: false,
     };
   },
-  mounted() {
-  },
+  mounted() {},
   methods: {
+    test(item) {
+      console.log(item);
+    },
     getBoardinfo() {
       //获取boardinfo数据
-      //socket请求
-      // let ws = new WebSocket("ws://139.198.123.178:2000");
-      // ws.onopen = function () {
-      //   console.log("连接成功");
-      //   ws.send({
-      //     APIName: "QueryPlayId",
-      //     FileInformations: {
-      //       FileName:
-      //         "gnss_3345678683688856_20211227_103250_325_115910_456.bin",
-      //       PlayBoardIndexs: [],
-      //     },
-      //   });
-      //   console.log("给服务端发送一个字符串：数据");
-      // };
-      // ws.onmessage = function (e) {
-      //   console.log("收到服务端的消息：" + e.data);
-      // };
+      //socket请求----
+      var ws = new WebSocket("ws://192.168.1.203:9001");
+      ws.onopen = function (e) {
+        // console.log(ws.readyState);
+        ws.send(
+          JSON.stringify({
+            cmd: {
+              APIName: "QueryBoardInfo",
+              SN: "NA",
+              ChannelNumber: -1,
+              ChannelInformations: [
+                {
+                  ChannelIndex: 0,
+                  ChannelStatus: "NA",
+                  BoardSN: "NA",
+                  BoardVersion: "NA",
+                  temperature: "0",
+                },
+              ],
+            },
+          })
+        );
+      };
+      var that = this;
+      ws.onmessage = function (e) {
+        console.log(JSON.parse(e.data).cmd.ChannelInformations);
+        var obj = JSON.parse(e.data).cmd.ChannelInformations;
+        that.boardinfo = obj;
+      };
+      ws.onclose = function (e) {
+        console.log(e);
+        ws.close(); //关闭TCP连接
+      };
+      //socket请求----
 
       //模拟请求数据
-      this.axios.get("/QueryBoardInfo").then((res) => {
-        this.boardinfo = res.data;
-      });
-      
+      // this.axios.get("/QueryBoardInfo").then((res) => {
+      //   this.boardinfo = res.data;
+      // });
+
       //提示不要频繁点击
       if (this.isclick) {
         this.isclick = false;
@@ -98,7 +117,6 @@ export default {
         });
       }
       //提示不要频繁点击
-
     },
     Signout() {
       //退出登录

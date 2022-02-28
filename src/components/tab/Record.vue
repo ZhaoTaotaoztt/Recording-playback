@@ -11,6 +11,7 @@
     <div id="table">
       <table>
         <tr>
+          <th>id</th>
           <th>
             <el-button
               type="warning"
@@ -38,6 +39,7 @@
         </tr>
         <tr v-for="item in record" :key="item.id">
           <!-- 复选框在这 -->
+          <td>{{ item.id }}</td>
           <td>
             Add Parameters&nbsp;<el-checkbox
               v-model="item.checked"
@@ -71,6 +73,10 @@
       :before-close="close"
     >
       <el-form>
+        <el-form-item label="ID" :label-width="formLabelWidth">
+          <el-input v-model="recordform.id" autocomplete="off"></el-input>
+        </el-form-item>
+
         <el-form-item label="ChanneIndex" :label-width="formLabelWidth">
           <el-select v-model="recordform.ChanneIndex">
             <el-option label="0" value="0"></el-option>
@@ -129,19 +135,65 @@
 </template>
 
 <script>
-// import $ from 'jquery'
-// import 'jquery-ui-dist/jquery-ui'
-// import 'jquery-ui-dist/jquery-ui.min.css'
-
 export default {
   data() {
     return {
-      record: {},
-      recordid: [],
+      record: [
+        {
+          ChanneIndex: 0,
+          FileSize: "154090653200",
+          BitNumber: "2",
+          SampleRate: "122880000",
+          RecordBandwidth: "10000000",
+          RecordRXFrequency: "1575420000",
+          RecordRXGain: "40",
+          id: 5,
+        },
+        {
+          ChanneIndex: "1",
+          FileSize: "154090653200",
+          BitNumber: "2",
+          SampleRate: "122880000",
+          RecordBandwidth: "10000000",
+          RecordRXFrequency: "1575420000",
+          RecordRXGain: "40",
+          id: 6,
+        },
+        {
+          ChanneIndex: "1",
+          FileSize: "154090653200",
+          BitNumber: "8",
+          SampleRate: "122880000",
+          RecordBandwidth: "10000000",
+          RecordRXFrequency: "1575420000",
+          RecordRXGain: "40",
+          id: 7,
+        },
+        {
+          ChanneIndex: "0",
+          FileSize: "154090653200",
+          BitNumber: "8",
+          SampleRate: "122880000",
+          RecordBandwidth: "10000000",
+          RecordRXFrequency: "1575420000",
+          RecordRXGain: "40",
+          id: 8,
+        },
+        {
+          ChanneIndex: "0",
+          FileSize: "154090653200",
+          BitNumber: "4",
+          SampleRate: "122880000",
+          RecordBandwidth: "10000000",
+          RecordRXFrequency: "1575420000",
+          RecordRXGain: "40",
+          id: 9,
+        },
+      ],
       recordIndex: [],
-      recordItem: [],
+      removeData: [],
       recordboolen: false,
-      
+
       recordboolen0: true,
       recordboolen1: true,
 
@@ -151,6 +203,7 @@ export default {
       dialogrecord: false,
 
       recordform: {
+        id: 1,
         ChanneIndex: 0,
         FileSize: "154090653200",
         BitNumber: "2",
@@ -164,44 +217,53 @@ export default {
     };
   },
   created() {
-    this.getRecord();
+    // this.getRecord();
   },
   methods: {
     //record部分record部分record部分record部分record部分record部分record部分record部分record部分record部分record部分record部分record部分record部分
     getRecord() {
       //获取record数据
-      this.axios.get("/record").then((res) => {
-        this.record = res.data;
-        // this.Deleterecord();
-        // console.log(this.record);
-      });
+      // this.axios.get("/record").then((res) => {
+      //   this.record = res.data;
+      // });
     },
     addRecordData() {
       //添加新的数据到record
       this.dialogrecord = false;
-      this.axios.post("/record", this.recordform).then((res) => {
-        // console.log(res);
-        // console. log(1);
-        this.getRecord();
-      });
+
+      this.record.push(this.recordform);
+      this.recordform = {
+        id: this.recordform.id,
+        ChanneIndex: this.recordform.ChanneIndex,
+        FileSize: this.recordform.FileSize,
+        BitNumber: this.recordform.BitNumber,
+        SampleRate: this.recordform.SampleRate,
+        RecordBandwidth: this.recordform.RecordBandwidth,
+        RecordRXFrequency: this.recordform.RecordRXFrequency,
+        RecordRXGain: this.recordform.RecordRXGain,
+      };
+
+      //模拟数据
+      // this.axios.post("/record", this.recordform).then((res) => {
+      //   // console.log(res);
+      //   // console. log(1);
+      //   this.getRecord();
+      // });
     },
     Checkedrecord(item) {
       if (item.checked == true) {
         this.recordboolen = true;
         this.$nextTick(() => {
           if (this["recordboolen" + item.ChanneIndex]) {
-            console.log(this["recordboolen" + item.ChanneIndex]);
+            // console.log(this["recordboolen" + item.ChanneIndex]);
             this["recordboolen" + item.ChanneIndex] = false;
             item.checked = true;
-            // console.log(item.id);
-            this.recordid.push(item.id);
-            this.recordItem.push(item);
-            // console.log(item);0
+            this.removeData.push(item.id);
           } else {
             item.checked = false;
-            console.log(this["recordboolen" + item.ChanneIndex]);
+            // console.log(this["recordboolen" + item.ChanneIndex]);
             this["recordboolen" + item.ChanneIndex] = this.record.every(
-              val => {
+              (val) => {
                 if (val.ChanneIndex == item.ChanneIndex) {
                   item.checked = false;
                   return val.checked == false;
@@ -217,60 +279,125 @@ export default {
       }
     },
     Deletrecord() {
-      //删除复选框选中的信息
+      var arr = this.record;
+      var ids = this.removeData;
+      function bantchDelete(taskList, deleteTaskIds) {
+        for (let i = 0; i < taskList.length; ) {
+          let task = taskList[i];
+          //根据id删除
+          if (deleteTaskIds.indexOf(task.id) !== -1) {
+            taskList.splice(i, 1);
+            continue;
+          }
+          i++;
+        }
+        return taskList;
+      }
+
       if (this.recordboolen == true) {
         this.$confirm("确定要删除这条信息吗？")
           .then((_) => {
-            for (let i = 0; i < this.recordid.length; i++) {
-              this.axios.delete("/record/" + this.recordid[i]).then((res) => {
-                this.getRecord();
-                this.recordid = [];
-                this.recordboolen0 = false;
-                this.recordboolen1 = false;
-                this.record.checked = false;
-                this.recordboolen = false;
-              });
-            }
+            bantchDelete(arr, ids);
+            // console.log(bantchDelete(arr, ids));
+            this.recordboolen = false;
           })
           .catch((err) => {
-            this.recordboolen0 = false;
-            this.recordboolen1 = false;
-            this.record.checked = false;
             console.log(err);
           });
       } else {
         return;
       }
+
+      //删除复选框选中的信息
+      // if (this.recordboolen == true) {
+      //   this.$confirm("确定要删除这条信息吗？")
+      //     .then((_) => {
+      //       for (let i = 0; i < this.recordid.length; i++) {
+      //         this.axios.delete("/record/" + this.recordid[i]).then((res) => {
+      //           this.getRecord();
+      //           this.recordid = [];
+      //           this.recordboolen0 = false;
+      //           this.recordboolen1 = false;
+      //           this.record.checked = false;
+      //           this.recordboolen = false;
+      //         });
+      //       }
+      //     })
+      //     .catch((err) => {
+      //       this.recordboolen0 = false;
+      //       this.recordboolen1 = false;
+      //       this.record.checked = false;
+      //       console.log(err);
+      //     });
+      // } else {
+      //   return;
+      // }
     },
     StartRecord() {
-      console.log(this.recordItem);
-      console.log("单独下发请求");
-      // console.log(this.item);
-      // if (this.recordIndex.length >= 2) {
-      //   console.log('klfji');
-      //   console.log(this.recordIndex.indexOf('0'));
-      //   // for (var i = 0; i < this.recordIndex.length; i++) {
-      //     // console.log(this.recordIndex[i]);
-      //     // if (
-      //     //   this.recordIndex.indexOf('0')
-      //     //   // &&
-      //     //   // this.recordIndex.indexOf(this.recordIndex[i] == 1)
-      //     // ) {
-      //     //   console.log('成功');
-      //     //   this.record.checked=false
-      //     // }else{
-      //     //      this.$message({
-      //     //     type: "warning",
-      //     //     message: "此操作不能同时选择ChannelIndex值相同的行",
-      //     //   });
-      //     // }
-      //   // }
-      // } else {
-      //   console.log('发送单独的请求');
-      //   //这里下发请求单条数据进行下发
-      // }
+      //socket请求----
+      var ws = new WebSocket("ws://192.168.1.203:9001");
+      ws.onopen = function (e) {
+        // console.log(ws.readyState);
+        ws.send(
+          JSON.stringify({
+            cmd: {
+              APIName: "AddFileInfo",
+              FileInformations: [
+                {
+                  FileName: "NA",
+                  FileSize: 15667788899,
+                  BitNumber: 16,
+                  SampleRate: 122880000,
+                  RecordBandwidth: 10000000,
+                  RecordRXFrequency: 1575420000,
+                  RecordRXGain: 50,
+                  RecordChannelIndex: 0,
+                },
+                {
+                  FileName: "NA",
+                  FileSize: 15667788899,
+                  BitNumber: 16,
+                  SampleRate: 122880000,
+                  RecordBandwidth: 10000000,
+                  RecordRXFrequency: 1227600000,
+                  RecordRXGain: 50,
+                  RecordChannelIndex: 1,
+                },
+              ],
+            },
+          })
+        );
+      };
+      var that = this;
+      ws.onmessage = function (e) {
+        console.log(JSON.parse(e.data).cmd.ResultCode);
+        var staut = parseInt(JSON.parse(e.data).cmd.ResultCode);
+        // console.log(this.boardinfo);
+        switch (staut) {
+          case 0:
+            that.$message({
+              message: "成功",
+              type: "success",
+            });
+            break;
+          case 1:
+            that.$message.error("录制失败!");
+            break;
+          case 2:
+            that.$message({
+              message: "板卡通道ID已经被使用!",
+              type: "warning",
+            });
+            break;
+        }
+      };
+      ws.onclose = function (e) {
+        console.log(e);
+        ws.close(); //关闭TCP连接
+      };
+      //socket请求----
 
-       //提示不要频繁点击
+      //提示不要频繁点击
       if (this.isclick) {
         this.isclick = false;
         setTimeout(() => {
@@ -287,10 +414,71 @@ export default {
     close() {
       this.dialogrecord = false;
     },
-    StartSynRecord(){
-      console.log('组合下发');
+    StartSynRecord() {
+      //socket请求----
+      var ws = new WebSocket("ws://192.168.1.203:9001");
+      ws.onopen = function (e) {
+        // console.log(ws.readyState);
+        ws.send(
+          JSON.stringify({
+            cmd: {
+              APIName: "AddFileInfo",
+              FileInformations: [
+                {
+                  FileName: "NA",
+                  FileSize: 15667788899,
+                  BitNumber: 16,
+                  SampleRate: 122880000,
+                  RecordBandwidth: 10000000,
+                  RecordRXFrequency: 1575420000,
+                  RecordRXGain: 50,
+                  RecordChannelIndex: 0,
+                },
+                {
+                  FileName: "NA",
+                  FileSize: 15667788899,
+                  BitNumber: 16,
+                  SampleRate: 122880000,
+                  RecordBandwidth: 10000000,
+                  RecordRXFrequency: 1227600000,
+                  RecordRXGain: 50,
+                  RecordChannelIndex: 1,
+                },
+              ],
+            },
+          })
+        );
+      };
+      var that = this;
+      ws.onmessage = function (e) {
+        console.log(JSON.parse(e.data).cmd.ResultCode);
+        var staut = parseInt(JSON.parse(e.data).cmd.ResultCode);
+        // console.log(this.boardinfo);
+        switch (staut) {
+          case 0:
+            that.$message({
+              message: "成功",
+              type: "success",
+            });
+            break;
+          case 1:
+            that.$message.error("录制失败!");
+            break;
+          case 2:
+            that.$message({
+              message: "板卡通道ID已经被使用!",
+              type: "warning",
+            });
+            break;
+        }
+      };
+      ws.onclose = function (e) {
+        console.log(e);
+        ws.close(); //关闭TCP连接
+      };
+      //socket请求----
 
-       //提示不要频繁点击
+      //提示不要频繁点击
       if (this.isclick) {
         this.isclick = false;
         setTimeout(() => {
@@ -303,7 +491,7 @@ export default {
         });
       }
       //提示不要频繁点击
-    }
+    },
   },
 };
 </script>
@@ -337,12 +525,12 @@ table td {
   height: 16px;
   background-color: rgb(245, 154, 35);
   background-size: cover;
-  border: rgb(245, 154, 35) 2px solid;
+  border: rgb(245, 154, 35) 3px solid;
 }
 .record >>> table .el-checkbox__inner {
   width: 16px;
   height: 16px;
-  border: rgb(245, 154, 35) 2px solid;
+  border: rgb(245, 154, 35) 3px solid;
 }
 .record >>> p .el-button {
   background-color: rgb(245, 154, 35);
@@ -351,5 +539,4 @@ table td {
   margin-left: 50px;
   width: 250px;
 }
-
 </style>

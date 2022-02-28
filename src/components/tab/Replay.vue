@@ -1,11 +1,4 @@
-<!--
- * @Author: your name
- * @Date: 2022-02-08 11:16:03
- * @LastEditTime: 2022-02-20 12:39:26
- * @LastEditors: Please set LastEditors
- * @Description: 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
- * @FilePath: \admin\src\components\tab\replay.vue
--->
+
 <template>
   <div class="replay">
     <div id="table">
@@ -45,44 +38,34 @@
               @click="dialogreplay = true"
             ></el-button>
           </td>
-          <td>{{ item.FileInformations.FileName }}</td>
+          <td>{{ item.FileName }}</td>
 
           <!-- 复选框在这 -->
           <td>
             <span
               class="status"
               :class="[
-                item.FileInformations.isRecording == 1 &&
-                item.FileInformations.isPlaying == 0
-                  ? 'background-color'
-                  : 'red',
-                item.FileInformations.isRecording == 0 &&
-                item.FileInformations.isPlaying == 1
-                  ? 'background-color'
-                  : 'green',
-                item.FileInformations.isRecording == 0 &&
-                item.FileInformations.isPlaying == 0
-                  ? 'background-color'
-                  : 'gray',
+                item.isRecording == 1 && item.isPlaying == 0 ? 'red' : '',
+                item.isRecording == 0 && item.isPlaying == 1 ? 'green' : '',
+                item.isRecording == 0 && item.isPlaying == 0 ? 'gray' : '',
               ]"
             ></span
-            >&nbsp;{{ item.FileInformations.isRecording
-            }}{{ item.FileInformations.isPlaying }}
+            >&nbsp;
             <el-checkbox
               class="select"
               v-model="item.checked"
-              @change="Checkedreplay(item.id, item.checked)"
+              @change="Checkedreplay(item.FileName, item.checked)"
             ></el-checkbox>
           </td>
           <!-- 复选框在这 -->
 
-          <td>{{ item.FileInformations.RecordChannelIndex }}</td>
-          <td>{{ item.FileInformations.FileSize }}</td>
-          <td>{{ item.FileInformations.BitNumber }}</td>
-          <td>{{ item.FileInformations.SampleRate }}</td>
-          <td>{{ item.FileInformations.RecordBandwidth }}</td>
-          <td>{{ item.FileInformations.RecordRXFrequency }}</td>
-          <td>{{ item.FileInformations.RecordRXGain }}</td>
+          <td>{{ item.RecordChannelIndex }}</td>
+          <td>{{ item.FileSize }}</td>
+          <td>{{ item.BitNumber }}</td>
+          <td>{{ item.SampleRate }}</td>
+          <td>{{ item.RecordBandwidth }}</td>
+          <td>{{ item.RecordRXFrequency }}</td>
+          <td>{{ item.RecordRXGain }}</td>
         </tr>
       </table>
     </div>
@@ -96,13 +79,15 @@
       <el-button class="btn query">Query Replaying BoardIndex</el-button>
     </p>
     <p>
-      <el-button class="btn query">Start Replay</el-button>
-      <el-button class="btn query">Stop Replay</el-button>
+      <el-button class="btn query" @click="StartPlay">Start Replay</el-button>
+      <el-button class="btn query" @click="StopPlay">Stop Replay</el-button>
       <el-button class="btn query">Stop Record</el-button>
     </p>
     <p>
-      <el-button class="btn query">Start SynReplay</el-button>
-      <el-button class="btn query">Stop SynReplay</el-button>
+      <el-button class="btn query" @click="StartSynPlay"
+        >Start SynReplay</el-button
+      >
+      <el-button class="btn query" @click="StopSynPlay">Stop SynReplay</el-button>
       <el-button class="btn query">Stop SynRecord</el-button>
     </p>
 
@@ -127,43 +112,135 @@
 
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogreplay = false">CANCEL</el-button>
-        <el-button type="primary" @click="playback">ACCEPT</el-button>
+        <el-button type="primary" @click="Accept">ACCEPT</el-button>
       </div>
     </el-dialog>
   </div>
 </template>
 
 <script>
-
-import $ from 'jquery'
-import 'jquery-ui-dist/jquery-ui'
-import 'jquery-ui-dist/jquery-ui.min.css'
-
 export default {
   data() {
     return {
-      replay: [],
+      replay: [
+        // {
+        //   BitNumber: 16,
+        //   FileName: "gnss_16457582170#0_20220225_110355_293_110914_055.bin",
+        //   FileSize: "15667788899",
+        //   RecordBandwidth: "10000000",
+        //   RecordChannelIndex: 0,
+        //   RecordRXFrequency: "1575420000",
+        //   RecordRXGain: 50,
+        //   SampleRate: "122880000",
+        //   isPlaying: 0,
+        //   isRecording: 1,
+        // },
+        // {
+        //   BitNumber: 16,
+        //   FileName: "gnss_16457582170#0_20220225_110355_293_110914_055.bin",
+        //   FileSize: "15667788899",
+        //   RecordBandwidth: "10000000",
+        //   RecordChannelIndex: 0,
+        //   RecordRXFrequency: "1575420000",
+        //   RecordRXGain: 50,
+        //   SampleRate: "122880000",
+        //   isPlaying: 1,
+        //   isRecording: 0,
+        // },
+        // {
+        //   BitNumber: 16,
+        //   FileName: "gnss_16457582170#0_20220225_110355_293_110914_055.bin",
+        //   FileSize: "15667788899",
+        //   RecordBandwidth: "10000000",
+        //   RecordChannelIndex: 0,
+        //   RecordRXFrequency: "1575420000",
+        //   RecordRXGain: 50,
+        //   SampleRate: "122880000",
+        //   isPlaying: 1,
+        //   isRecording: 1,
+        // },
+        // {
+        //   BitNumber: 16,
+        //   FileName: "gnss_16457582170#0_20220225_110355_293_110914_055.bin",
+        //   FileSize: "15667788899",
+        //   RecordBandwidth: "10000000",
+        //   RecordChannelIndex: 0,
+        //   RecordRXFrequency: "1575420000",
+        //   RecordRXGain: 50,
+        //   SampleRate: "122880000",
+        //   isPlaying: 0,
+        //   isRecording: 0,
+        // },
+      ],
       dialogreplay: false,
-      replayid: [],
+      removeData: "",
       replayboolen: false,
       formLabelWidth: "120px",
+      isclick: true,
     };
   },
   methods: {
     //replay部分replay部分replay部分replay部分replay部分replay部分replay部分replay部分replay部分replay部分replay部分replay部分replay部分replay部分
     getReplay() {
-      //获取replay数据
-      this.axios.get("/QueryFileInfo").then((res) => {
-        this.replay = res.data;
-        // console.log(this.replay);
-      });
-    },
+      //获取数据
+      //模拟replay数据
+      // this.axios.get("/QueryFileInfo").then((res) => {
+      //   this.replay = res.data;
+      //   // console.log(this.replay);
+      // });
 
-    Checkedreplay(id, istrue) {
+      //socket请求----
+      var ws = new WebSocket("ws://192.168.1.203:9001");
+      ws.onopen = function (e) {
+        // console.log(ws.readyState);
+        ws.send(
+          JSON.stringify({
+            cmd: {
+              APIName: "QueryFileInfo",
+              RemainHarddiskSize: -1,
+              FileNumber: -1,
+              FileInformations: [
+                {
+                  FileName: "NA",
+                  FileSize: 0,
+                },
+              ],
+            },
+          })
+        );
+      };
+      var that = this;
+      ws.onmessage = function (e) {
+        console.log(JSON.parse(e.data).cmd.FileInformations);
+        // that.replay=JSON.parse(e.data).cmd.FileInformations
+        that.replay = JSON.parse(e.data).cmd.FileInformations;
+      };
+      ws.onclose = function (e) {
+        console.log(e);
+        ws.close(); //关闭TCP连接
+      };
+      //socket请求----
+
+      //提示不要频繁点击
+      if (this.isclick) {
+        this.isclick = false;
+        setTimeout(() => {
+          this.isclick = true;
+        }, 4000);
+      } else {
+        this.$message({
+          message: "请不要频繁点击！",
+          type: "warning",
+        });
+      }
+      //提示不要频繁点击
+    },
+    Checkedreplay(FileName, istrue) {
       //复选框选中的事件
-      // console.log(id, istrue);
+      console.log(FileName);
       if (istrue == true) {
-        this.replayid.push(id);
+        this.removeData = FileName;
+        console.log(this.removeData);
         this.replayboolen = istrue;
       } else {
         this.replayboolen = istrue;
@@ -171,17 +248,58 @@ export default {
     },
     Deletreplay() {
       //删除复选框选中的信息
+      var ids = this.removeData;
       if (this.replayboolen == true) {
         this.$confirm("确定要删除这条信息吗？")
           .then((_) => {
-            for (var i = 0; i < this.replayid.length; i++) {
-              this.axios
-                .delete("/QueryFileInfo/" + this.replayid[i])
-                .then((res) => {
-                  this.getReplay();
-                  this.replayboolen = false;
-                });
-            }
+            //socket请求----
+            var ws = new WebSocket("ws://192.168.1.203:9001");
+            ws.onopen = function (e) {
+              // console.log(ws.readyState);
+              ws.send(
+                JSON.stringify({
+                  cmd: {
+                    APIName: "DeleteFileInfo",
+                    FileInformations: {
+                      FileName: ids,
+                    },
+                  },
+                })
+              );
+            };
+            var that = this;
+            ws.onmessage = function (e) {
+              console.log(JSON.parse(e.data).cmd);
+              var statu = JSON.parse(e.data).cmd.ResultCode;
+              switch (statu) {
+                case 0:
+                  that.$message({
+                    message: "成功",
+                    type: "success",
+                  });
+                  break;
+                case 1:
+                  that.$message.error("文件不存在!");
+                  break;
+                case 2:
+                  that.$message({
+                    message: "文件正在录制!",
+                    type: "warning",
+                  });
+                  break;
+                case 3:
+                  that.$message({
+                    message: "文件正在回放!",
+                    type: "warning",
+                  });
+                  break;
+              }
+            };
+            ws.onclose = function (e) {
+              console.log(e);
+              ws.close(); //关闭TCP连接
+            };
+            //socket请求----
           })
           .catch((err) => {
             this.replay.checked = false;
@@ -190,21 +308,326 @@ export default {
       } else {
         return;
       }
+
+      this.getReplay();
+      this.replay.checked = false;
+
+      //提示不要频繁点击
+      if (this.isclick) {
+        this.isclick = false;
+        setTimeout(() => {
+          this.isclick = true;
+        }, 4000);
+      } else {
+        this.$message({
+          message: "请不要频繁点击！",
+          type: "warning",
+        });
+      }
+      //提示不要频繁点击
+
+      // if (this.replayboolen == true) {
+      //   this.$confirm("确定要删除这条信息吗？")
+      //     .then((_) => {
+      //       for (var i = 0; i < this.replayid.length; i++) {
+      //         this.axios
+      //           .delete("/QueryFileInfo/" + this.replayid[i])
+      //           .then((res) => {
+      //             this.getReplay();
+      //             this.replayboolen = false;
+      //           });
+      //       }
+      //     })
+      //     .catch((err) => {
+      //       this.replay.checked = false;
+      //       console.log(err);
+      //     });
+      // } else {
+      //   return;
+      // }
     },
 
-    playback() {
-      //配置的回放
+    Accept() {
+      //配置（对话框）
       this.dialogreplay = false;
+    },
+    StartPlay() {
+      //下发StartPlay API请求  多条下发
+
+      //socket请求----
+      var ws = new WebSocket("ws://192.168.1.203:9001");
+      ws.onopen = function (e) {
+        // console.log(ws.readyState);
+        ws.send(
+          JSON.stringify({
+            cmd: {
+              APIName: "StartPlay",
+              FileInformations: [
+                {
+                  FileName:
+                    "gnss_3345678683688856#0_20211227_103250_325_115910_456.bin",
+                  PlayTXFrequency: 1575420000,
+                  PlayTXGain: 40,
+                  PlayChannelIndex: 0,
+                },
+                {
+                  FileName:
+                    "gnss_3345678683688856#1_20211227_103250_325_115910_456.bin",
+                  PlayTXFrequency: 1575420000,
+                  PlayTXGain: 40,
+                  PlayChannelIndex: 1,
+                },
+              ],
+            },
+          })
+        );
+      };
+      var that = this;
+      ws.onmessage = function (e) {
+        var statu = JSON.parse(e.data).cmd.ResultCode;
+        switch (statu) {
+          case 0:
+            that.$message({
+              message: "成功",
+              type: "success",
+            });
+            break;
+          case 1:
+            that.$message.error("文件不存在!");
+            break;
+          case 2:
+            that.$message({
+              message: "板卡ID已被使用!",
+              type: "warning",
+            });
+            break;
+          case 3:
+            that.$message({
+              message: "其他失败!",
+              type: "warning",
+            });
+            break;
+        }
+      };
+      ws.onclose = function (e) {
+        console.log(e);
+        ws.close(); //关闭TCP连接
+      };
+      //socket请求----
+
+      //提示不要频繁点击
+      if (this.isclick) {
+        this.isclick = false;
+        setTimeout(() => {
+          this.isclick = true;
+        }, 4000);
+      } else {
+        this.$message({
+          message: "请不要频繁点击！",
+          type: "warning",
+        });
+      }
+      //提示不要频繁点击
+    },
+    StartSynPlay() {
+      //下发StartPlay API请求  单条数据下发
+
+      //socket请求----
+      var ws = new WebSocket("ws://192.168.1.203:9001");
+      ws.onopen = function (e) {
+        // console.log(ws.readyState);
+        ws.send(
+          JSON.stringify({
+            cmd: {
+              APIName: "StartPlay",
+              FileInformations: [
+                {
+                  FileName:
+                    "gnss_33456786836456230_20211227_103250_325_115910_456.bin",
+                  PlayTXFrequency: 1575420000,
+                  PlayTXGain: 40,
+                  PlayChannelIndex: 0,
+                },
+              ],
+            },
+          })
+        );
+      };
+      var that = this;
+      ws.onmessage = function (e) {
+        var statu = JSON.parse(e.data).cmd.ResultCode;
+        switch (statu) {
+          case 0:
+            that.$message({
+              message: "成功",
+              type: "success",
+            });
+            break;
+          case 1:
+            that.$message.error("文件不存在!");
+            break;
+          case 2:
+            that.$message({
+              message: "板卡ID已被使用!",
+              type: "warning",
+            });
+            break;
+          case 3:
+            that.$message({
+              message: "其他失败!",
+              type: "warning",
+            });
+            break;
+        }
+      };
+      ws.onclose = function (e) {
+        console.log(e);
+        ws.close(); //关闭TCP连接
+      };
+      //socket请求----
+
+      //提示不要频繁点击
+      if (this.isclick) {
+        this.isclick = false;
+        setTimeout(() => {
+          this.isclick = true;
+        }, 4000);
+      } else {
+        this.$message({
+          message: "请不要频繁点击！",
+          type: "warning",
+        });
+      }
+      //提示不要频繁点击
+    },
+    StopPlay() {
+      //下发StartPlay API请求  单条数据下发
+
+      //socket请求----
+      var ws = new WebSocket("ws://192.168.1.203:9001");
+      ws.onopen = function (e) {
+        // console.log(ws.readyState);
+        ws.send(
+          JSON.stringify({
+            cmd: {
+              APIName: "StopPlay",
+              FileInformations: [
+                {
+                  FileName:
+                    "gnss_3345678683688856#0_20211227_103250_325_115910_456.bin",
+                  PlayChannelIndex: 0,
+                },
+                {
+                  FileName:
+                    "gnss_3345678683688856#1_20211227_103250_325_115910_456.bin",
+                  PlayChannelIndex: 1,
+                },
+              ],
+            },
+          })
+        );
+      };
+      var that = this;
+      ws.onmessage = function (e) {
+        var statu = JSON.parse(e.data).cmd.ResultCode;
+        switch (statu) {
+          case 0:
+            that.$message({
+              message: "成功",
+              type: "success",
+            });
+            break;
+          case 1:
+            that.$message.error("文件不存在!");
+            break;
+        }
+      };
+      ws.onclose = function (e) {
+        console.log(e);
+        ws.close(); //关闭TCP连接
+      };
+      //socket请求----
+
+      //提示不要频繁点击
+      if (this.isclick) {
+        this.isclick = false;
+        setTimeout(() => {
+          this.isclick = true;
+        }, 4000);
+      } else {
+        this.$message({
+          message: "请不要频繁点击！",
+          type: "warning",
+        });
+      }
+      //提示不要频繁点击
+    },
+    StopSynPlay() {
+      //下发StartPlay API请求  单条数据下发
+
+      //socket请求----
+      var ws = new WebSocket("ws://192.168.1.203:9001");
+      ws.onopen = function (e) {
+        // console.log(ws.readyState);
+        ws.send(
+          JSON.stringify({
+            cmd: {
+              APIName: "StopPlay",
+              FileInformations: [
+                {
+                  FileName:
+                    "gnss_3345678683324512_20211227_103250_325_115910_456.bin",
+                  PlayChannelIndex: 0,
+                },
+              ],
+            },
+          })
+        );
+      };
+      var that = this;
+      ws.onmessage = function (e) {
+        var statu = JSON.parse(e.data).cmd.ResultCode;
+        switch (statu) {
+          case 0:
+            that.$message({
+              message: "成功",
+              type: "success",
+            });
+            break;
+          case 1:
+            that.$message.error("文件不存在!");
+            break;
+        }
+      };
+      ws.onclose = function (e) {
+        console.log(e);
+        ws.close(); //关闭TCP连接
+      };
+      //socket请求----
+
+      //提示不要频繁点击
+      if (this.isclick) {
+        this.isclick = false;
+        setTimeout(() => {
+          this.isclick = true;
+        }, 4000);
+      } else {
+        this.$message({
+          message: "请不要频繁点击！",
+          type: "warning",
+        });
+      }
+      //提示不要频繁点击
     },
   },
 };
 </script>
 
 <style scoped>
-#table{
+#table {
   width: 100%;
   height: auto;
-  overflow-x:scroll;
+  overflow-x: scroll;
 }
 table {
   width: 100%;
@@ -254,7 +677,7 @@ table td {
   top: 5px;
 }
 .red {
-      background-color: rgb(217, 0, 27) !important;
+  background-color: rgb(217, 0, 27) !important;
 }
 .gray {
   background-color: rgb(170, 170, 170) !important;
