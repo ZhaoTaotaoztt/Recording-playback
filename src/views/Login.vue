@@ -8,7 +8,7 @@
       class="demo-ruleForm"
     >
       <div id="logo"></div>
-      <el-form-item label="*Username" prop="name">
+      <el-form-item label="* Username" prop="name">
         <el-input
           type="text"
           v-model="loginForm.username"
@@ -16,7 +16,7 @@
         ></el-input>
       </el-form-item>
 
-      <el-form-item label="*Password" prop="pass">
+      <el-form-item label="* Password" prop="pass">
         <el-input
           type="password"
           autocomplete="on"
@@ -97,6 +97,16 @@ export default {
 </script>
 
 <style scoped>
+body{
+  width: 100%;
+  height: 100%;
+}
+.home{
+  /* background-color: pink; */
+  position: relative;
+  top: 50%;
+  transform: translateY(50%);
+}
 .home >>> .el-form {
   width: 40%;
   height: 300px;
@@ -108,6 +118,7 @@ export default {
   width: 90%;
 }
 .home >>> .el-form .el-button {
+  width: 92% !important;
   background-color: rgb(245, 124, 0);
   border-color: rgb(245, 124, 0);
   color: black;
@@ -117,7 +128,7 @@ export default {
   width: 80%;
   height: 100px;
   background: url("../assets/logo.png") no-repeat center;
-  background-size: 90%;
+  background-size: 78%;
   margin: 40px auto;
   border: none;
 }

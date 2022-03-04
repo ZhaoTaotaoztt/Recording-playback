@@ -1,11 +1,4 @@
-<!--
- * @Author: your name
- * @Date: 2022-02-08 11:15:01
- * @LastEditTime: 2022-02-21 14:14:12
- * @LastEditors: Please set LastEditors
- * @Description: 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
- * @FilePath: \admin\src\components\tab\Boardinfo.vue
--->
+
 <template>
   <div class="boardinfo">
     <div class="sn">
@@ -53,7 +46,7 @@ export default {
     return {
       boardinfo: [],
       navactive: false,
-      isclick: true,
+      isclick: true, //用来判断提示不要频繁点击的布尔值
       showWarn: false,
     };
   },
@@ -92,11 +85,14 @@ export default {
         console.log(JSON.parse(e.data).cmd.ChannelInformations);
         var obj = JSON.parse(e.data).cmd.ChannelInformations;
         that.boardinfo = obj;
+
+        //关闭TCP连接
+        ws.close();
+        ws.onclose = function (e) {
+          console.log(e);
+        };
       };
-      ws.onclose = function (e) {
-        console.log(e);
-        ws.close(); //关闭TCP连接
-      };
+
       //socket请求----
 
       //模拟请求数据

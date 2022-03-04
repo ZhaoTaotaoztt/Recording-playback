@@ -1,11 +1,4 @@
-<!--
- * @Author: your name
- * @Date: 2022-02-08 11:16:03
- * @LastEditTime: 2022-02-21 17:19:19
- * @LastEditors: Please set LastEditors
- * @Description: 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
- * @FilePath: \admin\src\components\tab\Record.vue
--->
+
 <template>
   <div class="record">
     <div id="table">
@@ -179,7 +172,6 @@ export default {
           RecordRXGain: "40",
           id: 8,
         },
-
       ],
       recordIndex: [],
       removeData: [],
@@ -188,7 +180,7 @@ export default {
       recordboolen0: true,
       recordboolen1: true,
 
-      isclick: true,
+      isclick: true, //用来判断提示不要频繁点击的布尔值
 
       dialogVisible: false,
       dialogrecord: false,
@@ -246,13 +238,12 @@ export default {
         this.recordboolen = true;
         this.$nextTick(() => {
           if (this["recordboolen" + item.ChanneIndex]) {
-            // console.log(this["recordboolen" + item.ChanneIndex]);
             this["recordboolen" + item.ChanneIndex] = false;
+            console.log(item.checked);
             item.checked = true;
             this.removeData.push(item.id);
           } else {
             item.checked = false;
-            // console.log(this["recordboolen" + item.ChanneIndex]);
             this["recordboolen" + item.ChanneIndex] = this.record.every(
               (val) => {
                 if (val.ChanneIndex == item.ChanneIndex) {
@@ -266,6 +257,7 @@ export default {
           }
         });
       } else {
+        console.log(item.checked);
         this.recordboolen = false;
       }
     },
@@ -381,11 +373,14 @@ export default {
             });
             break;
         }
+
+        //关闭TCP连接
+        ws.close();
+        ws.onclose = function (e) {
+          console.log(e);
+        };
       };
-      ws.onclose = function (e) {
-        console.log(e);
-        ws.close(); //关闭TCP连接
-      };
+
       //socket请求----
 
       //提示不要频繁点击
@@ -462,11 +457,14 @@ export default {
             });
             break;
         }
+
+        //关闭TCP连接
+        ws.close();
+        ws.onclose = function (e) {
+          console.log(e);
+        };
       };
-      ws.onclose = function (e) {
-        console.log(e);
-        ws.close(); //关闭TCP连接
-      };
+
       //socket请求----
 
       //提示不要频繁点击
