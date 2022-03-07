@@ -95,11 +95,6 @@ export default {
 
       //socket请求----
 
-      //模拟请求数据
-      // this.axios.get("/QueryBoardInfo").then((res) => {
-      //   this.boardinfo = res.data;
-      // });
-
       //提示不要频繁点击
       if (this.isclick) {
         this.isclick = false;

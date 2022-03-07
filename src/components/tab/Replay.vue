@@ -29,7 +29,12 @@
           <th>RecordFrequency(Hz)</th>
           <th>RecordXRgain(Hz)</th>
         </tr>
-        <tr v-for="(item, index) in replay" ref="allchecked" :key="index" id="scrolltable">
+        <tr
+          v-for="(item, index) in replay"
+          ref="allchecked"
+          :key="index"
+          id="scrolltable"
+        >
           <td>
             <!-- 配置按钮在这 -->
             <el-button
@@ -52,11 +57,12 @@
               ]"
             ></span
             >&nbsp;
-            <el-checkbox
+            <input
+              type="checkbox"
               class="select"
-              v-model="item.checked"
-              @change="Checkedreplay(item, index)"
-            ></el-checkbox>
+              @change="Checkedreplay($event, item, index)"
+              ref="checkbox"
+            />
           </td>
 
           <td>{{ item.RecordChannelIndex }}</td>
@@ -76,7 +82,9 @@
       <el-button class="btn query" @click="getReplay"
         >Query File Info</el-button
       >
-      <el-button class="btn query">Query Replaying BoardIndex</el-button>
+      <el-button class="btn query" @click="QueryPlayId"
+        >Query Replaying ChannelIndex</el-button
+      >
     </p>
     <p>
       <el-button class="btn query" @click="StartPlay">Start Replay</el-button>
@@ -189,10 +197,11 @@ export default {
         //   isRecording: 0,
         // },
       ],
+      IndexList: [], //用来控制只可以选中两个index不一样的复选框
       cloneReplay: [],
       dialogreplay: false, //对话框是否显示
 
-      ischecked:true,
+      ischecked: true,
 
       replayboolen: false, //用来判断删除是否可点击
       formLabelWidth: "120px", //对话框的长度
@@ -207,6 +216,8 @@ export default {
       stopRcordData: [], //需要停止录制的数据
       playData: [], //需要回放的相关数据
       stopPlayData: [], //需要停止回放的相关数据
+      queryIndex: [], //查询使用的办卡ID的数据
+
       PlayChannelIndex: "",
       PlayTXGain: "",
       PlayTXFrequency: "",
@@ -217,7 +228,7 @@ export default {
     //replay部分replay部分replay部分replay部分replay部分replay部分replay部分replay部分replay部分replay部分replay部分replay部分replay部分replay部分
     getReplay() {
       //获取数据
-
+      // console.log(111);
       //socket请求----
       var ws = new WebSocket("ws://192.168.1.203:9001");
       ws.onopen = function (e) {
@@ -251,6 +262,12 @@ export default {
 
       //socket请求----
 
+      //所有的需要操作的数据清空数组
+      this.removeData = [];
+      this.stopRcordData = [];
+      this.playData = [];
+      this.stopPlayData = [];
+
       //提示不要频繁点击
       if (this.isclick) {
         this.isclick = false;
@@ -265,63 +282,50 @@ export default {
       }
       //提示不要频繁点击
     },
-    Checkedreplay(item, index) {
+    Checkedreplay(e, item, index) {
+      let ChannelIndex = item.RecordChannelIndex;
+      if (e.target.checked == true) {
+        if (this.IndexList.indexOf(ChannelIndex) == -1) {
+          this.IndexList.unshift(ChannelIndex);
+          this.replayboolen = true;
+          console.log(this.replayboolen);
 
-      if (item.checked) {
-        // console.log(item.checked);
-        this.$nextTick(() => {
-          if (this["boolen" + item.RecordChannelIndex]) {
-            this["boolen" + item.RecordChannelIndex] = false;
-            item.checked = true;
+          //要删除的数据操作
+          this.removeData.push(item.FileName);
 
-            item.checked=this.ischecked
-            console.log(item.checked);
-            console.log(this.ischecked);
+          //要停止回放的数据的数据操作
+          this.stopPlayData.push({
+            FileName: this.replay[index].FileName,
+            PlayChannelIndex: parseInt(this.replay[index].RecordChannelIndex),
+          });
 
-            //要删除的数据操作
-            this.removeData.push(item.FileName);
+          //要停止录制的相关数据操作
+          this.stopRcordData.push({
+            FileName: item.FileName,
+            PlayChannelIndex: item.RecordChannelIndex,
+          });
 
-            //要停止录制的相关数据操作
-            this.stopRcordData.push({
-              FileName: item.FileName,
-              PlayChannelIndex: item.RecordChannelIndex,
-            });
+          //查询使用的办卡ID的数据相关操作
+          this.queryIndex = {
+            FileName: this.replay[index].FileName,
+            PlayChannelIndexs: parseInt(this.replay[index].RecordChannelIndex),
+          };
 
-            //要停止回放的数据的数据操作
-            this.stopPlayData.push({
-              FileName: this.replay[index].FileName,
-              PlayChannelIndex: parseInt(this.replay[index].RecordChannelIndex),
-            });
-            // console.log(this.stopRcordData);
-            this.replayboolen = true;
-          } else {
-            item.checked = false;
-            this.replayboolen = false;
-            // console.log(item.checked);
-            this["boolen" + item.RecordChannelIndex] = this.replay.every(
-              (val) => {
-                if (val.RecordChannelIndex == item.RecordChannelIndex) {
-                  item.checked = false;
-                  return val.checked == false;
-                } else {
-                  return true;
-                }
-              }
-            );
-          }
-        });
+          console.log(this.queryIndex);
+        } else {
+          e.target.checked = false;
+          this.replayboolen = false;
+        }
       } else {
+        this.IndexList.splice(this.IndexList.indexOf(ChannelIndex), 1);
         this.replayboolen = false;
       }
+      console.log(e.target.checked);
     },
     Deletreplay() {
       //删除复选框选中的信息
-      var ids = this.removeData;
+      var data = this.removeData;
       var item;
-      for (var i = 0; i < ids.length; i++) {
-        item = ids[i];
-        console.log(item);
-      }
 
       if (this.replayboolen == true) {
         this.$confirm("确定要删除这条信息吗？")
@@ -330,8 +334,8 @@ export default {
             var ws = new WebSocket("ws://192.168.1.203:9001");
             ws.onopen = function (e) {
               // console.log(ws.readyState);
-              for (var i = 0; i < ids.length; i++) {
-                item = ids[i];
+              for (var i = 0; i < data.length; i++) {
+                item = data[i];
                 console.log(item);
                 ws.send(
                   JSON.stringify({
@@ -431,7 +435,6 @@ export default {
     showplay(index) {
       if (this.replayboolen == true) {
         this.curren_index = index;
-        // console.log(index);
         this.dialogreplay = true;
       } else {
         return;
@@ -444,6 +447,7 @@ export default {
       // console.log(this.PlayTXFrequency);
       // console.log(this.replay[this.curren_index]);
 
+      //要开始回放的数据操作
       this.playData.push({
         FileName: this.replay[this.curren_index].FileName,
         PlayTXFrequency: parseInt(this.PlayTXFrequency),
@@ -458,103 +462,26 @@ export default {
     },
     StartPlay() {
       //下发StartPlay API请求  多条下发
-      var data = this.playData;
-      var item;
-      //socket请求----
-      var ws = new WebSocket("ws://192.168.1.203:9001");
-      ws.onopen = function (e) {
-        // console.log(ws.readyState);
-        for (var i = 0; i < data.length; i++) {
-          item = data[i];
-          ws.send(
-            JSON.stringify({
-              cmd: {
-                APIName: "StartPlay",
-                FileInformations: [item],
-              },
-            })
-          );
-        }
-      };
-      var that = this;
-      ws.onmessage = function (e) {
-        var statu = JSON.parse(e.data).cmd.ResultCode;
-        switch (statu) {
-          case 0:
-            that.$message({
-              message: "成功",
-              type: "success",
-            });
-            break;
-          case 1:
-            that.$message.error("文件不存在!");
-            break;
-          case 2:
-            that.$message({
-              message: "板卡ID已被使用!",
-              type: "warning",
-            });
-            break;
-          case 3:
-            that.$message({
-              message: "其他失败!",
-              type: "warning",
-            });
-            break;
-        }
 
-        //关闭TCP连接
-        ws.close();
-        ws.onclose = function (e) {
-          console.log(e);
-        };
-      };
-
-      //socket请求----
-
-      //提示不要频繁点击
-      if (this.isclick) {
-        this.isclick = false;
-        setTimeout(() => {
-          this.isclick = true;
-        }, 4000);
-      } else {
-        this.$message({
-          message: "请不要频繁点击！",
-          type: "warning",
-        });
-      }
-      //提示不要频繁点击
-    },
-
-    StartSynPlay() {
-      //下发StartPlay API请求  组合多条数据在一个数组里面进行下发请求
-      var data;
-
-      setTimeout(() => {
-        data = this.playData;
-        console.log(data);
-
-        console.log(
-          JSON.stringify({
-            cmd: {
-              APIName: "StartPlay",
-              FileInformations: data,
-            },
-          })
-        );
+      if (this.replayboolen == true) {
+        var data = this.playData;
+        var item;
 
         //socket请求----
         var ws = new WebSocket("ws://192.168.1.203:9001");
         ws.onopen = function (e) {
-          ws.send(
-            JSON.stringify({
-              cmd: {
-                APIName: "StartPlay",
-                FileInformations: data,
-              },
-            })
-          );
+          // console.log(ws.readyState);
+          for (var i = 0; i < data.length; i++) {
+            item = data[i];
+            ws.send(
+              JSON.stringify({
+                cmd: {
+                  APIName: "StartPlay",
+                  FileInformations: [item],
+                },
+              })
+            );
+          }
         };
         var that = this;
         ws.onmessage = function (e) {
@@ -589,22 +516,127 @@ export default {
             console.log(e);
           };
         };
-      }, 800);
-      //socket请求----
 
-      //提示不要频繁点击
-      if (this.isclick) {
-        this.isclick = false;
-        setTimeout(() => {
-          this.isclick = true;
-        }, 4000);
-      } else {
-        this.$message({
-          message: "请不要频繁点击！",
-          type: "warning",
+        //socket请求----
+
+        //取消所有的复选框的勾选
+        this.$refs.checkbox.map(function (item) {
+          item.checked = false;
         });
+        this.IndexList = [];
+        //取消所有的复选框的勾选
+
+        //提示不要频繁点击
+        if (this.isclick) {
+          this.isclick = false;
+          setTimeout(() => {
+            this.isclick = true;
+          }, 4000);
+        } else {
+          this.$message({
+            message: "请不要频繁点击！",
+            type: "warning",
+          });
+        }
+        //提示不要频繁点击
+
+        this.replayboolen = false;
+      } else {
+        return;
       }
-      //提示不要频繁点击
+    },
+
+    StartSynPlay() {
+      //下发StartPlay API请求  组合多条数据在一个数组里面进行下发请求
+
+      if (this.replayboolen == true) {
+        var data;
+        setTimeout(() => {
+          //定时器是因为vue框架默认的对你数组进行，立马存立马取，取不到，用定时器就可以取到
+          data = this.playData;
+          console.log(data);
+          console.log(
+            JSON.stringify({
+              cmd: {
+                APIName: "StartPlay",
+                FileInformations: data,
+              },
+            })
+          );
+
+          //socket请求----
+          var ws = new WebSocket("ws://192.168.1.203:9001");
+          ws.onopen = function (e) {
+            ws.send(
+              JSON.stringify({
+                cmd: {
+                  APIName: "StartPlay",
+                  FileInformations: data,
+                },
+              })
+            );
+          };
+          var that = this;
+          ws.onmessage = function (e) {
+            var statu = JSON.parse(e.data).cmd.ResultCode;
+            switch (statu) {
+              case 0:
+                that.$message({
+                  message: "成功",
+                  type: "success",
+                });
+                break;
+              case 1:
+                that.$message.error("文件不存在!");
+                break;
+              case 2:
+                that.$message({
+                  message: "板卡ID已被使用!",
+                  type: "warning",
+                });
+                break;
+              case 3:
+                that.$message({
+                  message: "其他失败!",
+                  type: "warning",
+                });
+                break;
+            }
+
+            //关闭TCP连接
+            ws.close();
+            ws.onclose = function (e) {
+              console.log(e);
+            };
+          };
+        }, 800);
+        //socket请求----
+
+        //取消所有的复选框的勾选
+        this.$refs.checkbox.map(function (item) {
+          item.checked = false;
+        });
+        this.IndexList = [];
+        //取消所有的复选框的勾选
+
+        //提示不要频繁点击
+        if (this.isclick) {
+          this.isclick = false;
+          setTimeout(() => {
+            this.isclick = true;
+          }, 4000);
+        } else {
+          this.$message({
+            message: "请不要频繁点击！",
+            type: "warning",
+          });
+        }
+        //提示不要频繁点击
+
+        this.replayboolen = false;
+      } else {
+        return;
+      }
     },
     StopPlay() {
       //下发StartPlay API请求  单条数据下发
@@ -614,94 +646,22 @@ export default {
       var data = this.stopPlayData;
       var item;
 
-      //socket请求----
-      var ws = new WebSocket("ws://192.168.1.203:9001");
-      ws.onopen = function (e) {
-        // console.log(ws.readyState);
-        for (var i = 0; i < data.length; i++) {
-          item = data[i];
-          ws.send(
-            JSON.stringify({
-              cmd: {
-                APIName: "StopPlay",
-                FileInformations: [item],
-              },
-            })
-          );
-        }
-      };
-      var that = this;
-      ws.onmessage = function (e) {
-        var statu = JSON.parse(e.data).cmd.ResultCode;
-        switch (statu) {
-          case 0:
-            that.$message({
-              message: "成功",
-              type: "success",
-            });
-            break;
-          case 1:
-            that.$message.error("文件不存在!");
-            break;
-        }
-
-        //关闭TCP连接
-        ws.close();
-        ws.onclose = function (e) {
-          console.log(e);
-        };
-      };
-
-      //socket请求----
-
-      this.getReplay();
-
-      //提示不要频繁点击
-      if (this.isclick) {
-        this.isclick = false;
-        setTimeout(() => {
-          this.isclick = true;
-        }, 4000);
-      } else {
-        this.$message({
-          message: "请不要频繁点击！",
-          type: "warning",
-        });
-      }
-      //提示不要频繁点击
-    },
-
-    StopSynPlay() {
-      //下发StartPlay API请求  单条数据下发
-
-      //this.stopPlayData
-      var data;
-
-      setTimeout(() => {
-        data = this.stopPlayData;
-        console.log(data);
-
-        console.log(
-          JSON.stringify({
-            cmd: {
-              APIName: "StopPlay",
-              FileInformations: data,
-            },
-          })
-        );
-
+      if (this.replayboolen == true) {
         //socket请求----
         var ws = new WebSocket("ws://192.168.1.203:9001");
         ws.onopen = function (e) {
           // console.log(ws.readyState);
-          ws.send(
-            JSON.stringify({
-              cmd: {
-                APIName: "StopPlay",
-                FileInformations: data,
-              },
-            })
-          );
+          for (var i = 0; i < data.length; i++) {
+            item = data[i];
+            ws.send(
+              JSON.stringify({
+                cmd: {
+                  APIName: "StopPlay",
+                  FileInformations: [item],
+                },
+              })
+            );
+          }
         };
         var that = this;
         ws.onmessage = function (e) {
@@ -724,23 +684,118 @@ export default {
             console.log(e);
           };
         };
-      }, 800);
 
-      //socket请求----
+        //socket请求----
 
-      //提示不要频繁点击
-      if (this.isclick) {
-        this.isclick = false;
-        setTimeout(() => {
-          this.isclick = true;
-        }, 4000);
-      } else {
-        this.$message({
-          message: "请不要频繁点击！",
-          type: "warning",
+        //取消所有的复选框的勾选
+        this.$refs.checkbox.map(function (item) {
+          item.checked = false;
         });
+        this.IndexList = [];
+        //取消所有的复选框的勾选
+
+        //提示不要频繁点击
+        if (this.isclick) {
+          this.isclick = false;
+          setTimeout(() => {
+            this.isclick = true;
+          }, 4000);
+        } else {
+          this.$message({
+            message: "请不要频繁点击！",
+            type: "warning",
+          });
+        }
+        //提示不要频繁点击
+
+        this.replayboolen = false;
+      } else {
+        return;
       }
-      //提示不要频繁点击
+    },
+
+    StopSynPlay() {
+      //下发StartPlay API请求  单条数据下发
+
+      if (this.replayboolen == true) {
+        var data;
+        setTimeout(() => {
+          data = this.stopPlayData;
+
+          console.log(data);
+
+          console.log(
+            JSON.stringify({
+              cmd: {
+                APIName: "StopPlay",
+                FileInformations: data,
+              },
+            })
+          );
+
+          //socket请求----
+          var ws = new WebSocket("ws://192.168.1.203:9001");
+          ws.onopen = function (e) {
+            // console.log(ws.readyState);
+            ws.send(
+              JSON.stringify({
+                cmd: {
+                  APIName: "StopPlay",
+                  FileInformations: data,
+                },
+              })
+            );
+          };
+          var that = this;
+          ws.onmessage = function (e) {
+            var statu = JSON.parse(e.data).cmd.ResultCode;
+            switch (statu) {
+              case 0:
+                that.$message({
+                  message: "成功",
+                  type: "success",
+                });
+                break;
+              case 1:
+                that.$message.error("文件不存在!");
+                break;
+            }
+
+            //关闭TCP连接
+            ws.close();
+            ws.onclose = function (e) {
+              console.log(e);
+            };
+          };
+        }, 800);
+
+        //socket请求----
+
+        //取消所有的复选框的勾选
+        this.$refs.checkbox.map(function (item) {
+          item.checked = false;
+        });
+        this.IndexList = [];
+        //取消所有的复选框的勾选
+
+        //提示不要频繁点击
+        if (this.isclick) {
+          this.isclick = false;
+          setTimeout(() => {
+            this.isclick = true;
+          }, 4000);
+        } else {
+          this.$message({
+            message: "请不要频繁点击！",
+            type: "warning",
+          });
+        }
+        //提示不要频繁点击
+
+        this.replayboolen = false;
+      } else {
+        return;
+      }
     },
     StopRecord() {
       //下发停止录制StopRecord请求  单条数据下发
@@ -748,92 +803,22 @@ export default {
       var item;
       console.log(data);
 
-      //socket请求----
-      var ws = new WebSocket("ws://192.168.1.203:9001");
-      ws.onopen = function (e) {
-        // console.log(ws.readyState);
-        for (var i = 0; i < data.length; i++) {
-          item = data[i];
-          ws.send(
-            JSON.stringify({
-              cmd: {
-                APIName: "StopRecord",
-                FileInformations: [item],
-              },
-            })
-          );
-        }
-      };
-      var that = this;
-      ws.onmessage = function (e) {
-        var statu = JSON.parse(e.data).cmd.ResultCode;
-        switch (statu) {
-          case 0:
-            that.$message({
-              message: "成功",
-              type: "success",
-            });
-            break;
-          case 1:
-            that.$message.error("失败!");
-            break;
-        }
-
-        //关闭TCP连接
-        ws.close();
-        ws.onclose = function (e) {
-          console.log(e);
-        };
-      };
-
-      //socket请求----
-
-      //提示不要频繁点击
-      if (this.isclick) {
-        this.isclick = false;
-        setTimeout(() => {
-          this.isclick = true;
-        }, 4000);
-      } else {
-        this.$message({
-          message: "请不要频繁点击！",
-          type: "warning",
-        });
-      }
-      //提示不要频繁点击
-    },
-
-    StopSynRecord() {
-      //下发停止录制StopRecord请求  组合数据下发
-      console.log(this.stopRcordData);
-
-      var data;
-
-      setTimeout(() => {
-        data = this.stopRcordData;
-        console.log(data);
-
-        console.log(
-          JSON.stringify({
-            cmd: {
-              APIName: "StopRecord",
-              FileInformations: data,
-            },
-          })
-        );
-
+      if (this.replayboolen == true) {
         //socket请求----
         var ws = new WebSocket("ws://192.168.1.203:9001");
         ws.onopen = function (e) {
           // console.log(ws.readyState);
-          ws.send(
-            JSON.stringify({
-              cmd: {
-                APIName: "StopRecord",
-                FileInformations: data,
-              },
-            })
-          );
+          for (var i = 0; i < data.length; i++) {
+            item = data[i];
+            ws.send(
+              JSON.stringify({
+                cmd: {
+                  APIName: "StopRecord",
+                  FileInformations: [item],
+                },
+              })
+            );
+          }
         };
         var that = this;
         ws.onmessage = function (e) {
@@ -849,28 +834,211 @@ export default {
               that.$message.error("失败!");
               break;
           }
+
           //关闭TCP连接
           ws.close();
           ws.onclose = function (e) {
             console.log(e);
           };
         };
-      }, 800);
-      //socket请求----
 
-      //提示不要频繁点击
-      if (this.isclick) {
-        this.isclick = false;
-        setTimeout(() => {
-          this.isclick = true;
-        }, 4000);
-      } else {
-        this.$message({
-          message: "请不要频繁点击！",
-          type: "warning",
+        //socket请求----
+
+        //取消所有的复选框的勾选
+        this.$refs.checkbox.map(function (item) {
+          item.checked = false;
         });
+        this.IndexList = [];
+        //取消所有的复选框的勾选
+
+        //提示不要频繁点击
+        if (this.isclick) {
+          this.isclick = false;
+          setTimeout(() => {
+            this.isclick = true;
+          }, 4000);
+        } else {
+          this.$message({
+            message: "请不要频繁点击！",
+            type: "warning",
+          });
+        }
+        //提示不要频繁点击
+
+        this.replayboolen = false;
+      } else {
+        return;
       }
-      //提示不要频繁点击
+    },
+
+    StopSynRecord() {
+      //下发停止录制StopRecord请求  组合数据下发
+      console.log(this.stopRcordData);
+
+      var data;
+      if (this.replayboolen == true) {
+        setTimeout(() => {
+          data = this.stopRcordData;
+          console.log(data);
+
+          console.log(
+            JSON.stringify({
+              cmd: {
+                APIName: "StopRecord",
+                FileInformations: data,
+              },
+            })
+          );
+
+          //socket请求----
+          var ws = new WebSocket("ws://192.168.1.203:9001");
+          ws.onopen = function (e) {
+            // console.log(ws.readyState);
+            ws.send(
+              JSON.stringify({
+                cmd: {
+                  APIName: "StopRecord",
+                  FileInformations: data,
+                },
+              })
+            );
+          };
+          var that = this;
+          ws.onmessage = function (e) {
+            var statu = JSON.parse(e.data).cmd.ResultCode;
+            switch (statu) {
+              case 0:
+                that.$message({
+                  message: "成功",
+                  type: "success",
+                });
+                break;
+              case 1:
+                that.$message.error("失败!");
+                break;
+            }
+            //关闭TCP连接
+            ws.close();
+            ws.onclose = function (e) {
+              console.log(e);
+            };
+          };
+        }, 800);
+        //socket请求----
+
+        //取消所有的复选框的勾选
+        this.$refs.checkbox.map(function (item) {
+          item.checked = false;
+        });
+        this.IndexList = [];
+        //取消所有的复选框的勾选
+
+        //提示不要频繁点击
+        if (this.isclick) {
+          this.isclick = false;
+          setTimeout(() => {
+            this.isclick = true;
+          }, 4000);
+        } else {
+          this.$message({
+            message: "请不要频繁点击！",
+            type: "warning",
+          });
+        }
+        //提示不要频繁点击
+
+        this.replayboolen = false;
+      } else {
+        return;
+      }
+    },
+
+    QueryPlayId() {
+      //下发StartPlay API请求  多条下发
+
+      if (this.replayboolen == true) {
+        var data = this.queryIndex;
+        console.log(
+          JSON.stringify({
+            cmd: {
+              APIName: "QueryPlayId",
+              FileInformations: data,
+            },
+          })
+        );
+
+        //socket请求----
+        var ws = new WebSocket("ws://192.168.1.203:9001");
+        ws.onopen = function (e) {
+          ws.send(
+            JSON.stringify({
+              cmd: {
+                APIName: "QueryPlayId",
+                FileInformations: data,
+              },
+            })
+          );
+        };
+        var that = this;
+        ws.onmessage = function (e) {
+          var statu = JSON.parse(e.data).cmd.FileInformations.PlayChannelIndexs;
+          console.log(JSON.parse(e.data).cmd.FileInformations.PlayChannelIndexs);
+          console.log(statu);
+          switch (statu) {
+            case 0:
+              that.$message({
+                message: statu,
+                type: "success",
+              });
+              break;
+            case 1:
+              that.$message({
+                message: statu,
+                type: "success",
+              });
+              break;
+            case statu.length=0:
+              that.$message({
+                message: "未查询到结果!",
+                type: "warning",
+              });
+              break;
+          }
+
+          //关闭TCP连接
+          ws.close();
+          ws.onclose = function (e) {
+            console.log(e);
+          };
+        };
+
+        //socket请求----
+
+        //取消所有的复选框的勾选
+        this.$refs.checkbox.map(function (item) {
+          item.checked = false;
+        });
+        this.IndexList = [];
+        //取消所有的复选框的勾选
+
+        //提示不要频繁点击
+        if (this.isclick) {
+          this.isclick = false;
+          setTimeout(() => {
+            this.isclick = true;
+          }, 4000);
+        } else {
+          this.$message({
+            message: "请不要频繁点击！",
+            type: "warning",
+          });
+        }
+        //提示不要频繁点击
+
+        this.replayboolen = false;
+      } else {
+        return;
+      }
     },
   },
 };
