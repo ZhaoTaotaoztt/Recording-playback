@@ -76,7 +76,7 @@
       </table>
     </div>
 
-    <p>RemainHarddisk Size: &nbsp;&nbsp;&nbsp;11670744000 Byte</p>
+    <p>RemainHarddisk Size: &nbsp;&nbsp;&nbsp;{{ RemainHarddiskSize }} Byte</p>
 
     <p>
       <el-button class="btn query" @click="getReplay"
@@ -197,8 +197,9 @@ export default {
         //   isRecording: 0,
         // },
       ],
+      RemainHarddiskSize: 11670744000,
       IndexList: [], //用来控制只可以选中两个index不一样的复选框
-      cloneReplay: [],
+      cloneReplay: [], //用来存储磁盘大小
       dialogreplay: false, //对话框是否显示
 
       ischecked: true,
@@ -217,6 +218,7 @@ export default {
       playData: [], //需要回放的相关数据
       stopPlayData: [], //需要停止回放的相关数据
       queryIndex: [], //查询使用的办卡ID的数据
+      FileName: [], //组合下发判断是否选择的是一样的数据
 
       PlayChannelIndex: "",
       PlayTXGain: "",
@@ -250,8 +252,12 @@ export default {
       };
       var that = this;
       ws.onmessage = function (e) {
-        // console.log(JSON.parse(e.data).cmd.FileInformations);
-        that.replay = JSON.parse(e.data).cmd.FileInformations;
+        if (JSON.parse(e.data).cmd.APIName == "GenericErr") {
+          that.$message.error("通用错误!");
+        } else {
+          that.replay = JSON.parse(e.data).cmd.FileInformations;
+          that.RemainHarddiskSize = JSON.parse(e.data).cmd.RemainHarddiskSize;
+        }
 
         //关闭socket连接
         ws.close();
@@ -267,6 +273,7 @@ export default {
       this.stopRcordData = [];
       this.playData = [];
       this.stopPlayData = [];
+      this.FileName = [];
 
       //提示不要频繁点击
       if (this.isclick) {
@@ -288,7 +295,6 @@ export default {
         if (this.IndexList.indexOf(ChannelIndex) == -1) {
           this.IndexList.unshift(ChannelIndex);
           this.replayboolen = true;
-          console.log(this.replayboolen);
 
           //要删除的数据操作
           this.removeData.push(item.FileName);
@@ -311,7 +317,9 @@ export default {
             PlayChannelIndexs: parseInt(this.replay[index].RecordChannelIndex),
           };
 
-          console.log(this.queryIndex);
+          //组合下发判断是否选择的是一样的数据
+          this.FileName.push(item.FileName);
+          console.log(this.FileName);
         } else {
           e.target.checked = false;
           this.replayboolen = false;
@@ -333,7 +341,6 @@ export default {
             //socket请求----
             var ws = new WebSocket("ws://192.168.1.203:9001");
             ws.onopen = function (e) {
-              // console.log(ws.readyState);
               for (var i = 0; i < data.length; i++) {
                 item = data[i];
                 console.log(item);
@@ -351,39 +358,42 @@ export default {
             };
             var that = this;
             ws.onmessage = function (e) {
-              var statu = JSON.parse(e.data).cmd.ResultCode;
-              switch (statu) {
-                case 0:
-                  that.$message({
-                    message: "成功",
-                    type: "success",
-                  });
-                  break;
-                case 1:
-                  that.$message.error("文件不存在!");
-                  break;
-                case 2:
-                  that.$message({
-                    message: "文件正在录制!",
-                    type: "warning",
-                  });
-                  break;
-                case 3:
-                  that.$message({
-                    message: "文件正在回放!",
-                    type: "warning",
-                  });
-                  break;
+              if (JSON.parse(e.data).cmd.APIName == "GenericErr") {
+                that.$message.error("通用错误!");
+              } else {
+                var statu = JSON.parse(e.data).cmd.ResultCode;
+                switch (statu) {
+                  case 0:
+                    that.$message({
+                      message: "成功",
+                      type: "success",
+                    });
+                    break;
+                  case 1:
+                    that.$message.error("文件不存在!");
+                    break;
+                  case 2:
+                    that.$message({
+                      message: "文件正在录制!",
+                      type: "warning",
+                    });
+                    break;
+                  case 3:
+                    that.$message({
+                      message: "文件正在回放!",
+                      type: "warning",
+                    });
+                    break;
+                }
               }
-            };
 
-            ws.onclose = function (e) {
-              console.log(e);
-              ws.close(); //关闭TCP连接
+              //关闭TCP连接
+              ws.close();
+              ws.onclose = function (e) {
+                console.log(e);
+              };
             };
             //socket请求----
-            this.reload();
-            this.getReplay();
           })
           .catch((err) => {
             this.replay.checked = false;
@@ -394,6 +404,13 @@ export default {
       }
       this.getReplay();
       this.replay.checked = false;
+
+      //取消所有的复选框的勾选
+      this.$refs.checkbox.map(function (item) {
+        item.checked = false;
+      });
+      this.IndexList = [];
+      //取消所有的复选框的勾选
 
       //提示不要频繁点击
       setTimeout(() => {
@@ -485,29 +502,33 @@ export default {
         };
         var that = this;
         ws.onmessage = function (e) {
-          var statu = JSON.parse(e.data).cmd.ResultCode;
-          switch (statu) {
-            case 0:
-              that.$message({
-                message: "成功",
-                type: "success",
-              });
-              break;
-            case 1:
-              that.$message.error("文件不存在!");
-              break;
-            case 2:
-              that.$message({
-                message: "板卡ID已被使用!",
-                type: "warning",
-              });
-              break;
-            case 3:
-              that.$message({
-                message: "其他失败!",
-                type: "warning",
-              });
-              break;
+          if (JSON.parse(e.data).cmd.APIName == "GenericErr") {
+            that.$message.error("通用错误!");
+          } else {
+            var statu = JSON.parse(e.data).cmd.ResultCode;
+            switch (statu) {
+              case 0:
+                that.$message({
+                  message: "成功",
+                  type: "success",
+                });
+                break;
+              case 1:
+                that.$message.error("文件不存在!");
+                break;
+              case 2:
+                that.$message({
+                  message: "板卡ID已被使用!",
+                  type: "warning",
+                });
+                break;
+              case 3:
+                that.$message({
+                  message: "其他失败!",
+                  type: "warning",
+                });
+                break;
+            }
           }
 
           //关闭TCP连接
@@ -550,65 +571,69 @@ export default {
       //下发StartPlay API请求  组合多条数据在一个数组里面进行下发请求
 
       if (this.replayboolen == true) {
+        var FileName;
         var data;
         setTimeout(() => {
           //定时器是因为vue框架默认的对你数组进行，立马存立马取，取不到，用定时器就可以取到
           data = this.playData;
-          console.log(data);
-          console.log(
-            JSON.stringify({
-              cmd: {
-                APIName: "StartPlay",
-                FileInformations: data,
-              },
-            })
-          );
-
-          //socket请求----
-          var ws = new WebSocket("ws://192.168.1.203:9001");
-          ws.onopen = function (e) {
-            ws.send(
-              JSON.stringify({
-                cmd: {
-                  APIName: "StartPlay",
-                  FileInformations: data,
-                },
-              })
-            );
-          };
-          var that = this;
-          ws.onmessage = function (e) {
-            var statu = JSON.parse(e.data).cmd.ResultCode;
-            switch (statu) {
-              case 0:
-                that.$message({
-                  message: "成功",
-                  type: "success",
-                });
-                break;
-              case 1:
-                that.$message.error("文件不存在!");
-                break;
-              case 2:
-                that.$message({
-                  message: "板卡ID已被使用!",
-                  type: "warning",
-                });
-                break;
-              case 3:
-                that.$message({
-                  message: "其他失败!",
-                  type: "warning",
-                });
-                break;
-            }
-
-            //关闭TCP连接
-            ws.close();
-            ws.onclose = function (e) {
-              console.log(e);
+          FileName = this.FileName;
+          console.log(FileName);
+          if (FileName[0].split("#")[0] != FileName[1].split("#")[0]) {
+            this.$message({
+              message: "同步回放文件选择错误!",
+              type: "warning",
+            });
+          } else {
+            //socket请求----
+            var ws = new WebSocket("ws://192.168.1.203:9001");
+            ws.onopen = function (e) {
+              ws.send(
+                JSON.stringify({
+                  cmd: {
+                    APIName: "StartPlay",
+                    FileInformations: data,
+                  },
+                })
+              );
             };
-          };
+            var that = this;
+            ws.onmessage = function (e) {
+              if (JSON.parse(e.data).cmd.APIName == "GenericErr") {
+                that.$message.error("通用错误!");
+              } else {
+                var statu = JSON.parse(e.data).cmd.ResultCode;
+                switch (statu) {
+                  case 0:
+                    that.$message({
+                      message: "成功",
+                      type: "success",
+                    });
+                    break;
+                  case 1:
+                    that.$message.error("文件不存在!");
+                    break;
+                  case 2:
+                    that.$message({
+                      message: "板卡ID已被使用!",
+                      type: "warning",
+                    });
+                    break;
+                  case 3:
+                    that.$message({
+                      message: "其他失败!",
+                      type: "warning",
+                    });
+                    break;
+                }
+              }
+
+              //关闭TCP连接
+              ws.close();
+              ws.onclose = function (e) {
+                console.log(e);
+              };
+            };
+          }
         }, 800);
         //socket请求----
 
@@ -665,17 +690,21 @@ export default {
         };
         var that = this;
         ws.onmessage = function (e) {
-          var statu = JSON.parse(e.data).cmd.ResultCode;
-          switch (statu) {
-            case 0:
-              that.$message({
-                message: "成功",
-                type: "success",
-              });
-              break;
-            case 1:
-              that.$message.error("文件不存在!");
-              break;
+          if (JSON.parse(e.data).cmd.APIName == "GenericErr") {
+            that.$message.error("通用错误!");
+          } else {
+            var statu = JSON.parse(e.data).cmd.ResultCode;
+            switch (statu) {
+              case 0:
+                that.$message({
+                  message: "成功",
+                  type: "success",
+                });
+                break;
+              case 1:
+                that.$message.error("文件不存在!");
+                break;
+            }
           }
 
           //关闭TCP连接
@@ -719,57 +748,58 @@ export default {
 
       if (this.replayboolen == true) {
         var data;
+        var FileName;
         setTimeout(() => {
           data = this.stopPlayData;
-
-          console.log(data);
-
-          console.log(
-            JSON.stringify({
-              cmd: {
-                APIName: "StopPlay",
-                FileInformations: data,
-              },
-            })
-          );
-
-          //socket请求----
-          var ws = new WebSocket("ws://192.168.1.203:9001");
-          ws.onopen = function (e) {
-            // console.log(ws.readyState);
-            ws.send(
-              JSON.stringify({
-                cmd: {
-                  APIName: "StopPlay",
-                  FileInformations: data,
-                },
-              })
-            );
-          };
-          var that = this;
-          ws.onmessage = function (e) {
-            var statu = JSON.parse(e.data).cmd.ResultCode;
-            switch (statu) {
-              case 0:
-                that.$message({
-                  message: "成功",
-                  type: "success",
-                });
-                break;
-              case 1:
-                that.$message.error("文件不存在!");
-                break;
-            }
-
-            //关闭TCP连接
-            ws.close();
-            ws.onclose = function (e) {
-              console.log(e);
+          FileName = this.FileName;
+          console.log(FileName);
+          if (FileName[0].split("#")[0] != FileName[1].split("#")[0]) {
+            this.$message({
+              message: "同步回放文件选择错误!",
+              type: "warning",
+            });
+          } else {
+            //socket请求----
+            var ws = new WebSocket("ws://192.168.1.203:9001");
+            ws.onopen = function (e) {
+              // console.log(ws.readyState);
+              ws.send(
+                JSON.stringify({
+                  cmd: {
+                    APIName: "StopPlay",
+                    FileInformations: data,
+                  },
+                })
+              );
             };
-          };
-        }, 800);
+            var that = this;
+            ws.onmessage = function (e) {
+              if (JSON.parse(e.data).cmd.APIName == "GenericErr") {
+                that.$message.error("通用错误!");
+              } else {
+                var statu = JSON.parse(e.data).cmd.ResultCode;
+                switch (statu) {
+                  case 0:
+                    that.$message({
+                      message: "成功",
+                      type: "success",
+                    });
+                    break;
+                  case 1:
+                    that.$message.error("文件不存在!");
+                    break;
+                }
+              }
 
-        //socket请求----
+              //关闭TCP连接
+              ws.close();
+              ws.onclose = function (e) {
+                console.log(e);
+              };
+            };
+          }
+          //socket请求----
+        }, 800);
 
         //取消所有的复选框的勾选
         this.$refs.checkbox.map(function (item) {
@@ -822,17 +852,21 @@ export default {
         };
         var that = this;
         ws.onmessage = function (e) {
-          var statu = JSON.parse(e.data).cmd.ResultCode;
-          switch (statu) {
-            case 0:
-              that.$message({
-                message: "成功",
-                type: "success",
-              });
-              break;
-            case 1:
-              that.$message.error("失败!");
-              break;
+          if (JSON.parse(e.data).cmd.APIName == "GenericErr") {
+            that.$message.error("通用错误!");
+          } else {
+            var statu = JSON.parse(e.data).cmd.ResultCode;
+            switch (statu) {
+              case 0:
+                that.$message({
+                  message: "成功",
+                  type: "success",
+                });
+                break;
+              case 1:
+                that.$message.error("失败!");
+                break;
+            }
           }
 
           //关闭TCP连接
@@ -876,55 +910,60 @@ export default {
       console.log(this.stopRcordData);
 
       var data;
+      var FileName;
       if (this.replayboolen == true) {
         setTimeout(() => {
           data = this.stopRcordData;
-          console.log(data);
+          FileName = this.FileName;
+          console.log(FileName);
+          if (FileName[0].split("#")[0] != FileName[1].split("#")[0]) {
+            this.$message({
+              message: "同步录制文件选择错误!",
+              type: "warning",
+            });
+          } else {
+            //socket请求----
+            var ws = new WebSocket("ws://192.168.1.203:9001");
+            ws.onopen = function (e) {
+              // console.log(ws.readyState);
+              ws.send(
+                JSON.stringify({
+                  cmd: {
+                    APIName: "StopRecord",
+                    FileInformations: data,
+                  },
+                })
+              );
+            };
+            var that = this;
+            ws.onmessage = function (e) {
+              if (JSON.parse(e.data).cmd.APIName == "GenericErr") {
+                that.$message.error("通用错误!");
+              } else {
+                var statu = JSON.parse(e.data).cmd.ResultCode;
+                switch (statu) {
+                  case 0:
+                    that.$message({
+                      message: "成功",
+                      type: "success",
+                    });
+                    break;
+                  case 1:
+                    that.$message.error("失败!");
+                    break;
+                }
+              }
 
-          console.log(
-            JSON.stringify({
-              cmd: {
-                APIName: "StopRecord",
-                FileInformations: data,
-              },
-            })
-          );
+              //关闭TCP连接
+              ws.close();
+              ws.onclose = function (e) {
+                console.log(e);
+              };
+            };
+          }
 
           //socket请求----
-          var ws = new WebSocket("ws://192.168.1.203:9001");
-          ws.onopen = function (e) {
-            // console.log(ws.readyState);
-            ws.send(
-              JSON.stringify({
-                cmd: {
-                  APIName: "StopRecord",
-                  FileInformations: data,
-                },
-              })
-            );
-          };
-          var that = this;
-          ws.onmessage = function (e) {
-            var statu = JSON.parse(e.data).cmd.ResultCode;
-            switch (statu) {
-              case 0:
-                that.$message({
-                  message: "成功",
-                  type: "success",
-                });
-                break;
-              case 1:
-                that.$message.error("失败!");
-                break;
-            }
-            //关闭TCP连接
-            ws.close();
-            ws.onclose = function (e) {
-              console.log(e);
-            };
-          };
         }, 800);
-        //socket请求----
 
         //取消所有的复选框的勾选
         this.$refs.checkbox.map(function (item) {
@@ -981,28 +1020,35 @@ export default {
         };
         var that = this;
         ws.onmessage = function (e) {
-          var statu = JSON.parse(e.data).cmd.FileInformations.PlayChannelIndexs;
-          console.log(JSON.parse(e.data).cmd.FileInformations.PlayChannelIndexs);
-          console.log(statu);
-          switch (statu) {
-            case 0:
-              that.$message({
-                message: statu,
-                type: "success",
-              });
-              break;
-            case 1:
-              that.$message({
-                message: statu,
-                type: "success",
-              });
-              break;
-            case statu.length=0:
-              that.$message({
-                message: "未查询到结果!",
-                type: "warning",
-              });
-              break;
+          if (JSON.parse(e.data).cmd.APIName == "GenericErr") {
+            that.$message.error("通用错误!");
+          } else {
+            var statu = JSON.parse(e.data).cmd.FileInformations
+              .PlayChannelIndexs;
+            console.log(
+              JSON.parse(e.data).cmd.FileInformations.PlayChannelIndexs
+            );
+            console.log(statu);
+            switch (statu) {
+              case 0:
+                that.$message({
+                  message: statu,
+                  type: "success",
+                });
+                break;
+              case 1:
+                that.$message({
+                  message: statu,
+                  type: "success",
+                });
+                break;
+              case (statu.length = 0):
+                that.$message({
+                  message: "未查询到结果!",
+                  type: "warning",
+                });
+                break;
+            }
           }
 
           //关闭TCP连接

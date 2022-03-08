@@ -41,7 +41,6 @@
 // import { Component, Vue } from 'vue-property-decorator';
 // import HelloWorld from '@/components/HelloWorld.vue'; // @ is an alias to /src
 import { validUsername } from "@/utils/validate";
-import ws from "../utils/websocket"
 
 export default {
   name: "login",

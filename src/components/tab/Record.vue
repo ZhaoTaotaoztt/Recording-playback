@@ -175,7 +175,7 @@ export default {
           id: 4,
         },
       ],
-
+      RemainHarddiskSize: 0, //用来存储磁盘大小
       IndexList: [], //用来控制只可以选中两个index不一样的复选框
 
       removeData: [], //需要删除的数据
@@ -203,9 +203,47 @@ export default {
     };
   },
   created() {
-    // this.getRecord();
+    this.getRemainHarddiskSize();
   },
   methods: {
+    getRemainHarddiskSize() {
+      //socket请求----
+      var ws = new WebSocket("ws://192.168.1.203:9001");
+      ws.onopen = function (e) {
+        ws.send(
+          JSON.stringify({
+            cmd: {
+              APIName: "QueryFileInfo",
+              RemainHarddiskSize: -1,
+              FileNumber: -1,
+              FileInformations: [
+                {
+                  FileName: "NA",
+                  FileSize: 0,
+                },
+              ],
+            },
+          })
+        );
+      };
+      var that = this;
+      ws.onmessage = function (e) {
+        if (JSON.parse(e.data).APIName == "GenericErr") {
+          that.$message.error("通用错误!");
+        } else {
+          that.RemainHarddiskSize = JSON.parse(e.data).cmd.RemainHarddiskSize;
+          console.log(that.RemainHarddiskSize);
+        }
+
+        //关闭socket连接
+        ws.close();
+        ws.onclose = function (e) {
+          console.log(e);
+        };
+      };
+
+      //socket请求----
+    },
     addRecordData() {
       //添加新的数据到record
       this.dialogrecord = false;
@@ -320,65 +358,77 @@ export default {
       this.dialogrecord = false;
     },
     StartRecord() {
-      var data = this.RecordData;
-      var item;
       if (this.recordboolen == true) {
-        //socket请求----
-        var ws = new WebSocket("ws://192.168.1.203:9001");
+        if (this.RemainHarddiskSize < 5225000000) {
+          this.$message({
+            message: "磁盘空间不足！！！",
+            type: "warning",
+          });
+        } else {
+          var data = this.RecordData;
+          var item;
+          console.log(data);
+          //socket请求----
+          var ws = new WebSocket("ws://192.168.1.203:9001");
 
-        ws.onopen = function (e) {
-          for (var i = 0; i < data.length; i++) {
-            item = data[i];
-            console.log(
-              JSON.stringify({
-                cmd: {
-                  APIName: "AddFileInfo",
-                  FileInformations: [item],
-                },
-              })
-            );
-            ws.send(
-              JSON.stringify({
-                cmd: {
-                  APIName: "AddFileInfo",
-                  FileInformations: [item],
-                },
-              })
-            );
-          }
-        };
-        var that = this;
-        ws.onmessage = function (e) {
-          console.log(JSON.parse(e.data).cmd.ResultCode);
-          var staut = parseInt(JSON.parse(e.data).cmd.ResultCode);
-          // console.log(this.boardinfo);
-          switch (staut) {
-            case 0:
-              that.$message({
-                message: "成功",
-                type: "success",
-              });
-              break;
-            case 1:
-              that.$message.error("录制失败!");
-              break;
-            case 2:
-              that.$message({
-                message: "板卡通道ID已经被使用!",
-                type: "warning",
-              });
-              break;
-          }
-
-          this.RecordData = [];
-
-          //关闭TCP连接
-          ws.close();
-          ws.onclose = function (e) {
-            console.log(e);
+          ws.onopen = function (e) {
+            for (var i = 0; i < data.length; i++) {
+              item = data[i];
+              console.log(item);
+              console.log(
+                JSON.stringify({
+                  cmd: {
+                    APIName: "AddFileInfo",
+                    FileInformations: [item],
+                  },
+                })
+              );
+              ws.send(
+                JSON.stringify({
+                  cmd: {
+                    APIName: "AddFileInfo",
+                    FileInformations: [item],
+                  },
+                })
+              );
+            }
           };
-        };
+          var that = this;
+          ws.onmessage = function (e) {
+            if (JSON.parse(e.data).cmd.APIName == "GenericErr") {
+              that.$message.error("通用错误!");
+            } else {
+              console.log(JSON.parse(e.data).cmd.ResultCode);
+              var staut = parseInt(JSON.parse(e.data).cmd.ResultCode);
+              // console.log(this.boardinfo);
+              switch (staut) {
+                case 0:
+                  that.$message({
+                    message: "成功",
+                    type: "success",
+                  });
+                  break;
+                case 1:
+                  that.$message.error("录制失败!");
+                  break;
+                case 2:
+                  that.$message({
+                    message: "板卡通道ID已经被使用!",
+                    type: "warning",
+                  });
+                  break;
+              }
+            }
 
+            that.RecordData = [];
+
+            //关闭TCP连接
+            ws.close();
+            ws.onclose = function (e) {
+              console.log(e);
+            };
+          };
+        }
         //socket请求----
 
         //取消所有的复选框的勾选
@@ -409,22 +459,16 @@ export default {
     },
     StartSynRecord() {
       if (this.recordboolen == true) {
-        var data;
-        setTimeout(() => {
-          data = this.RecordData;
-          console.log(
-            JSON.stringify({
-              cmd: {
-                APIName: "AddFileInfo",
-                FileInformations: data,
-              },
-            })
-          );
-
-          //socket请求----
-          var ws = new WebSocket("ws://192.168.1.203:9001");
-          ws.onopen = function (e) {
-            ws.send(
+        if (this.RemainHarddiskSize < 5225000000) {
+          this.$message({
+            message: "磁盘空间不足！！！",
+            type: "warning",
+          });
+        } else {
+          var data;
+          setTimeout(() => {
+            data = this.RecordData;
+            console.log(
               JSON.stringify({
                 cmd: {
                   APIName: "AddFileInfo",
@@ -432,40 +476,56 @@ export default {
                 },
               })
             );
-          };
-          var that = this;
-          ws.onmessage = function (e) {
-            console.log(JSON.parse(e.data).cmd.ResultCode);
-            var staut = parseInt(JSON.parse(e.data).cmd.ResultCode);
-            // console.log(this.boardinfo);
-            switch (staut) {
-              case 0:
-                that.$message({
-                  message: "成功",
-                  type: "success",
-                });
-                break;
-              case 1:
-                that.$message.error("录制失败!");
-                break;
-              case 2:
-                that.$message({
-                  message: "板卡通道ID已经被使用!",
-                  type: "warning",
-                });
-                break;
-            }
 
-            this.RecordData = [];
-
-            //关闭TCP连接
-            ws.close();
-            ws.onclose = function (e) {
-              console.log(e);
+            //socket请求----
+            var ws = new WebSocket("ws://192.168.1.203:9001");
+            ws.onopen = function (e) {
+              ws.send(
+                JSON.stringify({
+                  cmd: {
+                    APIName: "AddFileInfo",
+                    FileInformations: data,
+                  },
+                })
+              );
             };
-          };
-        }, 800);
+            var that = this;
+            ws.onmessage = function (e) {
+              if (JSON.parse(e.data).cmd.APIName == "GenericErr") {
+                that.$message.error("通用错误!");
+              } else {
+                console.log(JSON.parse(e.data).cmd.ResultCode);
+                var staut = parseInt(JSON.parse(e.data).cmd.ResultCode);
+                // console.log(this.boardinfo);
+                switch (staut) {
+                  case 0:
+                    that.$message({
+                      message: "成功",
+                      type: "success",
+                    });
+                    break;
+                  case 1:
+                    that.$message.error("录制失败!");
+                    break;
+                  case 2:
+                    that.$message({
+                      message: "板卡通道ID已经被使用!",
+                      type: "warning",
+                    });
+                    break;
+                }
+              }
 
+              that.RecordData = [];
+
+              //关闭TCP连接
+              ws.close();
+              ws.onclose = function (e) {
+                console.log(e);
+              };
+            };
+          }, 800);
+        }
         //socket请求----
 
         //取消所有的复选框的勾选
@@ -489,7 +549,12 @@ export default {
         }
         //提示不要频繁点击
 
-      this.recordboolen=false
+        this.recordboolen = false;
+
+        // setTimeout(() => {
+        //   this.RecordData = [];
+        // }, 500);
+        // console.log(this.RecordData);
 
       } else {
         return;

@@ -23,90 +23,10 @@
 export default {
   data() {
     return {
-      activeName: "first",
-      boardinfo: [],
-      record: [],
-      replay: [],
-      dialogVisible: false,
-      dialogrecord: false,
-      dialogreplay: false,
 
-      recordid: [],
-      recordboolen: false,
-
-      replayid: [],
-      replayboolen: false,
-
-      recordform: {
-        boardindex: 0,
-        filesize: "1",
-        bitnum: "2",
-        samplerate: "3",
-        recordbandwidth: "4",
-        recordfrequency: "5",
-        recordxrgain: "6",
-      },
-
-      formLabelWidth: "120px",
     };
   },
-  created() {},
-  methods: {
-    //replay部分replay部分replay部分replay部分replay部分replay部分replay部分replay部分replay部分replay部分
-    getReplay() {
-      //获取replay数据
-      this.axios.get("/replay").then((res) => {
-        this.replay = res.data;
-        // console.log(this.replay);
-      });
-    },
 
-    Checkedreplay(id, istrue) {
-      //复选框选中的事件
-      // console.log(id, istrue);
-      if (istrue == true) {
-        this.replayid = id;
-        this.replayboolen = istrue;
-      } else {
-        this.replayboolen = istrue;
-      }
-    },
-    Deletreplay() {
-      //删除复选框选中的信息
-      if (this.replayboolen == true) {
-        this.$confirm("确定要删除这条信息吗？")
-          .then((_) => {
-            this.axios.delete("/replay/" + this.replayid).then((res) => {
-              this.getReplay();
-              this.replayboolen = false;
-            });
-          })
-          .catch((err) => {
-            this.replay.checked = false;
-            console.log(err);
-          });
-      } else {
-        return;
-      }
-    },
-
-    playback() {
-      //配置的回放
-      this.dialogreplay = false;
-    },
-
-    Signout() {
-      //退出登录
-      this.$confirm("确认关闭？")
-        .then((_) => {
-          this.$store.commit("setUser", null);
-          this.$router.push("/");
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    },
-  },
 };
 </script>
 
