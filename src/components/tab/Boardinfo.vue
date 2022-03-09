@@ -82,9 +82,22 @@ export default {
       };
       var that = this;
       ws.onmessage = function (e) {
-        console.log(JSON.parse(e.data).cmd.ChannelInformations);
         var obj = JSON.parse(e.data).cmd.ChannelInformations;
         that.boardinfo = obj;
+
+        var arr=JSON.parse(e.data).cmd.ChannelInformations
+        var data=arr.filter(function (item) {
+            return item.ChannelStatus =="idle" ;
+          });
+        var ChannelIndex=[]
+        for(var i=0;i<data.length;i++){
+          ChannelIndex.unshift({ChannelIndex:data[i].ChannelIndex})
+        }
+        
+        console.log(arr);
+        console.log(data);
+        console.log(ChannelIndex);
+        that.$store.commit("getChannelIndex", ChannelIndex);
 
         //关闭TCP连接
         ws.close();
@@ -119,9 +132,6 @@ export default {
         .catch((err) => {
           console.log(err);
         });
-    },
-    clickHandle() {
-      console.log(aaa);
     },
   },
 };

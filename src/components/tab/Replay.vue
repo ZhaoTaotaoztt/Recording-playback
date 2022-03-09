@@ -122,8 +122,13 @@
       <el-form>
         <el-form-item label="PlayChannelIndex" :label-width="formLabelWidth">
           <el-select v-model="PlayChannelIndex" placeholder="0">
-            <el-option label="0" value="0"></el-option>
-            <el-option label="1" value="1"></el-option>
+            <el-option
+              v-for="item in ChannelIndex"
+              :key="item.ChannelIndex"
+              :label="item.ChannelIndex"
+              :value="item.ChannelIndex"
+            ></el-option>
+            <!-- <el-option label="1" value="1"></el-option> -->
           </el-select>
         </el-form-item>
 
@@ -206,21 +211,15 @@ export default {
         //   isRecording: 0,
         // },
       ],
-      RemainHarddiskSize: 11670744000,
+      RemainHarddiskSize: 11670744000, //用来存储磁盘大小
       IndexList: [], //用来控制只可以选中两个index不一样的复选框
-      cloneReplay: [], //用来存储磁盘大小
+      ChannelIndex: [], //板卡
       dialogreplay: false, //对话框是否显示
-
-      ischecked: true,
 
       replayboolen: false, //用来判断删除是否可点击
       formLabelWidth: "120px", //对话框的长度
       isclick: true, //用来判断提示不要频繁点击的布尔值
-      boolen0: true,
-      boolen1: true,
       index: "",
-      //配置回放的对话框绑定的数据
-      replayIDForm: {},
 
       removeData: [], //需要删除的数据
       stopRcordData: [], //需要停止录制的数据
@@ -229,15 +228,18 @@ export default {
       queryIndex: [], //查询使用的办卡ID的数据
       FileName: [], //组合下发判断是否选择的是一样的数据
 
+      //配置回放对话框绑定的数据
       PlayChannelIndex: "",
       PlayTXGain: "",
       PlayTXFrequency: "",
-      curren_index: "",
+
+      curren_index: "", //获取index，取到当下点击的是哪一条数据
     };
   },
   methods: {
-    //replay部分replay部分replay部分replay部分replay部分replay部分replay部分replay部分replay部分replay部分replay部分replay部分replay部分replay部分
     getReplay() {
+      this.ChannelIndex = this.$store.state.ChannelIndex;
+      console.log(this.ChannelIndex);
       //获取数据
       // console.log(111);
       //socket请求----
@@ -290,9 +292,6 @@ export default {
 
         //关闭socket连接
         ws.close();
-        ws.onclose = function (e) {
-          console.log(e);
-        };
       };
 
       //socket请求----
@@ -428,28 +427,32 @@ export default {
 
           //要删除的数据操作
           this.removeData.push(item.FileName);
+          // console.log(this.removeData);
 
           //要停止回放的数据的数据操作
           this.stopPlayData.push({
             FileName: this.replay[index].FileName,
             PlayChannelIndex: parseInt(this.replay[index].RecordChannelIndex),
           });
+          // console.log(this.stopPlayData);
 
           //要停止录制的相关数据操作
           this.stopRcordData.push({
             FileName: item.FileName,
             PlayChannelIndex: item.RecordChannelIndex,
           });
+          // console.log(this.stopPlayData);
 
           //查询使用的办卡ID的数据相关操作
           this.queryIndex = {
             FileName: this.replay[index].FileName,
             PlayChannelIndexs: parseInt(this.replay[index].RecordChannelIndex),
           };
+          // console.log(this.queryIndex);
 
           //组合下发判断是否选择的是一样的数据
           this.FileName.push(item.FileName);
-          console.log(this.FileName);
+          // console.log(this.FileName);
         } else {
           e.target.checked = false;
           this.replayboolen = false;
@@ -621,6 +624,14 @@ export default {
           // console.log(ws.readyState);
           for (var i = 0; i < data.length; i++) {
             item = data[i];
+            // console.log(
+            //   JSON.stringify({
+            //     cmd: {
+            //       APIName: "StartPlay",
+            //       FileInformations: [item],
+            //     },
+            //   })
+            // );
             ws.send(
               JSON.stringify({
                 cmd: {

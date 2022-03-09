@@ -77,9 +77,8 @@
         </el-form-item>
 
         <el-form-item label="RecordChannelIndex" :label-width="formLabelWidth">
-          <el-select v-model="recordform.RecordChannelIndex">
-            <el-option label="0" value="0"></el-option>
-            <el-option label="1" value="1"></el-option>
+          <el-select v-model="recordform.RecordChannelIndex" >
+            <el-option  v-for="item in ChannelIndex" :key="item.ChannelIndex" :label="item.ChannelIndex" :value="item.ChannelIndex"></el-option>
           </el-select>
         </el-form-item>
 
@@ -179,6 +178,7 @@ export default {
           id: 4,
         },
       ],
+      ChannelIndex:[],//板卡
       RemainHarddiskSize: 0, //用来存储磁盘大小
       IndexList: [], //用来控制只可以选中两个index不一样的复选框
       Availablespace: "",
@@ -186,14 +186,13 @@ export default {
       removeData: [], //需要删除的数据
       RecordData: [], //需要录制的数据
 
-      recordboolen: false,
+      recordboolen: false,//用来石佛允许点击按钮的布尔值
 
       isclick: true, //用来判断提示不要频繁点击的布尔值
 
-      dialogVisible: false,
-      dialogrecord: false,
+      dialogrecord: false,//对话框是否显示
 
-      recordform: {
+      recordform: {//配置录制的数据的对话框所绑定的数据
         id: 1,
         RecordChannelIndex: 0,
         FileSize: 1000000000,
@@ -208,48 +207,50 @@ export default {
     };
   },
   created() {
-    this.getRemainHarddiskSize();
+    // this.getRemainHarddiskSize();
     this.Availablespace = this.$store.state.Availablespace;
+    this.ChannelIndex = this.$store.state.ChannelIndex;
     console.log(this.Availablespace);
+    console.log(this.ChannelIndex);
   },
   methods: {
     getRemainHarddiskSize() {
-      //socket请求----
-      var ws = new WebSocket("ws://192.168.1.203:9001");
-      ws.onopen = function (e) {
-        ws.send(
-          JSON.stringify({
-            cmd: {
-              APIName: "QueryFileInfo",
-              RemainHarddiskSize: -1,
-              FileNumber: -1,
-              FileInformations: [
-                {
-                  FileName: "NA",
-                  FileSize: 0,
-                },
-              ],
-            },
-          })
-        );
-      };
-      var that = this;
-      ws.onmessage = function (e) {
-        if (JSON.parse(e.data).APIName == "GenericErr") {
-          that.$message.error("通用错误!");
-        } else {
-          that.RemainHarddiskSize = JSON.parse(e.data).cmd.RemainHarddiskSize;
-          console.log(that.RemainHarddiskSize);
-        }
+      // //socket请求----
+      // var ws = new WebSocket("ws://192.168.1.203:9001");
+      // ws.onopen = function (e) {
+      //   ws.send(
+      //     JSON.stringify({
+      //       cmd: {
+      //         APIName: "QueryFileInfo",
+      //         RemainHarddiskSize: -1,
+      //         FileNumber: -1,
+      //         FileInformations: [
+      //           {
+      //             FileName: "NA",
+      //             FileSize: 0,
+      //           },
+      //         ],
+      //       },
+      //     })
+      //   );
+      // };
+      // var that = this;
+      // ws.onmessage = function (e) {
+      //   if (JSON.parse(e.data).APIName == "GenericErr") {
+      //     that.$message.error("通用错误!");
+      //   } else {
+      //     that.RemainHarddiskSize = JSON.parse(e.data).cmd.RemainHarddiskSize;
+      //     // console.log(that.RemainHarddiskSize);
+      //   }
 
-        //关闭socket连接
-        ws.close();
-        ws.onclose = function (e) {
-          console.log(e);
-        };
-      };
+      //   //关闭socket连接
+      //   ws.close();
+      //   ws.onclose = function (e) {
+      //     console.log(e);
+      //   };
+      // };
 
-      //socket请求----
+      // //socket请求----
     },
     addRecordData() {
       //添加新的数据到record
@@ -360,7 +361,6 @@ export default {
       //   return;
       // }
     },
-
     close() {
       this.dialogrecord = false;
     },
