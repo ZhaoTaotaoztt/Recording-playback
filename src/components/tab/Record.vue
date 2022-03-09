@@ -28,7 +28,7 @@
           <th>SampleRate(Hz)</th>
           <th>RecordBandWidth(Hz)</th>
           <th>RecordFrequency(Hz)</th>
-          <th>RecordXRgain(Hz)</th>
+          <th>RecordXRgain</th>
         </tr>
         <tr v-for="item in record" :key="item.id">
           <!-- 复选框在这 -->
@@ -56,8 +56,12 @@
     </div>
 
     <p>
-      <el-button id="btn" @click="StartRecord">Start Record</el-button>
-      <el-button id="btn" @click="StartSynRecord">Start SynRecord</el-button>
+      <el-button id="btn" @click="StartRecord" v-preventReClick="30000"
+        >Start Record</el-button
+      >
+      <el-button id="btn" @click="StartSynRecord" v-preventReClick="30000"
+        >Start SynRecord</el-button
+      >
     </p>
 
     <!-- 嵌套的表单 -->
@@ -136,47 +140,48 @@ export default {
       record: [
         {
           RecordChannelIndex: 0,
-          FileSize: "154090653200",
-          BitNumber: "2",
-          SampleRate: "122880000",
-          RecordBandwidth: "10000000",
-          RecordRXFrequency: "1575420000",
-          RecordRXGain: "40",
+          FileSize: 1000000000,
+          BitNumber: 2,
+          SampleRate: 122880000,
+          RecordBandwidth: 10000000,
+          RecordRXFrequency: 1575420000,
+          RecordRXGain: 40,
           id: 1,
         },
         {
           RecordChannelIndex: 1,
-          FileSize: "154090653200",
-          BitNumber: "2",
-          SampleRate: "122880000",
-          RecordBandwidth: "10000000",
-          RecordRXFrequency: "1575420000",
-          RecordRXGain: "40",
+          FileSize: 1000000000,
+          BitNumber: 2,
+          SampleRate: 122880000,
+          RecordBandwidth: 10000000,
+          RecordRXFrequency: 1575420000,
+          RecordRXGain: 40,
           id: 2,
         },
         {
           RecordChannelIndex: 1,
-          FileSize: "154090653200",
-          BitNumber: "8",
-          SampleRate: "122880000",
-          RecordBandwidth: "10000000",
-          RecordRXFrequency: "1575420000",
-          RecordRXGain: "40",
+          FileSize: 1000000000,
+          BitNumber: 8,
+          SampleRate: 122880000,
+          RecordBandwidth: 10000000,
+          RecordRXFrequency: 1575420000,
+          RecordRXGain: 40,
           id: 3,
         },
         {
           RecordChannelIndex: 0,
-          FileSize: "154090653200",
-          BitNumber: "8",
-          SampleRate: "122880000",
-          RecordBandwidth: "10000000",
-          RecordRXFrequency: "1575420000",
-          RecordRXGain: "40",
+          FileSize: 1000000000,
+          BitNumber: 8,
+          SampleRate: 122880000,
+          RecordBandwidth: 10000000,
+          RecordRXFrequency: 1575420000,
+          RecordRXGain: 40,
           id: 4,
         },
       ],
       RemainHarddiskSize: 0, //用来存储磁盘大小
       IndexList: [], //用来控制只可以选中两个index不一样的复选框
+      Availablespace: "",
 
       removeData: [], //需要删除的数据
       RecordData: [], //需要录制的数据
@@ -191,12 +196,12 @@ export default {
       recordform: {
         id: 1,
         RecordChannelIndex: 0,
-        FileSize: "154090653200",
-        BitNumber: "2",
-        SampleRate: "122880000",
-        RecordBandwidth: "10000000",
-        RecordRXFrequency: "1575420000",
-        RecordRXGain: "40",
+        FileSize: 1000000000,
+        BitNumber: 2,
+        SampleRate: 122880000,
+        RecordBandwidth: 10000000,
+        RecordRXFrequency: 1575420000,
+        RecordRXGain: 40,
       },
 
       formLabelWidth: "120px", //控制对话框的长度
@@ -204,6 +209,8 @@ export default {
   },
   created() {
     this.getRemainHarddiskSize();
+    this.Availablespace = this.$store.state.Availablespace;
+    console.log(this.Availablespace);
   },
   methods: {
     getRemainHarddiskSize() {
@@ -359,11 +366,12 @@ export default {
     },
     StartRecord() {
       if (this.recordboolen == true) {
-        if (this.RemainHarddiskSize < 5225000000) {
+        if (parseInt(this.Availablespace) < 5220000000) {
           this.$message({
             message: "磁盘空间不足！！！",
             type: "warning",
           });
+          this.RecordData = [];
         } else {
           var data = this.RecordData;
           var item;
@@ -459,15 +467,18 @@ export default {
     },
     StartSynRecord() {
       if (this.recordboolen == true) {
-        if (this.RemainHarddiskSize < 5225000000) {
+        if (parseInt(this.Availablespace) < 5220000000) {
           this.$message({
             message: "磁盘空间不足！！！",
             type: "warning",
           });
+          this.RecordData = [];
         } else {
           var data;
           setTimeout(() => {
             data = this.RecordData;
+            console.log(data);
+            console.log(this.RecordData);
             console.log(
               JSON.stringify({
                 cmd: {
@@ -528,6 +539,7 @@ export default {
         }
         //socket请求----
 
+
         //取消所有的复选框的勾选
         this.$refs.checkbox.map(function (item) {
           item.checked = false;
@@ -555,7 +567,6 @@ export default {
         //   this.RecordData = [];
         // }, 500);
         // console.log(this.RecordData);
-
       } else {
         return;
       }

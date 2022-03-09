@@ -22,7 +22,7 @@
           <!-- 删除按钮在这 -->
 
           <th>RecordChannelIndex</th>
-          <th>FileSize(Byte)</th>
+          <th>FileCurrentSize(Byte)</th>
           <th>BitNum</th>
           <th>SampleRate(Hz)</th>
           <th>RecordBandWidth(Hz)</th>
@@ -66,7 +66,7 @@
           </td>
 
           <td>{{ item.RecordChannelIndex }}</td>
-          <td>{{ item.FileSize }}</td>
+          <td>{{ item.FileCurrentSize }}</td>
           <td>{{ item.BitNumber }}</td>
           <td>{{ item.SampleRate }}</td>
           <td>{{ item.RecordBandwidth }}</td>
@@ -87,18 +87,27 @@
       >
     </p>
     <p>
-      <el-button class="btn query" @click="StartPlay">Start Replay</el-button>
-      <el-button class="btn query" @click="StopPlay">Stop Replay</el-button>
-      <el-button class="btn query" @click="StopRecord">Stop Record</el-button>
+      <el-button class="btn query" @click="StartPlay" v-preventReClick="5000"
+        >Start Replay</el-button
+      >
+      <el-button class="btn query" @click="StopPlay" v-preventReClick="5000"
+        >Stop Replay</el-button
+      >
+      <el-button class="btn query" @click="StopRecord" v-preventReClick="5000"
+        >Stop Record</el-button
+      >
     </p>
     <p>
-      <el-button class="btn query" @click="StartSynPlay"
+      <el-button class="btn query" @click="StartSynPlay" v-preventReClick="5000"
         >Start SynReplay</el-button
       >
-      <el-button class="btn query" @click="StopSynPlay"
+      <el-button class="btn query" @click="StopSynPlay" v-preventReClick="5000"
         >Stop SynReplay</el-button
       >
-      <el-button class="btn query" @click="StopSynRecord"
+      <el-button
+        class="btn query"
+        @click="StopSynRecord"
+        v-preventReClick="5000"
         >Stop SynRecord</el-button
       >
     </p>
@@ -257,6 +266,26 @@ export default {
         } else {
           that.replay = JSON.parse(e.data).cmd.FileInformations;
           that.RemainHarddiskSize = JSON.parse(e.data).cmd.RemainHarddiskSize;
+          var arr = JSON.parse(e.data).cmd.FileInformations;
+          var Allspace = JSON.parse(e.data).cmd.RemainHarddiskSize;
+          var RecordData;
+          var Availablespace;
+          RecordData = arr.filter(function (item) {
+            return item.isRecording == 1 && item.isPlaying == 0;
+          });
+          if (RecordData.length > 0) {
+            for (var i = 0; i < RecordData.length; i++) {
+              console.log(RecordData[i].FileSize);
+              console.log(RecordData[i].FileCurrentSize);
+              Availablespace =
+                Allspace -
+                (RecordData[i].FileSize - RecordData[i].FileCurrentSize);
+              that.$store.commit("getAvailablespace", Availablespace);
+            }
+          }
+          // console.log(Allspace);
+          // console.log(RecordData);
+          // console.log(Availablespace);
         }
 
         //关闭socket连接
@@ -268,6 +297,13 @@ export default {
 
       //socket请求----
 
+      //取消所有的复选框的勾选
+      this.$refs.checkbox.map(function (item) {
+        item.checked = false;
+      });
+      this.IndexList = [];
+      //取消所有的复选框的勾选
+
       //所有的需要操作的数据清空数组
       this.removeData = [];
       this.stopRcordData = [];
@@ -275,19 +311,113 @@ export default {
       this.stopPlayData = [];
       this.FileName = [];
 
-      //提示不要频繁点击
-      if (this.isclick) {
-        this.isclick = false;
-        setTimeout(() => {
-          this.isclick = true;
-        }, 4000);
-      } else {
-        this.$message({
-          message: "请不要频繁点击！",
-          type: "warning",
+      // //提示不要频繁点击
+      // if (this.isclick) {
+      //   this.isclick = false;
+      //   setTimeout(() => {
+      //     this.isclick = true;
+      //   }, 4000);
+      // } else {
+      //   this.$message({
+      //     message: "请不要频繁点击！",
+      //     type: "warning",
+      //   });
+      // }
+      // //提示不要频繁点击
+    },
+    QueryPlayId() {
+      //下发StartPlay API请求  多条下发
+
+      if (this.replayboolen == true) {
+        var data = this.queryIndex;
+        console.log(
+          JSON.stringify({
+            cmd: {
+              APIName: "QueryPlayId",
+              FileInformations: data,
+            },
+          })
+        );
+
+        //socket请求----
+        var ws = new WebSocket("ws://192.168.1.203:9001");
+        ws.onopen = function (e) {
+          ws.send(
+            JSON.stringify({
+              cmd: {
+                APIName: "QueryPlayId",
+                FileInformations: data,
+              },
+            })
+          );
+        };
+        var that = this;
+        ws.onmessage = function (e) {
+          if (JSON.parse(e.data).cmd.APIName == "GenericErr") {
+            that.$message.error("通用错误!");
+          } else {
+            var statu = JSON.parse(e.data).cmd.FileInformations
+              .PlayChannelIndexs;
+            console.log(
+              JSON.parse(e.data).cmd.FileInformations.PlayChannelIndexs
+            );
+            console.log(statu);
+            switch (statu) {
+              case 0:
+                that.$message({
+                  message: statu,
+                  type: "success",
+                });
+                break;
+              case 1:
+                that.$message({
+                  message: statu,
+                  type: "success",
+                });
+                break;
+              case (statu.length = 0):
+                that.$message({
+                  message: "未查询到结果!",
+                  type: "warning",
+                });
+                break;
+            }
+          }
+
+          //关闭TCP连接
+          ws.close();
+          ws.onclose = function (e) {
+            console.log(e);
+          };
+        };
+
+        //socket请求----
+
+        //取消所有的复选框的勾选
+        this.$refs.checkbox.map(function (item) {
+          item.checked = false;
         });
+        this.IndexList = [];
+        //取消所有的复选框的勾选
+
+        // //提示不要频繁点击
+        // if (this.isclick) {
+        //   this.isclick = false;
+        //   setTimeout(() => {
+        //     this.isclick = true;
+        //   }, 4000);
+        // } else {
+        //   this.$message({
+        //     message: "请不要频繁点击！",
+        //     type: "warning",
+        //   });
+        // }
+        // //提示不要频繁点击
+
+        this.replayboolen = false;
+      } else {
+        return;
       }
-      //提示不要频繁点击
     },
     Checkedreplay(e, item, index) {
       let ChannelIndex = item.RecordChannelIndex;
@@ -481,6 +611,7 @@ export default {
       //下发StartPlay API请求  多条下发
 
       if (this.replayboolen == true) {
+        this.replayboolen = false;
         var data = this.playData;
         var item;
 
@@ -552,6 +683,7 @@ export default {
           this.isclick = false;
           setTimeout(() => {
             this.isclick = true;
+            // this.replayboolen = true
           }, 4000);
         } else {
           this.$message({
@@ -964,101 +1096,6 @@ export default {
 
           //socket请求----
         }, 800);
-
-        //取消所有的复选框的勾选
-        this.$refs.checkbox.map(function (item) {
-          item.checked = false;
-        });
-        this.IndexList = [];
-        //取消所有的复选框的勾选
-
-        //提示不要频繁点击
-        if (this.isclick) {
-          this.isclick = false;
-          setTimeout(() => {
-            this.isclick = true;
-          }, 4000);
-        } else {
-          this.$message({
-            message: "请不要频繁点击！",
-            type: "warning",
-          });
-        }
-        //提示不要频繁点击
-
-        this.replayboolen = false;
-      } else {
-        return;
-      }
-    },
-
-    QueryPlayId() {
-      //下发StartPlay API请求  多条下发
-
-      if (this.replayboolen == true) {
-        var data = this.queryIndex;
-        console.log(
-          JSON.stringify({
-            cmd: {
-              APIName: "QueryPlayId",
-              FileInformations: data,
-            },
-          })
-        );
-
-        //socket请求----
-        var ws = new WebSocket("ws://192.168.1.203:9001");
-        ws.onopen = function (e) {
-          ws.send(
-            JSON.stringify({
-              cmd: {
-                APIName: "QueryPlayId",
-                FileInformations: data,
-              },
-            })
-          );
-        };
-        var that = this;
-        ws.onmessage = function (e) {
-          if (JSON.parse(e.data).cmd.APIName == "GenericErr") {
-            that.$message.error("通用错误!");
-          } else {
-            var statu = JSON.parse(e.data).cmd.FileInformations
-              .PlayChannelIndexs;
-            console.log(
-              JSON.parse(e.data).cmd.FileInformations.PlayChannelIndexs
-            );
-            console.log(statu);
-            switch (statu) {
-              case 0:
-                that.$message({
-                  message: statu,
-                  type: "success",
-                });
-                break;
-              case 1:
-                that.$message({
-                  message: statu,
-                  type: "success",
-                });
-                break;
-              case (statu.length = 0):
-                that.$message({
-                  message: "未查询到结果!",
-                  type: "warning",
-                });
-                break;
-            }
-          }
-
-          //关闭TCP连接
-          ws.close();
-          ws.onclose = function (e) {
-            console.log(e);
-          };
-        };
-
-        //socket请求----
 
         //取消所有的复选框的勾选
         this.$refs.checkbox.map(function (item) {

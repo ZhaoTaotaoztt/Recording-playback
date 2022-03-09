@@ -24,7 +24,7 @@
     </table>
     <p>
       <el-button id="btn" class="btn" @click="getBoardinfo"
-        >Query Board Info</el-button
+        v-preventReClick="5000">Query Board Info</el-button
       >
     </p>
     <p>
@@ -95,19 +95,19 @@ export default {
 
       //socket请求----
 
-      //提示不要频繁点击
-      if (this.isclick) {
-        this.isclick = false;
-        setTimeout(() => {
-          this.isclick = true;
-        }, 4000);
-      } else {
-        this.$message({
-          message: "请不要频繁点击！",
-          type: "warning",
-        });
-      }
-      //提示不要频繁点击
+      // //提示不要频繁点击
+      // if (this.isclick) {
+      //   this.isclick = false;
+      //   setTimeout(() => {
+      //     this.isclick = true;
+      //   }, 4000);
+      // } else {
+      //   this.$message({
+      //     message: "请不要频繁点击！",
+      //     type: "warning",
+      //   });
+      // }
+      // //提示不要频繁点击
     },
     Signout() {
       //退出登录
