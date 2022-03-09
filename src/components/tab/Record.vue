@@ -10,7 +10,7 @@
               type="warning"
               icon="el-icon-circle-plus"
               circle
-              @click="dialogrecord = true"
+              @click="Showdialog"
             ></el-button>
 
             <!-- 删除按钮在这 -->
@@ -34,7 +34,7 @@
           <!-- 复选框在这 -->
           <td>{{ item.id }}</td>
           <td>
-            Add Parameters&nbsp;
+            <span class="add">Add Parameters</span>&nbsp;
             <input
               type="checkbox"
               @change="Checkedrecord($event, item)"
@@ -77,8 +77,13 @@
         </el-form-item>
 
         <el-form-item label="RecordChannelIndex" :label-width="formLabelWidth">
-          <el-select v-model="recordform.RecordChannelIndex" >
-            <el-option  v-for="item in ChannelIndex" :key="item.ChannelIndex" :label="item.ChannelIndex" :value="item.ChannelIndex"></el-option>
+          <el-select v-model="recordform.RecordChannelIndex">
+            <el-option
+              v-for="item in ChannelIndex"
+              :key="item.ChannelIndex"
+              :label="item.ChannelIndex"
+              :value="item.ChannelIndex"
+            ></el-option>
           </el-select>
         </el-form-item>
 
@@ -178,7 +183,7 @@ export default {
           id: 4,
         },
       ],
-      ChannelIndex:[],//板卡
+      ChannelIndex: [], //板卡
       RemainHarddiskSize: 0, //用来存储磁盘大小
       IndexList: [], //用来控制只可以选中两个index不一样的复选框
       Availablespace: "",
@@ -186,13 +191,14 @@ export default {
       removeData: [], //需要删除的数据
       RecordData: [], //需要录制的数据
 
-      recordboolen: false,//用来石佛允许点击按钮的布尔值
+      recordboolen: false, //用来石佛允许点击按钮的布尔值
 
       isclick: true, //用来判断提示不要频繁点击的布尔值
 
-      dialogrecord: false,//对话框是否显示
+      dialogrecord: false, //对话框是否显示
 
-      recordform: {//配置录制的数据的对话框所绑定的数据
+      recordform: {
+        //配置录制的数据的对话框所绑定的数据
         id: 1,
         RecordChannelIndex: 0,
         FileSize: 1000000000,
@@ -210,8 +216,8 @@ export default {
     // this.getRemainHarddiskSize();
     this.Availablespace = this.$store.state.Availablespace;
     this.ChannelIndex = this.$store.state.ChannelIndex;
-    console.log(this.Availablespace);
     console.log(this.ChannelIndex);
+    console.log(this.Availablespace);
   },
   methods: {
     getRemainHarddiskSize() {
@@ -242,18 +248,22 @@ export default {
       //     that.RemainHarddiskSize = JSON.parse(e.data).cmd.RemainHarddiskSize;
       //     // console.log(that.RemainHarddiskSize);
       //   }
-
       //   //关闭socket连接
       //   ws.close();
       //   ws.onclose = function (e) {
       //     console.log(e);
       //   };
       // };
-
       // //socket请求----
+    },
+    Showdialog() {
+      this.dialogrecord = true;
+      this.ChannelIndex = this.$store.state.ChannelIndex;
+      console.log(this.ChannelIndex);
     },
     addRecordData() {
       //添加新的数据到record
+
       this.dialogrecord = false;
 
       this.record.push(this.recordform);
@@ -539,7 +549,6 @@ export default {
         }
         //socket请求----
 
-
         //取消所有的复选框的勾选
         this.$refs.checkbox.map(function (item) {
           item.checked = false;
@@ -617,5 +626,8 @@ table td {
   font-size: 1rem;
   margin-left: 50px;
   width: 250px;
+}
+.record >>> .add {
+  color: rgb(37, 141, 222);
 }
 </style>
