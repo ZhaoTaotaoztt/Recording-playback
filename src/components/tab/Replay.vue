@@ -35,7 +35,7 @@
           :key="index"
           id="scrolltable"
         >
-          <td>
+          <td class="td">
             <!-- 配置按钮在这 -->
             <el-button
               type="warning"
@@ -45,9 +45,9 @@
             ></el-button>
             <!-- 配置按钮在这 -->
           </td>
-          <td>{{ item.FileName }}</td>
+          <td id="fileName">{{ item.FileName }}</td>
 
-          <td>
+          <td class="td">
             <span
               class="status"
               :class="[
@@ -65,13 +65,13 @@
             />
           </td>
 
-          <td>{{ item.RecordChannelIndex }}</td>
-          <td>{{ item.FileCurrentSize }}</td>
-          <td>{{ item.BitNumber }}</td>
-          <td>{{ item.SampleRate }}</td>
-          <td>{{ item.RecordBandwidth }}</td>
-          <td>{{ item.RecordRXFrequency }}</td>
-          <td>{{ item.RecordRXGain }}</td>
+          <td class="td">{{ item.RecordChannelIndex }}</td>
+          <td class="td">{{ item.FileCurrentSize }}</td>
+          <td class="td">{{ item.BitNumber }}</td>
+          <td class="td">{{ item.SampleRate }}</td>
+          <td class="td">{{ item.RecordBandwidth }}</td>
+          <td class="td">{{ item.RecordRXFrequency }}</td>
+          <td class="td">{{ item.RecordRXGain }}</td>
         </tr>
       </table>
     </div>
@@ -118,17 +118,13 @@
       :visible="dialogreplay"
       id="dialogreplay"
       :before-close="close"
+      :modal="modal"
     >
       <el-form>
         <el-form-item label="PlayChannelIndex" :label-width="formLabelWidth">
           <el-select v-model="PlayChannelIndex" placeholder="0">
-            <el-option
-              v-for="item in ChannelIndex"
-              :key="item.ChannelIndex"
-              :label="item.ChannelIndex"
-              :value="item.ChannelIndex"
-            ></el-option>
-            <!-- <el-option label="1" value="1"></el-option> -->
+            <el-option label="0" value="0"></el-option>
+            <el-option label="1" value="1"></el-option>
           </el-select>
         </el-form-item>
 
@@ -165,7 +161,7 @@ export default {
         // {
         //   BitNumber: 16,
         //   FileName: "gnss_16457582170#0_20220225_110355_293_110914_055.bin",
-        //   FileSize: "15667788899",
+        //   FileCurrentSize: "15667788899",
         //   RecordBandwidth: "10000000",
         //   RecordChannelIndex: 0,
         //   RecordRXFrequency: "1575420000",
@@ -177,7 +173,7 @@ export default {
         // {
         //   BitNumber: 16,
         //   FileName: "gnss_16457582170#0_20220225_110355_293_110914_055.bin",
-        //   FileSize: "15667788899",
+        //   FileCurrentSize: "15667788899",
         //   RecordBandwidth: "10000000",
         //   RecordChannelIndex: 0,
         //   RecordRXFrequency: "1575420000",
@@ -189,7 +185,7 @@ export default {
         // {
         //   BitNumber: 16,
         //   FileName: "gnss_16457582170#0_20220225_110355_293_110914_055.bin",
-        //   FileSize: "15667788899",
+        //   FileCurrentSize: "15667788899",
         //   RecordBandwidth: "10000000",
         //   RecordChannelIndex: 0,
         //   RecordRXFrequency: "1575420000",
@@ -201,7 +197,7 @@ export default {
         // {
         //   BitNumber: 16,
         //   FileName: "gnss_16457582170#0_20220225_110355_293_110914_055.bin",
-        //   FileSize: "15667788899",
+        //   FileCurrentSize: "15667788899",
         //   RecordBandwidth: "10000000",
         //   RecordChannelIndex: 0,
         //   RecordRXFrequency: "1575420000",
@@ -211,6 +207,7 @@ export default {
         //   isRecording: 0,
         // },
       ],
+      modal: false, //不要蒙层
       RemainHarddiskSize: 11670744000, //用来存储磁盘大小
       IndexList: [], //用来控制只可以选中两个index不一样的复选框
       ChannelIndex: [], //板卡
@@ -267,7 +264,12 @@ export default {
           that.$message.error("通用错误!");
         } else {
           that.replay = JSON.parse(e.data).cmd.FileInformations;
+          that.replay = that.replay.sort((a, b) =>
+            a.FileName > b.FileName ? 1 : b.FileName > a.FileName ? -1 : 0
+          );
+
           that.RemainHarddiskSize = JSON.parse(e.data).cmd.RemainHarddiskSize;
+
           var arr = JSON.parse(e.data).cmd.FileInformations;
           var Allspace = JSON.parse(e.data).cmd.RemainHarddiskSize;
           var RecordData;
@@ -459,6 +461,10 @@ export default {
         }
       } else {
         this.IndexList.splice(this.IndexList.indexOf(ChannelIndex), 1);
+        this.removeData.splice(this.IndexList.indexOf(ChannelIndex), 1);
+        this.stopPlayData.splice(this.IndexList.indexOf(ChannelIndex), 1);
+        this.stopRcordData.splice(this.IndexList.indexOf(ChannelIndex), 1);
+        this.FileName.splice(this.IndexList.indexOf(ChannelIndex), 1);
         this.replayboolen = false;
       }
       console.log(e.target.checked);
@@ -612,26 +618,18 @@ export default {
     },
     StartPlay() {
       //下发StartPlay API请求  多条下发
+      var data = this.playData;
+      var item;
 
       if (this.replayboolen == true) {
         this.replayboolen = false;
-        var data = this.playData;
-        var item;
 
         //socket请求----
         var ws = new WebSocket("ws://192.168.1.203:9001");
         ws.onopen = function (e) {
-          // console.log(ws.readyState);
+          console.log(ws.readyState);
           for (var i = 0; i < data.length; i++) {
             item = data[i];
-            // console.log(
-            //   JSON.stringify({
-            //     cmd: {
-            //       APIName: "StartPlay",
-            //       FileInformations: [item],
-            //     },
-            //   })
-            // );
             ws.send(
               JSON.stringify({
                 cmd: {
@@ -644,6 +642,7 @@ export default {
         };
         var that = this;
         ws.onmessage = function (e) {
+          console.log(e.data);
           if (JSON.parse(e.data).cmd.APIName == "GenericErr") {
             that.$message.error("通用错误!");
           } else {
@@ -815,6 +814,7 @@ export default {
       var item;
 
       if (this.replayboolen == true) {
+        this.replayboolen = false;
         //socket请求----
         var ws = new WebSocket("ws://192.168.1.203:9001");
         ws.onopen = function (e) {
@@ -1145,9 +1145,8 @@ export default {
   overflow-x: scroll;
 }
 table {
-  width: 100%;
+  width: 130%;
   height: auto;
-  /* background-color: pink; */
 }
 table th {
   height: 5rem;
@@ -1156,7 +1155,6 @@ table th {
 }
 table td {
   height: 5rem;
-  /* background-color: aqua; */
   text-align: center;
   border-bottom: 1px solid gainsboro;
   color: rgb(151, 151, 146);
@@ -1184,8 +1182,6 @@ table td {
 .replay >>> table .status {
   width: 22px;
   height: 22px;
-  /* background-color: rgb(217, 0, 27); */
-  /* border: 1px solid black; */
   display: inline-block;
   border-radius: 50%;
   position: relative;
@@ -1202,5 +1198,12 @@ table td {
 }
 .white {
   background-color: white !important;
+}
+
+@media screen and (min-width: 500px) and (max-width:1297px) {
+table {
+  width: 200%;
+  height: auto;
+}
 }
 </style>

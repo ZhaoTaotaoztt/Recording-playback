@@ -2,7 +2,7 @@
 <template>
   <div class="record">
     <div id="table">
-      <table>
+      <table class="table">
         <tr>
           <th>id</th>
           <th>
@@ -30,7 +30,7 @@
           <th>RecordFrequency(Hz)</th>
           <th>RecordXRgain</th>
         </tr>
-        <tr v-for="item in record" :key="item.id">
+        <tr v-for="(item, index) in record" :key="index">
           <!-- 复选框在这 -->
           <td>{{ item.id }}</td>
           <td>
@@ -68,27 +68,32 @@
     <el-dialog
       title="新建录制配置"
       id="dialogrecord"
-      :visible="dialogrecord"
+      :visible.sync="dialogrecord"
       :before-close="close"
+      :modal="modal"
     >
       <el-form>
         <el-form-item label="ID" :label-width="formLabelWidth">
-          <el-input v-model="recordform.id" autocomplete="off"></el-input>
+          <el-input
+            v-model="recordform.id"
+            autocomplete="off"
+            suffix-icon="xxxx"
+          ></el-input>
         </el-form-item>
 
         <el-form-item label="RecordChannelIndex" :label-width="formLabelWidth">
           <el-select v-model="recordform.RecordChannelIndex">
-            <el-option
-              v-for="item in ChannelIndex"
-              :key="item.ChannelIndex"
-              :label="item.ChannelIndex"
-              :value="item.ChannelIndex"
-            ></el-option>
+            <el-option label="0" value="0"></el-option>
+            <el-option label="1" value="1"></el-option>
           </el-select>
         </el-form-item>
 
-        <el-form-item label="Filesize" :label-width="formLabelWidth">
-          <el-input v-model="recordform.FileSize" autocomplete="off"></el-input>
+        <el-form-item label="Filesize(Byte)" :label-width="formLabelWidth">
+          <el-input
+            v-model="recordform.FileSize"
+            autocomplete="off"
+            suffix-icon="xxxx"
+          ></el-input>
         </el-form-item>
 
         <el-form-item label="BitNum" :label-width="formLabelWidth">
@@ -100,24 +105,27 @@
           </el-select>
         </el-form-item>
 
-        <el-form-item label="SampleRate" :label-width="formLabelWidth">
+        <el-form-item label="SampleRate(Byte)" :label-width="formLabelWidth">
           <el-input
             v-model="recordform.SampleRate"
             autocomplete="off"
+            suffix-icon="xxxx"
           ></el-input>
         </el-form-item>
 
-        <el-form-item label="RecordBandWidth" :label-width="formLabelWidth">
+        <el-form-item label="RecordBandWidth(Hz)" :label-width="formLabelWidth">
           <el-input
             v-model="recordform.RecordBandwidth"
             autocomplete="off"
+            suffix-icon="xxxx"
           ></el-input>
         </el-form-item>
 
-        <el-form-item label="RecordFrequency" :label-width="formLabelWidth">
+        <el-form-item label="RecordFrequency(Hz)" :label-width="formLabelWidth">
           <el-input
             v-model="recordform.RecordRXFrequency"
             autocomplete="off"
+            suffix-icon="xxxx"
           ></el-input>
         </el-form-item>
 
@@ -125,13 +133,16 @@
           <el-input
             v-model="recordform.RecordRXGain"
             autocomplete="off"
+            suffix-icon="xxxx"
           ></el-input>
         </el-form-item>
       </el-form>
 
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogrecord = false">取 消</el-button>
-        <el-button type="primary" @click="addRecordData">确 定</el-button>
+        <el-button type="primary" @click="addRecordData(recordform.id)"
+          >确 定</el-button
+        >
       </div>
     </el-dialog>
   </div>
@@ -142,47 +153,48 @@ export default {
   data() {
     return {
       record: [
-        {
-          RecordChannelIndex: 0,
-          FileSize: 1000000000,
-          BitNumber: 2,
-          SampleRate: 122880000,
-          RecordBandwidth: 10000000,
-          RecordRXFrequency: 1575420000,
-          RecordRXGain: 40,
-          id: 1,
-        },
-        {
-          RecordChannelIndex: 1,
-          FileSize: 1000000000,
-          BitNumber: 2,
-          SampleRate: 122880000,
-          RecordBandwidth: 10000000,
-          RecordRXFrequency: 1575420000,
-          RecordRXGain: 40,
-          id: 2,
-        },
-        {
-          RecordChannelIndex: 1,
-          FileSize: 1000000000,
-          BitNumber: 8,
-          SampleRate: 122880000,
-          RecordBandwidth: 10000000,
-          RecordRXFrequency: 1575420000,
-          RecordRXGain: 40,
-          id: 3,
-        },
-        {
-          RecordChannelIndex: 0,
-          FileSize: 1000000000,
-          BitNumber: 8,
-          SampleRate: 122880000,
-          RecordBandwidth: 10000000,
-          RecordRXFrequency: 1575420000,
-          RecordRXGain: 40,
-          id: 4,
-        },
+        // {
+        //   RecordChannelIndex: 0,
+        //   FileSize: 1000000000,
+        //   BitNumber: 2,
+        //   SampleRate: 122880000,
+        //   RecordBandwidth: 10000000,
+        //   RecordRXFrequency: 1575420000,
+        //   RecordRXGain: 40,
+        //   id: 2,
+        // },
+        // {
+        //   RecordChannelIndex: 1,
+        //   FileSize: 1000000000,
+        //   BitNumber: 2,
+        //   SampleRate: 122880000,
+        //   RecordBandwidth: 10000000,
+        //   RecordRXFrequency: 1575420000,
+        //   RecordRXGain: 40,
+        //   id: 3,
+        // },
+        // {
+        //   RecordChannelIndex: 1,
+        //   FileSize: 1000000000,
+        //   BitNumber: 8,
+        //   SampleRate: 122880000,
+        //   RecordBandwidth: 10000000,
+        //   RecordRXFrequency: 1575420000,
+        //   RecordRXGain: 40,
+        //   id: 4,
+        // },
+        // {
+        //   RecordChannelIndex: 0,
+        //   FileSize: 1000000000,
+        //   BitNumber: 8,
+        //   SampleRate: 122880000,
+        //   RecordBandwidth: 10000000,
+        //   RecordRXFrequency: 1575420000,
+        //   RecordRXGain: 40,
+        //   id: 1,
+        // },
       ],
+      modal: false, //不要蒙层
       ChannelIndex: [], //板卡
       RemainHarddiskSize: 0, //用来存储磁盘大小
       IndexList: [], //用来控制只可以选中两个index不一样的复选框
@@ -209,15 +221,14 @@ export default {
         RecordRXGain: 40,
       },
 
-      formLabelWidth: "120px", //控制对话框的长度
+      formLabelWidth: "165px", //控制对话框的长度
     };
   },
   created() {
-    // this.getRemainHarddiskSize();
     this.Availablespace = this.$store.state.Availablespace;
     this.ChannelIndex = this.$store.state.ChannelIndex;
-    console.log(this.ChannelIndex);
-    console.log(this.Availablespace);
+    this.record = JSON.parse(window.localStorage.getItem("recordData"));//获取localStorage本地存储的数据
+    this.record = this.record.sort((a, b) => a.id - b.id); //进行排序
   },
   methods: {
     getRemainHarddiskSize() {
@@ -261,29 +272,45 @@ export default {
       this.ChannelIndex = this.$store.state.ChannelIndex;
       console.log(this.ChannelIndex);
     },
-    addRecordData() {
+    addRecordData(id) {
       //添加新的数据到record
-
       this.dialogrecord = false;
-
-      this.record.push(this.recordform);
       this.recordform = {
-        id: this.recordform.id,
-        ChanneIndex: this.recordform.ChanneIndex,
-        FileSize: this.recordform.FileSize,
-        BitNumber: this.recordform.BitNumber,
-        SampleRate: this.recordform.SampleRate,
-        RecordBandwidth: this.recordform.RecordBandwidth,
-        RecordRXFrequency: this.recordform.RecordRXFrequency,
-        RecordRXGain: this.recordform.RecordRXGain,
+        id: parseInt(this.recordform.id),
+        RecordChannelIndex: parseInt(this.recordform.RecordChannelIndex),
+        FileSize: parseInt(this.recordform.FileSize),
+        BitNumber: parseInt(this.recordform.BitNumber),
+        SampleRate: parseInt(this.recordform.SampleRate),
+        RecordBandwidth: parseInt(this.recordform.RecordBandwidth),
+        RecordRXFrequency: parseInt(this.recordform.RecordRXFrequency),
+        RecordRXGain: parseInt(this.recordform.RecordRXGain),
       };
+      if (this.record.filter((item) => item["id"] === id).length !== 0) {
+        this.$message({
+          message: "id 已经存在，请重新输入！",
+          type: "warning",
+        });
+      } else {
+        this.record.push(this.recordform);
+        this.recordform = {
+          id: this.recordform.id,
+          RecordChannelIndex: this.recordform.RecordChannelIndex,
+          FileSize: this.recordform.FileSize,
+          BitNumber: this.recordform.BitNumber,
+          SampleRate: this.recordform.SampleRate,
+          RecordBandwidth: this.recordform.RecordBandwidth,
+          RecordRXFrequency: this.recordform.RecordRXFrequency,
+          RecordRXGain: this.recordform.RecordRXGain,
+        };
 
-      //模拟数据
-      // this.axios.post("/record", this.recordform).then((res) => {
-      //   // console.log(res);
-      //   // console. log(1);
-      //   this.getRecord();
-      // });
+        //存数据
+        window.localStorage.setItem("recordData", JSON.stringify(this.record));
+
+        //取数据
+        this.record = JSON.parse(window.localStorage.getItem("recordData"));
+
+        this.record = this.record.sort((a, b) => a.id - b.id); //进行排序
+      }
     },
     Checkedrecord(e, item) {
       let index = item.RecordChannelIndex;
@@ -313,7 +340,9 @@ export default {
         }
       } else {
         this.IndexList.splice(this.IndexList.indexOf(index), 1);
+        this.RecordData.splice(this.IndexList.indexOf(index), 1);
         this.recordboolen = false;
+        console.log(this.RecordData);
       }
     },
     Deletrecord() {
@@ -338,6 +367,9 @@ export default {
             bantchDelete(arr, ids);
             // console.log(bantchDelete(arr, ids));
             this.recordboolen = false;
+            this.RecordData = [];
+            console.log(arr);
+            window.localStorage.setItem("recordData", JSON.stringify(arr));//存储覆盖
           })
           .catch((err) => {
             console.log(err);
@@ -345,31 +377,12 @@ export default {
       } else {
         return;
       }
-
-      //删除复选框选中的信息
-      // if (this.recordboolen == true) {
-      //   this.$confirm("确定要删除这条信息吗？")
-      //     .then((_) => {
-      //       for (let i = 0; i < this.recordid.length; i++) {
-      //         this.axios.delete("/record/" + this.recordid[i]).then((res) => {
-      //           this.getRecord();
-      //           this.recordid = [];
-      //           this.recordboolen0 = false;
-      //           this.recordboolen1 = false;
-      //           this.record.checked = false;
-      //           this.recordboolen = false;
-      //         });
-      //       }
-      //     })
-      //     .catch((err) => {
-      //       this.recordboolen0 = false;
-      //       this.recordboolen1 = false;
-      //       this.record.checked = false;
-      //       console.log(err);
-      //     });
-      // } else {
-      //   return;
-      // }
+      //取消所有的复选框的勾选
+      this.$refs.checkbox.map(function (item) {
+        item.checked = false;
+      });
+      this.IndexList = [];
+      //取消所有的复选框的勾选
     },
     close() {
       this.dialogrecord = false;
@@ -584,29 +597,36 @@ export default {
 };
 </script>
 
-<style scoped>
+
+<style scoped >
+.record {
+  list-style-type: none !important ;
+}
 #table {
   width: 100%;
   height: auto;
   overflow-x: scroll;
 }
-table {
-  width: 90%;
+.table {
+  width: 95%;
   height: auto;
   /* background-color: pink; */
   margin: 0rem auto;
 }
-table th {
+.table th {
   height: 5rem;
   font-size: 1.3rem;
   border-bottom: 1px solid gainsboro;
 }
-table td {
+.table td {
   height: 5rem;
   /* background-color: aqua; */
   text-align: center;
   border-bottom: 1px solid gainsboro;
   color: rgb(151, 151, 146);
+}
+.record {
+  position: relative;
 }
 .record >>> table .el-checkbox__input.is-checked .el-checkbox__inner {
   width: 16px;
@@ -630,4 +650,28 @@ table td {
 .record >>> .add {
   color: rgb(37, 141, 222);
 }
+.el-input {
+  margin-left: -5%;
+  width: 50%;
+}
+.record >>> .el-input--suffix .el-input__inner {
+  margin-left: 35% !important;
+}
+.record >>> .el-dialog {
+  width: 40%;
+}
+.record >>> .el-select-dropdown {
+  margin-left: 7%;
+}
+
+@media screen and (min-width: 600px) and (max-width: 1683px) {
+  .record >>> .el-select > .el-input {
+    margin-left: -19% !important;
+  }
+}
+/* @media screen and (min-width: 600px) and (max-width:1145px) {
+.record >>> .el-select>.el-input{
+  margin-left:-19% !important;
+}
+} */
 </style>

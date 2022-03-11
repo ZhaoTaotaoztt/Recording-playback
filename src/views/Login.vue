@@ -88,7 +88,6 @@ export default {
           return false;
         }
       });
-
     },
   },
 };
@@ -96,11 +95,11 @@ export default {
 </script>
 
 <style scoped>
-body{
+body {
   width: 100%;
   height: 100%;
 }
-.home{
+.home {
   /* background-color: pink; */
   position: relative;
   top: 50%;
@@ -125,14 +124,22 @@ body{
 }
 .home >>> .el-form #logo {
   width: 80%;
-  height: 100px;
-  background: url("../assets/logo.png") no-repeat center;
-  background-size: 78%;
+  height: 150px;
+  background: url("../assets/logo1.png") no-repeat center;
+  background-size: cover;
   margin: 40px auto;
   border: none;
 }
-
-@media screen and (min-width: 200px) and (max-width: 800px) {
+@media screen and (min-width: 1500px) and (max-width: 2200px) {
+  .home >>> .el-form #logo {
+    width: 100%;
+    height: 10rem;
+    background: url("../assets/logo1.png") no-repeat center;
+    background-size: 80%;
+    margin: 40px auto;
+  }
+}
+@media screen and (min-width: 200px) and (max-width: 1500px) {
   .home >>> .el-form {
     width: 80%;
     height: 300px;
@@ -142,10 +149,9 @@ body{
   .home >>> .el-form #logo {
     width: 100%;
     height: 10rem;
-    background:url("../assets/logo.png") no-repeat center;
-    background-size: 90%;
+    background: url("../assets/logo1.png") no-repeat center;
+    background-size: 70%;
     margin: 40px auto;
-    border: 1px solid black;
   }
 }
 </style>

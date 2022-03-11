@@ -47,6 +47,8 @@ export default {
   display: flex;
   justify-content: space-around;
   align-items: center;
+  padding-bottom: 2rem;
+  padding-top: 1rem;
 }
 .hearder > .left {
   width: 40%;
@@ -60,7 +62,7 @@ export default {
   width: 27%;
   height: 8rem;
   background: url("../assets/logo.png") no-repeat center;
-  background-size: 100%;
+  background-size: 96%;
 }
 
 .nav {
