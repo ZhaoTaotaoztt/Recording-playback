@@ -28,6 +28,7 @@
           <th>RecordBandWidth(Hz)</th>
           <th>RecordFrequency(Hz)</th>
           <th>RecordXRgain(Hz)</th>
+          <th>Describe</th>
         </tr>
         <tr
           v-for="(item, index) in replay"
@@ -72,6 +73,7 @@
           <td class="td">{{ item.RecordBandwidth }}</td>
           <td class="td">{{ item.RecordRXFrequency }}</td>
           <td class="td">{{ item.RecordRXGain }}</td>
+          <td class="td">{{ item.Describe }}</td>
         </tr>
       </table>
     </div>
@@ -158,54 +160,92 @@ export default {
   data() {
     return {
       replay: [
-        // {
-        //   BitNumber: 16,
-        //   FileName: "gnss_16457582170#0_20220225_110355_293_110914_055.bin",
-        //   FileCurrentSize: "15667788899",
-        //   RecordBandwidth: "10000000",
-        //   RecordChannelIndex: 0,
-        //   RecordRXFrequency: "1575420000",
-        //   RecordRXGain: 50,
-        //   SampleRate: "122880000",
-        //   isPlaying: 0,
-        //   isRecording: 1,
-        // },
-        // {
-        //   BitNumber: 16,
-        //   FileName: "gnss_16457582170#0_20220225_110355_293_110914_055.bin",
-        //   FileCurrentSize: "15667788899",
-        //   RecordBandwidth: "10000000",
-        //   RecordChannelIndex: 0,
-        //   RecordRXFrequency: "1575420000",
-        //   RecordRXGain: 50,
-        //   SampleRate: "122880000",
-        //   isPlaying: 1,
-        //   isRecording: 0,
-        // },
-        // {
-        //   BitNumber: 16,
-        //   FileName: "gnss_16457582170#0_20220225_110355_293_110914_055.bin",
-        //   FileCurrentSize: "15667788899",
-        //   RecordBandwidth: "10000000",
-        //   RecordChannelIndex: 0,
-        //   RecordRXFrequency: "1575420000",
-        //   RecordRXGain: 50,
-        //   SampleRate: "122880000",
-        //   isPlaying: 1,
-        //   isRecording: 1,
-        // },
-        // {
-        //   BitNumber: 16,
-        //   FileName: "gnss_16457582170#0_20220225_110355_293_110914_055.bin",
-        //   FileCurrentSize: "15667788899",
-        //   RecordBandwidth: "10000000",
-        //   RecordChannelIndex: 0,
-        //   RecordRXFrequency: "1575420000",
-        //   RecordRXGain: 50,
-        //   SampleRate: "122880000",
-        //   isPlaying: 0,
-        //   isRecording: 0,
-        // },
+        {
+          FileName: "gnss_3345678683688856_20211227_103250_325_115910_456.bin",
+          FileSize: 154090653200,
+          BitNumber: 16,
+          SampleRate: 122880000,
+          RecordBandwidth: 10000000,
+          RecordRXFrequency: 1575420000,
+          RecordRXGain: 40,
+          RecordChannelIndex: 0,
+          Describe: "GPS,Shenzhen Skyworth Industrial Park",
+          FileCurrentSize: 154090653200,
+          isRecording: 0,
+          isPlaying: 1,
+        },
+        {
+          FileName: "gnss_3345678683656779_20211527_160150_115.bin",
+          FileSize: 8541255667,
+          BitNumber: 16,
+          SampleRate: 122880000,
+          RecordBandwidth: 10000000,
+          RecordRXFrequency: 1575420000,
+          RecordRXGain: 40,
+          RecordChannelIndex: 0,
+          Describe: "GPS,Shenzhen Skyworth Industrial Park",
+          FileCurrentSize: 32461111,
+          isRecording: 1,
+          isPlaying: 0,
+        },
+        {
+          FileName:
+            "gnss_3345678683688856#0_20211227_103250_325_115910_456.bin",
+          FileSize: 154090653200,
+          BitNumber: 16,
+          SampleRate: 122880000,
+          RecordBandwidth: 10000000,
+          RecordRXFrequency: 1575420000,
+          RecordRXGain: 40,
+          RecordChannelIndex: 0,
+          Describe: "GPS,Shenzhen Skyworth Industrial Park",
+          FileCurrentSize: 154090653200,
+          isRecording: 0,
+          isPlaying: 0,
+        },
+        {
+          FileName:
+            "gnss_3345678683688856#1_20211227_103250_325_115910_456.bin",
+          FileSize: 154090653200,
+          BitNumber: 16,
+          SampleRate: 122880000,
+          RecordBandwidth: 10000000,
+          RecordRXFrequency: 1575420000,
+          RecordRXGain: 40,
+          RecordChannelIndex: 1,
+          Describe: "GPS,Shenzhen Skyworth Industrial Park",
+          FileCurrentSize: 154090653200,
+          isRecording: 0,
+          isPlaying: 0,
+        },
+        {
+          FileName: "gnss_3345678683656779#0_20211527_160150_115.bin",
+          FileSize: 8541255666,
+          BitNumber: 16,
+          SampleRate: 122880000,
+          RecordBandwidth: 10000000,
+          RecordRXFrequency: 1575420000,
+          RecordRXGain: 40,
+          RecordChannelIndex: 0,
+          Describe: "GPS,Shenzhen Skyworth Industrial Park",
+          FileCurrentSize: 568733,
+          isRecording: 1,
+          isPlaying: 0,
+        },
+        {
+          FileName: "gnss_3345678683656779#1_20211527_160150_115.bin",
+          FileSize: 8541255666,
+          BitNumber: 16,
+          SampleRate: 122880000,
+          RecordBandwidth: 10000000,
+          RecordRXFrequency: 1575420000,
+          RecordRXGain: 40,
+          RecordChannelIndex: 1,
+          Describe: "GPS,Shenzhen Skyworth Industrial Park",
+          FileCurrentSize: 568733,
+          isRecording: 1,
+          isPlaying: 0,
+        },
       ],
       modal: false, //不要蒙层
       RemainHarddiskSize: 11670744000, //用来存储磁盘大小
@@ -1200,10 +1240,10 @@ table td {
   background-color: white !important;
 }
 
-@media screen and (min-width: 500px) and (max-width:1297px) {
-table {
-  width: 200%;
-  height: auto;
-}
+@media screen and (min-width: 500px) and (max-width: 1297px) {
+  table {
+    width: 200%;
+    height: auto;
+  }
 }
 </style>

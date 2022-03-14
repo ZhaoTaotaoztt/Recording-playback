@@ -29,6 +29,7 @@
           <th>RecordBandWidth(Hz)</th>
           <th>RecordFrequency(Hz)</th>
           <th>RecordXRgain</th>
+          <th>Describe</th>
         </tr>
         <tr v-for="(item, index) in record" :key="index">
           <!-- 复选框在这 -->
@@ -46,11 +47,12 @@
 
           <td>{{ item.RecordChannelIndex }}</td>
           <td>{{ item.FileSize }}</td>
-          <td>{{ item.BitNumber }}</td>
-          <td>{{ item.SampleRate }}</td>
-          <td>{{ item.RecordBandwidth }}</td>
-          <td>{{ item.RecordRXFrequency }}</td>
-          <td>{{ item.RecordRXGain }}</td>
+          <td><input type="text" class="text" v-model="item.BitNumber"> </td>
+          <td><input type="text" class="text" v-model="item.SampleRate"></td>
+          <td><input type="text" class="text" v-model="item.RecordBandwidth"></td>
+          <td><input type="text" class="text" v-model="item.RecordRXFrequency"></td>
+          <td><input type="text" class="text" v-model="item.RecordRXGain"></td>
+          <td><input type="text" class="text" v-model="item.Describe"></td>
         </tr>
       </table>
     </div>
@@ -136,6 +138,16 @@
             suffix-icon="xxxx"
           ></el-input>
         </el-form-item>
+
+        <el-form-item label="Describe" :label-width="formLabelWidth">
+          <el-input
+            v-model="recordform.Describe"
+            autocomplete="off"
+            type="textarea"
+            maxlength="256"
+            placeholder="Can be empty, with a maximum length of 256"
+          ></el-input>
+        </el-form-item>
       </el-form>
 
       <div slot="footer" class="dialog-footer">
@@ -153,46 +165,46 @@ export default {
   data() {
     return {
       record: [
-        // {
-        //   RecordChannelIndex: 0,
-        //   FileSize: 1000000000,
-        //   BitNumber: 2,
-        //   SampleRate: 122880000,
-        //   RecordBandwidth: 10000000,
-        //   RecordRXFrequency: 1575420000,
-        //   RecordRXGain: 40,
-        //   id: 2,
-        // },
-        // {
-        //   RecordChannelIndex: 1,
-        //   FileSize: 1000000000,
-        //   BitNumber: 2,
-        //   SampleRate: 122880000,
-        //   RecordBandwidth: 10000000,
-        //   RecordRXFrequency: 1575420000,
-        //   RecordRXGain: 40,
-        //   id: 3,
-        // },
-        // {
-        //   RecordChannelIndex: 1,
-        //   FileSize: 1000000000,
-        //   BitNumber: 8,
-        //   SampleRate: 122880000,
-        //   RecordBandwidth: 10000000,
-        //   RecordRXFrequency: 1575420000,
-        //   RecordRXGain: 40,
-        //   id: 4,
-        // },
-        // {
-        //   RecordChannelIndex: 0,
-        //   FileSize: 1000000000,
-        //   BitNumber: 8,
-        //   SampleRate: 122880000,
-        //   RecordBandwidth: 10000000,
-        //   RecordRXFrequency: 1575420000,
-        //   RecordRXGain: 40,
-        //   id: 1,
-        // },
+        {
+          RecordChannelIndex: 0,
+          FileSize: 1000000000,
+          BitNumber: 2,
+          SampleRate: 122880000,
+          RecordBandwidth: 10000000,
+          RecordRXFrequency: 1575420000,
+          RecordRXGain: 40,
+          id: 2,
+        },
+        {
+          RecordChannelIndex: 1,
+          FileSize: 1000000000,
+          BitNumber: 2,
+          SampleRate: 122880000,
+          RecordBandwidth: 10000000,
+          RecordRXFrequency: 1575420000,
+          RecordRXGain: 40,
+          id: 3,
+        },
+        {
+          RecordChannelIndex: 1,
+          FileSize: 1000000000,
+          BitNumber: 8,
+          SampleRate: 122880000,
+          RecordBandwidth: 10000000,
+          RecordRXFrequency: 1575420000,
+          RecordRXGain: 40,
+          id: 4,
+        },
+        {
+          RecordChannelIndex: 0,
+          FileSize: 1000000000,
+          BitNumber: 8,
+          SampleRate: 122880000,
+          RecordBandwidth: 10000000,
+          RecordRXFrequency: 1575420000,
+          RecordRXGain: 40,
+          id: 1,
+        },
       ],
       modal: false, //不要蒙层
       ChannelIndex: [], //板卡
@@ -219,6 +231,7 @@ export default {
         RecordBandwidth: 10000000,
         RecordRXFrequency: 1575420000,
         RecordRXGain: 40,
+        Describe:"",
       },
 
       formLabelWidth: "165px", //控制对话框的长度
@@ -227,7 +240,7 @@ export default {
   created() {
     this.Availablespace = this.$store.state.Availablespace;
     this.ChannelIndex = this.$store.state.ChannelIndex;
-    this.record = JSON.parse(window.localStorage.getItem("recordData"));//获取localStorage本地存储的数据
+    this.record = JSON.parse(window.localStorage.getItem("recordData")); //获取localStorage本地存储的数据
     this.record = this.record.sort((a, b) => a.id - b.id); //进行排序
   },
   methods: {
@@ -284,6 +297,7 @@ export default {
         RecordBandwidth: parseInt(this.recordform.RecordBandwidth),
         RecordRXFrequency: parseInt(this.recordform.RecordRXFrequency),
         RecordRXGain: parseInt(this.recordform.RecordRXGain),
+        Describe: this.recordform.Describe,
       };
       if (this.record.filter((item) => item["id"] === id).length !== 0) {
         this.$message({
@@ -301,6 +315,7 @@ export default {
           RecordBandwidth: this.recordform.RecordBandwidth,
           RecordRXFrequency: this.recordform.RecordRXFrequency,
           RecordRXGain: this.recordform.RecordRXGain,
+          Describe: this.recordform.Describe,
         };
 
         //存数据
@@ -318,6 +333,8 @@ export default {
         if (this.IndexList.indexOf(index) == -1) {
           this.IndexList.unshift(index);
           this.recordboolen = true;
+
+          console.log(this.record[index]);
 
           //需要删除的数据
           this.removeData.push(item.id);
@@ -341,6 +358,7 @@ export default {
       } else {
         this.IndexList.splice(this.IndexList.indexOf(index), 1);
         this.RecordData.splice(this.IndexList.indexOf(index), 1);
+        this.removeData.splice(this.IndexList.indexOf(index), 1);
         this.recordboolen = false;
         console.log(this.RecordData);
       }
@@ -369,7 +387,7 @@ export default {
             this.recordboolen = false;
             this.RecordData = [];
             console.log(arr);
-            window.localStorage.setItem("recordData", JSON.stringify(arr));//存储覆盖
+            window.localStorage.setItem("recordData", JSON.stringify(arr)); //存储覆盖
           })
           .catch((err) => {
             console.log(err);
@@ -608,7 +626,7 @@ export default {
   overflow-x: scroll;
 }
 .table {
-  width: 95%;
+  width:110%;
   height: auto;
   /* background-color: pink; */
   margin: 0rem auto;
@@ -624,6 +642,22 @@ export default {
   text-align: center;
   border-bottom: 1px solid gainsboro;
   color: rgb(151, 151, 146);
+}
+.table td input{
+  outline-color: aliceblue;
+  border: none;
+  color: gray;
+  text-align: center;
+  /* width: 100%;
+  height: 100%; */
+}
+.table td .text{
+  outline-color: aliceblue;
+  border: none;
+  /* color: gray; */
+  text-align: center;
+  width: 100%;
+  height: 50%;
 }
 .record {
   position: relative;
