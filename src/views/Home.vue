@@ -57,6 +57,7 @@ export default {
   color: white;
   line-height: 5rem;
   font-size: 2rem;
+  font-size:  2rem;
 }
 .hearder > .right {
   width: 27%;
@@ -96,5 +97,11 @@ export default {
 }
 .router-link-exact-active {
   border-bottom: 3px solid rgb(37, 141, 222) !important;
+}
+
+@media screen and (min-width:100px) and (max-width: 1297px) {
+  .hearder > .left{
+    font-size: 1rem;
+  }
 }
 </style>

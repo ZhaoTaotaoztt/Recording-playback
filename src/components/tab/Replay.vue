@@ -73,12 +73,65 @@
           <td class="td">{{ item.RecordBandwidth }}</td>
           <td class="td">{{ item.RecordRXFrequency }}</td>
           <td class="td">{{ item.RecordRXGain }}</td>
-          <td class="td">{{ item.Describe }}</td>
+          <td class="td">
+            <el-button type="warning" class="btn query" @click="ShowMore(item)"
+              >View more information</el-button
+            >
+          </td>
+          <!-- 嵌套的表单 点击配置显示的对话框在这-->
+          <el-dialog
+            title="新建录制配置"
+            :visible="dialogreplay"
+            id="dialogreplay"
+            :before-close="close"
+            :modal="modal"
+            class="ui-widget-content"
+          >
+            <el-form>
+              <el-form-item
+                label="PlayChannelIndex"
+                :label-width="formLabelWidth"
+              >
+                <el-select v-model="PlayChannelIndex" placeholder="0">
+                  <el-option label="0" value="0"></el-option>
+                  <el-option label="1" value="1"></el-option>
+                </el-select>
+              </el-form-item>
+
+              <el-form-item label="PlayTXGain" :label-width="formLabelWidth">
+                <el-input
+                  autocomplete="off"
+                  v-model="PlayTXGain"
+                  placeholder="50"
+                ></el-input>
+              </el-form-item>
+
+              <el-form-item
+                label="PlayTXFrequency(Hz)"
+                :label-width="formLabelWidth"
+              >
+                <el-input
+                  autocomplete="off"
+                  v-model="PlayTXFrequency"
+                  placeholder="1575420000"
+                ></el-input>
+              </el-form-item>
+            </el-form>
+
+            <div slot="footer" class="dialog-footer">
+              <el-button @click="dialogreplay = false">CANCEL</el-button>
+              <el-button type="primary" @click="Accept()">ACCEPT</el-button>
+            </div>
+          </el-dialog>
+          <!-- 嵌套的表单 点击配置显示的对话框在这-->
         </tr>
       </table>
     </div>
 
     <p>RemainHarddisk Size: &nbsp;&nbsp;&nbsp;{{ RemainHarddiskSize }} Byte</p>
+    <p>
+      RemainHarddisk Size: &nbsp;&nbsp;&nbsp;{{ RemainExHarddiskSize }} Byte
+    </p>
 
     <p>
       <el-button class="btn query" @click="getReplay"
@@ -113,148 +166,120 @@
         >Stop SynRecord</el-button
       >
     </p>
-
-    <!-- 嵌套的表单 点击配置显示的对话框在这-->
-    <el-dialog
-      title="新建录制配置"
-      :visible="dialogreplay"
-      id="dialogreplay"
-      :before-close="close"
-      :modal="modal"
-    >
-      <el-form>
-        <el-form-item label="PlayChannelIndex" :label-width="formLabelWidth">
-          <el-select v-model="PlayChannelIndex" placeholder="0">
-            <el-option label="0" value="0"></el-option>
-            <el-option label="1" value="1"></el-option>
-          </el-select>
-        </el-form-item>
-
-        <el-form-item label="PlayTXGain" :label-width="formLabelWidth">
-          <el-input
-            autocomplete="off"
-            v-model="PlayTXGain"
-            placeholder="50"
-          ></el-input>
-        </el-form-item>
-
-        <el-form-item label="PlayTXFrequency" :label-width="formLabelWidth">
-          <el-input
-            autocomplete="off"
-            v-model="PlayTXFrequency"
-            placeholder="1575420000"
-          ></el-input>
-        </el-form-item>
-      </el-form>
-
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogreplay = false">CANCEL</el-button>
-        <el-button type="primary" @click="Accept()">ACCEPT</el-button>
-      </div>
-    </el-dialog>
   </div>
 </template>
 
 <script>
+import $ from "jquery";
+import "jquery-ui-dist/jquery-ui";
+import "jquery-ui-dist/jquery-ui.min.css";
+
 export default {
   data() {
     return {
       replay: [
-        {
-          FileName: "gnss_3345678683688856_20211227_103250_325_115910_456.bin",
-          FileSize: 154090653200,
-          BitNumber: 16,
-          SampleRate: 122880000,
-          RecordBandwidth: 10000000,
-          RecordRXFrequency: 1575420000,
-          RecordRXGain: 40,
-          RecordChannelIndex: 0,
-          Describe: "GPS,Shenzhen Skyworth Industrial Park",
-          FileCurrentSize: 154090653200,
-          isRecording: 0,
-          isPlaying: 1,
-        },
-        {
-          FileName: "gnss_3345678683656779_20211527_160150_115.bin",
-          FileSize: 8541255667,
-          BitNumber: 16,
-          SampleRate: 122880000,
-          RecordBandwidth: 10000000,
-          RecordRXFrequency: 1575420000,
-          RecordRXGain: 40,
-          RecordChannelIndex: 0,
-          Describe: "GPS,Shenzhen Skyworth Industrial Park",
-          FileCurrentSize: 32461111,
-          isRecording: 1,
-          isPlaying: 0,
-        },
-        {
-          FileName:
-            "gnss_3345678683688856#0_20211227_103250_325_115910_456.bin",
-          FileSize: 154090653200,
-          BitNumber: 16,
-          SampleRate: 122880000,
-          RecordBandwidth: 10000000,
-          RecordRXFrequency: 1575420000,
-          RecordRXGain: 40,
-          RecordChannelIndex: 0,
-          Describe: "GPS,Shenzhen Skyworth Industrial Park",
-          FileCurrentSize: 154090653200,
-          isRecording: 0,
-          isPlaying: 0,
-        },
-        {
-          FileName:
-            "gnss_3345678683688856#1_20211227_103250_325_115910_456.bin",
-          FileSize: 154090653200,
-          BitNumber: 16,
-          SampleRate: 122880000,
-          RecordBandwidth: 10000000,
-          RecordRXFrequency: 1575420000,
-          RecordRXGain: 40,
-          RecordChannelIndex: 1,
-          Describe: "GPS,Shenzhen Skyworth Industrial Park",
-          FileCurrentSize: 154090653200,
-          isRecording: 0,
-          isPlaying: 0,
-        },
-        {
-          FileName: "gnss_3345678683656779#0_20211527_160150_115.bin",
-          FileSize: 8541255666,
-          BitNumber: 16,
-          SampleRate: 122880000,
-          RecordBandwidth: 10000000,
-          RecordRXFrequency: 1575420000,
-          RecordRXGain: 40,
-          RecordChannelIndex: 0,
-          Describe: "GPS,Shenzhen Skyworth Industrial Park",
-          FileCurrentSize: 568733,
-          isRecording: 1,
-          isPlaying: 0,
-        },
-        {
-          FileName: "gnss_3345678683656779#1_20211527_160150_115.bin",
-          FileSize: 8541255666,
-          BitNumber: 16,
-          SampleRate: 122880000,
-          RecordBandwidth: 10000000,
-          RecordRXFrequency: 1575420000,
-          RecordRXGain: 40,
-          RecordChannelIndex: 1,
-          Describe: "GPS,Shenzhen Skyworth Industrial Park",
-          FileCurrentSize: 568733,
-          isRecording: 1,
-          isPlaying: 0,
-        },
+        // {
+        //   FileName: "gnss_3345678683688856_20211227_103250_325_115910_456.bin",
+        //   FileSize: 154090653200,
+        //   BitNumber: 16,
+        //   SampleRate: 122880000,
+        //   RecordBandwidth: 10000000,
+        //   RecordRXFrequency: 1575420000,
+        //   RecordRXGain: 40,
+        //   RecordChannelIndex: 0,
+        //   Describe: "GPS,Shenzhen Skyworth Industrial Park",
+        //   FileCurrentSize: 154090653200,
+        //   isRecording: 0,
+        //   isPlaying: 1,
+        //   isUseExDisk: 1,
+        // },
+        // {
+        //   FileName: "gnss_3345678683656779_20211527_160150_115.bin",
+        //   FileSize: 8541255667,
+        //   BitNumber: 16,
+        //   SampleRate: 122880000,
+        //   RecordBandwidth: 10000000,
+        //   RecordRXFrequency: 1575420000,
+        //   RecordRXGain: 40,
+        //   RecordChannelIndex: 0,
+        //   Describe: "GPS,Shenzhen Skyworth Industrial Park",
+        //   FileCurrentSize: 32461111,
+        //   isRecording: 1,
+        //   isPlaying: 0,
+        //   isUseExDisk: 1,
+        // },
+        // {
+        //   FileName:
+        //     "gnss_3345678683688856#0_20211227_103250_325_115910_456.bin",
+        //   FileSize: 154090653200,
+        //   BitNumber: 16,
+        //   SampleRate: 122880000,
+        //   RecordBandwidth: 10000000,
+        //   RecordRXFrequency: 1575420000,
+        //   RecordRXGain: 40,
+        //   RecordChannelIndex: 0,
+        //   Describe: "GPS,Shenzhen Skyworth Industrial Park",
+        //   FileCurrentSize: 154090653200,
+        //   isRecording: 0,
+        //   isPlaying: 0,
+        //   isUseExDisk: 0,
+        // },
+        // {
+        //   FileName:
+        //     "gnss_3345678683688856#1_20211227_103250_325_115910_456.bin",
+        //   FileSize: 154090653200,
+        //   BitNumber: 16,
+        //   SampleRate: 122880000,
+        //   RecordBandwidth: 10000000,
+        //   RecordRXFrequency: 1575420000,
+        //   RecordRXGain: 40,
+        //   RecordChannelIndex: 1,
+        //   Describe: "GPS,Shenzhen Skyworth Industrial Park",
+        //   FileCurrentSize: 154090653200,
+        //   isRecording: 0,
+        //   isPlaying: 0,
+        //   isUseExDisk: 0,
+        // },
+        // {
+        //   FileName: "gnss_3345678683656779#0_20211527_160150_115.bin",
+        //   FileSize: 8541255666,
+        //   BitNumber: 16,
+        //   SampleRate: 122880000,
+        //   RecordBandwidth: 10000000,
+        //   RecordRXFrequency: 1575420000,
+        //   RecordRXGain: 40,
+        //   RecordChannelIndex: 0,
+        //   Describe: "GPS,Shenzhen Skyworth Industrial Park",
+        //   FileCurrentSize: 568733,
+        //   isRecording: 1,
+        //   isPlaying: 0,
+        //   isUseExDisk: 1,
+        // },
+        // {
+        //   FileName: "gnss_3345678683656779#1_20211527_160150_115.bin",
+        //   FileSize: 8541255666,
+        //   BitNumber: 16,
+        //   SampleRate: 122880000,
+        //   RecordBandwidth: 10000000,
+        //   RecordRXFrequency: 1575420000,
+        //   RecordRXGain: 40,
+        //   RecordChannelIndex: 1,
+        //   Describe: "GPS,Shenzhen Skyworth Industrial Park",
+        //   FileCurrentSize: 568733,
+        //   isRecording: 1,
+        //   isPlaying: 0,
+        //   isUseExDisk: 1,
+        // },
       ],
       modal: false, //不要蒙层
       RemainHarddiskSize: 11670744000, //用来存储磁盘大小
+      RemainExHarddiskSize: 11670744000, //用来存储外置磁盘大小
       IndexList: [], //用来控制只可以选中两个index不一样的复选框
       ChannelIndex: [], //板卡
       dialogreplay: false, //对话框是否显示
 
       replayboolen: false, //用来判断删除是否可点击
-      formLabelWidth: "120px", //对话框的长度
+      formLabelWidth: "155px", //对话框的长度
       isclick: true, //用来判断提示不要频繁点击的布尔值
       index: "",
 
@@ -266,7 +291,7 @@ export default {
       FileName: [], //组合下发判断是否选择的是一样的数据
 
       //配置回放对话框绑定的数据
-      PlayChannelIndex: "",
+      PlayChannelIndex: 0,
       PlayTXGain: "",
       PlayTXFrequency: "",
 
@@ -274,6 +299,41 @@ export default {
     };
   },
   methods: {
+    created() {
+      //拖拽事件
+      $(function () {
+        $("#dialogreplay").draggable();
+      });
+    },
+    ShowMore(item) {
+      console.log(item.isUseExDisk);
+      var save;
+      var Describe = item.Describe;
+      if (item.isUseExDisk == 0) {
+        save = "Built in storage";
+      } else {
+        save = "External storage";
+      }
+
+      this.$alert(
+        "<p><strong>Storage location&nbsp;:&nbsp;</strong>" +
+          save +
+          "</p><br/><p><strong>Describe&nbsp;:&nbsp;</strong>" +
+          Describe +
+          "</p>",
+        "View more information",
+        {
+          confirmButtonText: "Close",
+          dangerouslyUseHTMLString: true,
+          callback: (action) => {
+            // this.$message({
+            //   type: "info",
+            //   message: `action: ${action}`,
+            // });
+          },
+        }
+      );
+    },
     getReplay() {
       this.ChannelIndex = this.$store.state.ChannelIndex;
       console.log(this.ChannelIndex);
@@ -301,14 +361,18 @@ export default {
       var that = this;
       ws.onmessage = function (e) {
         if (JSON.parse(e.data).cmd.APIName == "GenericErr") {
-          that.$message.error("通用错误!");
+          that.$message.error("General error!"); //通用错误
         } else {
           that.replay = JSON.parse(e.data).cmd.FileInformations;
-          that.replay = that.replay.sort((a, b) =>
-            a.FileName > b.FileName ? 1 : b.FileName > a.FileName ? -1 : 0
-          );
+
+          // that.replay = that.replay.sort((a, b) =>
+          //   a.FileName > b.FileName ? 1 : b.FileName > a.FileName ? -1 : 0
+          // );
 
           that.RemainHarddiskSize = JSON.parse(e.data).cmd.RemainHarddiskSize;
+          that.RemainExHarddiskSize = JSON.parse(
+            e.data
+          ).cmd.RemainExHarddiskSize;
 
           var arr = JSON.parse(e.data).cmd.FileInformations;
           var Allspace = JSON.parse(e.data).cmd.RemainHarddiskSize;
@@ -351,20 +415,6 @@ export default {
       this.playData = [];
       this.stopPlayData = [];
       this.FileName = [];
-
-      // //提示不要频繁点击
-      // if (this.isclick) {
-      //   this.isclick = false;
-      //   setTimeout(() => {
-      //     this.isclick = true;
-      //   }, 4000);
-      // } else {
-      //   this.$message({
-      //     message: "请不要频繁点击！",
-      //     type: "warning",
-      //   });
-      // }
-      // //提示不要频繁点击
     },
     QueryPlayId() {
       //下发StartPlay API请求  多条下发
@@ -395,7 +445,7 @@ export default {
         var that = this;
         ws.onmessage = function (e) {
           if (JSON.parse(e.data).cmd.APIName == "GenericErr") {
-            that.$message.error("通用错误!");
+            that.$message.error("General error!"); //通用错误
           } else {
             var statu = JSON.parse(e.data).cmd.FileInformations
               .PlayChannelIndexs;
@@ -418,7 +468,7 @@ export default {
                 break;
               case (statu.length = 0):
                 that.$message({
-                  message: "未查询到结果!",
+                  message: "No results found!", //未查询到结果
                   type: "warning",
                 });
                 break;
@@ -467,6 +517,16 @@ export default {
           this.IndexList.unshift(ChannelIndex);
           this.replayboolen = true;
 
+          //要开始回放的数据操作
+          this.playData.push({
+            FileName: item.FileName,
+            PlayTXFrequency: parseInt(item.RecordRXFrequency),
+            PlayTXGain: parseInt(item.RecordRXGain),
+            PlayChannelIndex: parseInt(item.RecordChannelIndex),
+          });
+
+          console.log(this.playData);
+
           //要删除的数据操作
           this.removeData.push(item.FileName);
           // console.log(this.removeData);
@@ -507,7 +567,7 @@ export default {
         this.FileName.splice(this.IndexList.indexOf(ChannelIndex), 1);
         this.replayboolen = false;
       }
-      console.log(e.target.checked);
+      // console.log(e.target.checked);
     },
     Deletreplay() {
       //删除复选框选中的信息
@@ -515,7 +575,7 @@ export default {
       var item;
 
       if (this.replayboolen == true) {
-        this.$confirm("确定要删除这条信息吗？")
+        this.$confirm("Are you sure you want to delete？") //确定要删除吗
           .then((_) => {
             //socket请求----
             var ws = new WebSocket("ws://192.168.1.203:9001");
@@ -538,28 +598,28 @@ export default {
             var that = this;
             ws.onmessage = function (e) {
               if (JSON.parse(e.data).cmd.APIName == "GenericErr") {
-                that.$message.error("通用错误!");
+                that.$message.error("General error!"); //通用错误
               } else {
                 var statu = JSON.parse(e.data).cmd.ResultCode;
                 switch (statu) {
                   case 0:
                     that.$message({
-                      message: "成功",
+                      message: "success", //成功
                       type: "success",
                     });
                     break;
                   case 1:
-                    that.$message.error("文件不存在!");
+                    that.$message.error("file does not exist!"); //文件不存在
                     break;
                   case 2:
                     that.$message({
-                      message: "文件正在录制!",
+                      message: "The file is being recorded!", //文件正在录制
                       type: "warning",
                     });
                     break;
                   case 3:
                     that.$message({
-                      message: "文件正在回放!",
+                      message: "File playback in progress!", //文件正在回放
                       type: "warning",
                     });
                     break;
@@ -600,7 +660,7 @@ export default {
           }, 4000);
         } else {
           this.$message({
-            message: "请不要频繁点击！",
+            message: "Please do not click frequently！", //请不要频繁点击
             type: "warning",
           });
         }
@@ -629,29 +689,26 @@ export default {
       // }
     },
     showplay(index) {
-      if (this.replayboolen == true) {
-        this.curren_index = index;
-        this.dialogreplay = true;
-      } else {
-        return;
-      }
+      // if (this.replayboolen == true) {
+      this.curren_index = index;
+      this.dialogreplay = true;
+      console.log(this.curren_index);
+      // } else {
+      //   return;
+      // }
     },
     Accept() {
       //配置（对话框）
-      // console.log(this.PlayChannelIndex);
-      // console.log(this.PlayTXGain);
-      // console.log(this.PlayTXFrequency);
-      // console.log(this.replay[this.curren_index]);
+      console.log(this.replay[this.curren_index]);
 
-      //要开始回放的数据操作
-      this.playData.push({
-        FileName: this.replay[this.curren_index].FileName,
-        PlayTXFrequency: parseInt(this.PlayTXFrequency),
-        PlayTXGain: parseInt(this.PlayTXGain),
-        PlayChannelIndex: parseInt(this.PlayChannelIndex),
-      });
+      this.replay[this.curren_index].RecordChannelIndex = parseInt(
+        this.PlayChannelIndex
+      );
+      this.replay[this.curren_index].RecordRXGain = parseInt(this.PlayTXGain);
+      this.replay[this.curren_index].RecordRXFrequency = parseInt(
+        this.PlayTXFrequency
+      );
       this.dialogreplay = false;
-      return false;
     },
     close() {
       this.dialogreplay = false;
@@ -684,28 +741,28 @@ export default {
         ws.onmessage = function (e) {
           console.log(e.data);
           if (JSON.parse(e.data).cmd.APIName == "GenericErr") {
-            that.$message.error("通用错误!");
+            that.$message.error("General error!"); //通用错误
           } else {
             var statu = JSON.parse(e.data).cmd.ResultCode;
             switch (statu) {
               case 0:
                 that.$message({
-                  message: "成功",
+                  message: "success", //成功
                   type: "success",
                 });
                 break;
               case 1:
-                that.$message.error("文件不存在!");
+                that.$message.error("file does not exist!"); //文件不存在
                 break;
               case 2:
                 that.$message({
-                  message: "板卡ID已被使用!",
+                  message: "Card ID is already in use!", //板卡ID已被使用
                   type: "warning",
                 });
                 break;
               case 3:
                 that.$message({
-                  message: "其他失败!",
+                  message: "Other failures!", //其他失败
                   type: "warning",
                 });
                 break;
@@ -737,7 +794,7 @@ export default {
           }, 4000);
         } else {
           this.$message({
-            message: "请不要频繁点击！",
+            message: "Please do not click frequently！", //请不要频繁点击
             type: "warning",
           });
         }
@@ -762,7 +819,7 @@ export default {
           console.log(FileName);
           if (FileName[0].split("#")[0] != FileName[1].split("#")[0]) {
             this.$message({
-              message: "同步回放文件选择错误!",
+              message: "Synchronous playback file selection error!", //同步回放文件选择错误
               type: "warning",
             });
           } else {
@@ -781,28 +838,28 @@ export default {
             var that = this;
             ws.onmessage = function (e) {
               if (JSON.parse(e.data).cmd.APIName == "GenericErr") {
-                that.$message.error("通用错误!");
+                that.$message.error("General error!"); //通用错误
               } else {
                 var statu = JSON.parse(e.data).cmd.ResultCode;
                 switch (statu) {
                   case 0:
                     that.$message({
-                      message: "成功",
+                      message: "success", //成功
                       type: "success",
                     });
                     break;
                   case 1:
-                    that.$message.error("文件不存在!");
+                    that.$message.error("file does not exist!"); //文件不存在
                     break;
                   case 2:
                     that.$message({
-                      message: "板卡ID已被使用!",
+                      message: "Card ID is already in use!", //板卡ID已被使用
                       type: "warning",
                     });
                     break;
                   case 3:
                     that.$message({
-                      message: "其他失败!",
+                      message: "Other failures!", //其他失败
                       type: "warning",
                     });
                     break;
@@ -834,7 +891,7 @@ export default {
           }, 4000);
         } else {
           this.$message({
-            message: "请不要频繁点击！",
+            message: "Please do not click frequently！", //请不要频繁点击
             type: "warning",
           });
         }
@@ -874,18 +931,18 @@ export default {
         var that = this;
         ws.onmessage = function (e) {
           if (JSON.parse(e.data).cmd.APIName == "GenericErr") {
-            that.$message.error("通用错误!");
+            that.$message.error("General error!"); //通用错误
           } else {
             var statu = JSON.parse(e.data).cmd.ResultCode;
             switch (statu) {
               case 0:
                 that.$message({
-                  message: "成功",
+                  message: "success", //成功
                   type: "success",
                 });
                 break;
               case 1:
-                that.$message.error("文件不存在!");
+                that.$message.error("file does not exist!"); //文件不存在
                 break;
             }
           }
@@ -914,7 +971,7 @@ export default {
           }, 4000);
         } else {
           this.$message({
-            message: "请不要频繁点击！",
+            message: "Please do not click frequently！", //请不要频繁点击
             type: "warning",
           });
         }
@@ -938,7 +995,7 @@ export default {
           console.log(FileName);
           if (FileName[0].split("#")[0] != FileName[1].split("#")[0]) {
             this.$message({
-              message: "同步回放文件选择错误!",
+              message: "Synchronous playback file selection error!", //同步回放文件选择错误
               type: "warning",
             });
           } else {
@@ -958,18 +1015,18 @@ export default {
             var that = this;
             ws.onmessage = function (e) {
               if (JSON.parse(e.data).cmd.APIName == "GenericErr") {
-                that.$message.error("通用错误!");
+                that.$message.error("General error!"); //通用错误
               } else {
                 var statu = JSON.parse(e.data).cmd.ResultCode;
                 switch (statu) {
                   case 0:
                     that.$message({
-                      message: "成功",
+                      message: "success", //成功
                       type: "success",
                     });
                     break;
                   case 1:
-                    that.$message.error("文件不存在!");
+                    that.$message.error("file does not exist!"); //文件不存在
                     break;
                 }
               }
@@ -999,7 +1056,7 @@ export default {
           }, 4000);
         } else {
           this.$message({
-            message: "请不要频繁点击！",
+            message: "Please do not click frequently！", //请不要频繁点击
             type: "warning",
           });
         }
@@ -1036,18 +1093,18 @@ export default {
         var that = this;
         ws.onmessage = function (e) {
           if (JSON.parse(e.data).cmd.APIName == "GenericErr") {
-            that.$message.error("通用错误!");
+            that.$message.error("General error!"); //通用错误
           } else {
             var statu = JSON.parse(e.data).cmd.ResultCode;
             switch (statu) {
               case 0:
                 that.$message({
-                  message: "成功",
+                  message: "success", //成功
                   type: "success",
                 });
                 break;
               case 1:
-                that.$message.error("失败!");
+                that.$message.error("fail!"); //失败
                 break;
             }
           }
@@ -1076,7 +1133,7 @@ export default {
           }, 4000);
         } else {
           this.$message({
-            message: "请不要频繁点击！",
+            message: "Please do not click frequently！", //请不要频繁点击
             type: "warning",
           });
         }
@@ -1101,7 +1158,7 @@ export default {
           console.log(FileName);
           if (FileName[0].split("#")[0] != FileName[1].split("#")[0]) {
             this.$message({
-              message: "同步录制文件选择错误!",
+              message: "Error selecting sync recording file!", //同步录制文件选择错误
               type: "warning",
             });
           } else {
@@ -1121,18 +1178,18 @@ export default {
             var that = this;
             ws.onmessage = function (e) {
               if (JSON.parse(e.data).cmd.APIName == "GenericErr") {
-                that.$message.error("通用错误!");
+                that.$message.error("General error!"); //通用错误
               } else {
                 var statu = JSON.parse(e.data).cmd.ResultCode;
                 switch (statu) {
                   case 0:
                     that.$message({
-                      message: "成功",
+                      message: "success", //成功
                       type: "success",
                     });
                     break;
                   case 1:
-                    that.$message.error("失败!");
+                    that.$message.error("fail!"); //失败
                     break;
                 }
               }
@@ -1163,7 +1220,7 @@ export default {
           }, 4000);
         } else {
           this.$message({
-            message: "请不要频繁点击！",
+            message: "Please do not click frequently！", //请不要频繁点击
             type: "warning",
           });
         }
@@ -1185,7 +1242,7 @@ export default {
   overflow-x: scroll;
 }
 table {
-  width: 130%;
+  width: 140%;
   height: auto;
 }
 table th {
@@ -1240,10 +1297,64 @@ table td {
   background-color: white !important;
 }
 
+.replay >>> .el-dialog {
+  width: 30%;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 5%);
+}
+.replay >>> .ui-widget-content {
+  border: none;
+  background: none;
+}
+
 @media screen and (min-width: 500px) and (max-width: 1297px) {
   table {
     width: 200%;
     height: auto;
+  }
+  .replay >>> .el-dialog {
+    width: 40%;
+  }
+}
+@media screen and (min-width: 800px) and (max-width: 1297px) {
+  .replay >>> .el-dialog {
+    width: 30%;
+  }
+}
+
+@media screen and (min-width: 1356px) and (max-width: 1460px) {
+  table {
+    width: 160%;
+    height: auto;
+  }
+}
+@media screen and (min-width: 500px) and (max-width: 1356px) {
+  table {
+    width: 220%;
+    height: auto;
+  }
+}
+@media screen and (min-width: 899px) and (max-width: 1029px) {
+  table {
+    width: 260%;
+    height: auto;
+  }
+}
+@media screen and (min-width: 500px) and (max-width: 899px) {
+  table {
+    width: 290%;
+    height: auto;
+  }
+  .replay >>> .el-dialog {
+    width: 50%;
+  }
+}
+@media screen and (min-width: 100px) and (max-width: 500px) {
+  table {
+    width: 300%;
+    height: auto;
+  }
+  .replay >>> .el-dialog {
+    width: 70%;
   }
 }
 </style>

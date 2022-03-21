@@ -23,8 +23,12 @@
       </tr>
     </table>
     <p>
-      <el-button id="btn" class="btn" @click="getBoardinfo"
-        v-preventReClick="5000">Query Board Info</el-button
+      <el-button
+        id="btn"
+        class="btn"
+        @click="getBoardinfo"
+        v-preventReClick="5000"
+        >Query Board Info</el-button
       >
     </p>
     <p>
@@ -37,10 +41,6 @@
 </template>
 
 <script>
-// import ws from "../utils/websocket"
-// import {
-// websocketOpen,sendSock,websocketonmessage,websocketclose
-// } from "../../utils/websocket";
 export default {
   data() {
     return {
@@ -85,15 +85,15 @@ export default {
         var obj = JSON.parse(e.data).cmd.ChannelInformations;
         that.boardinfo = obj;
 
-        var arr=JSON.parse(e.data).cmd.ChannelInformations
-        var data=arr.filter(function (item) {
-            return item.ChannelStatus =="idle" ;
-          });
-        var ChannelIndex=[]
-        for(var i=0;i<data.length;i++){
-          ChannelIndex.unshift({ChannelIndex:data[i].ChannelIndex})
+        var arr = JSON.parse(e.data).cmd.ChannelInformations;
+        var data = arr.filter(function (item) {
+          return item.ChannelStatus == "idle";
+        });
+        var ChannelIndex = [];
+        for (var i = 0; i < data.length; i++) {
+          ChannelIndex.unshift({ ChannelIndex: data[i].ChannelIndex });
         }
-        
+
         console.log(arr);
         console.log(data);
         console.log(ChannelIndex);
@@ -124,7 +124,10 @@ export default {
     },
     Signout() {
       //退出登录
-      this.$confirm("确认关闭？")
+      this.$confirm("Are you sure to close it？", {
+        confirmButtonText: "Determine",
+        cancelButtonText: "Cancel",
+      })
         .then((_) => {
           this.$store.commit("setUser", null);
           this.$router.push("/");
