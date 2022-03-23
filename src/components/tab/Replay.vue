@@ -21,14 +21,15 @@
           </th>
           <!-- 删除按钮在这 -->
 
+          <th>Describe</th>
           <th>RecordChannelIndex</th>
           <th>FileCurrentSize(Byte)</th>
+          <th>RecordFrequency(Hz)</th>
           <th>BitNum</th>
           <th>SampleRate(Hz)</th>
           <th>RecordBandWidth(Hz)</th>
-          <th>RecordFrequency(Hz)</th>
-          <th>RecordXRgain(Hz)</th>
-          <th>Describe</th>
+          <!-- <th>RecordRXGain(Hz)</th> -->
+          <th>More Info</th>
         </tr>
         <tr
           v-for="(item, index) in replay"
@@ -66,17 +67,28 @@
             />
           </td>
 
+          <td class="td">
+            <div @click="ShowDes(item)">{{ item.Describe }}</div>
+          </td>
           <td class="td">{{ item.RecordChannelIndex }}</td>
           <td class="td">{{ item.FileCurrentSize }}</td>
+          <td class="td">{{ item.RecordRXFrequency }}</td>
           <td class="td">{{ item.BitNumber }}</td>
           <td class="td">{{ item.SampleRate }}</td>
           <td class="td">{{ item.RecordBandwidth }}</td>
-          <td class="td">{{ item.RecordRXFrequency }}</td>
-          <td class="td">{{ item.RecordRXGain }}</td>
+          <!-- <td class="td">{{ item.RecordRXGain }}</td> -->
           <td class="td">
-            <el-button type="warning" class="btn query" @click="ShowMore(item)"
-              >View more information</el-button
+            <el-button
+              type="warning"
+              class="btn query"
+              circle
+              @click="ShowMore(item)"
+              id="Showore"
+              >···</el-button
             >
+            <!-- <el-button type="warning" class="btn query" @click="ShowMore(item)"
+              >View more information</el-button
+            > -->
           </td>
           <!-- 嵌套的表单 点击配置显示的对话框在这-->
           <el-dialog
@@ -130,8 +142,11 @@
 
     <p>RemainHarddisk Size: &nbsp;&nbsp;&nbsp;{{ RemainHarddiskSize }} Byte</p>
     <p>
-      RemainHarddisk Size: &nbsp;&nbsp;&nbsp;{{ RemainExHarddiskSize }} Byte
+      RemainExHarddiskSize: &nbsp;&nbsp;&nbsp;{{ RemainExHarddiskSize }} Byte
     </p>
+    <!-- <p>
+      RemainHarddisk Size: &nbsp;&nbsp;&nbsp;{{ RemainExHarddiskSize }} Byte
+    </p> -->
 
     <p>
       <el-button class="btn query" @click="getReplay"
@@ -272,8 +287,8 @@ export default {
         // },
       ],
       modal: false, //不要蒙层
-      RemainHarddiskSize: 11670744000, //用来存储磁盘大小
-      RemainExHarddiskSize: 11670744000, //用来存储外置磁盘大小
+      RemainHarddiskSize: 0, //用来存储磁盘大小
+      RemainExHarddiskSize: 0, //用来存储外置磁盘大小
       IndexList: [], //用来控制只可以选中两个index不一样的复选框
       ChannelIndex: [], //板卡
       dialogreplay: false, //对话框是否显示
@@ -298,17 +313,30 @@ export default {
       curren_index: "", //获取index，取到当下点击的是哪一条数据
     };
   },
+  mounted() {
+    //拖拽事件
+    $(function () {
+      $("#dialogreplay").draggable();
+    });
+  },
   methods: {
-    created() {
-      //拖拽事件
-      $(function () {
-        $("#dialogreplay").draggable();
-      });
+    ShowDes(item) {
+      var Describe = item.Describe;
+
+      this.$alert(
+        "<p><strong>Describe&nbsp;:&nbsp;</strong>" + Describe + "</p>",
+        "View Describe",
+        {
+          confirmButtonText: "Close",
+          dangerouslyUseHTMLString: true,
+        }
+      );
     },
     ShowMore(item) {
-      console.log(item.isUseExDisk);
+      console.log(item);
+      console.log(item.RecordRXGain);
       var save;
-      var Describe = item.Describe;
+      var RecordRXGain = item.RecordRXGain;
       if (item.isUseExDisk == 0) {
         save = "Built in storage";
       } else {
@@ -316,11 +344,7 @@ export default {
       }
 
       this.$alert(
-        "<p><strong>Storage location&nbsp;:&nbsp;</strong>" +
-          save +
-          "</p><br/><p><strong>Describe&nbsp;:&nbsp;</strong>" +
-          Describe +
-          "</p>",
+        "<p><strong>RecordXRgain&nbsp;:&nbsp;</strong>" + RecordRXGain + "</p><p><strong>Storage location&nbsp;:&nbsp;</strong>" + save + "</p>",
         "View more information",
         {
           confirmButtonText: "Close",
@@ -513,54 +537,50 @@ export default {
     Checkedreplay(e, item, index) {
       let ChannelIndex = item.RecordChannelIndex;
       if (e.target.checked == true) {
-        if (this.IndexList.indexOf(ChannelIndex) == -1) {
-          this.IndexList.unshift(ChannelIndex);
-          this.replayboolen = true;
+        this.IndexList.unshift(index);
+        this.replayboolen = true;
 
-          //要开始回放的数据操作
-          this.playData.push({
-            FileName: item.FileName,
-            PlayTXFrequency: parseInt(item.RecordRXFrequency),
-            PlayTXGain: parseInt(item.RecordRXGain),
-            PlayChannelIndex: parseInt(item.RecordChannelIndex),
-          });
+        //要删除的数据操作
+        this.removeData.push(item.FileName);
+        // console.log(this.removeData);
 
-          console.log(this.playData);
+        //要开始回放的数据操作
+        this.playData.push({
+          RecordChannelIndex: item.RecordChannelIndex,
+          FileName: item.FileName,
+          PlayTXFrequency: parseInt(item.RecordRXFrequency),
+          PlayTXGain: parseInt(item.RecordRXGain),
+          PlayChannelIndex: parseInt(item.RecordChannelIndex),
+        });
+        console.log(this.playData);
 
-          //要删除的数据操作
-          this.removeData.push(item.FileName);
-          // console.log(this.removeData);
+        //要停止回放的数据的数据操作
+        this.stopPlayData.push({
+          FileName: this.replay[index].FileName,
+          PlayChannelIndex: parseInt(this.replay[index].RecordChannelIndex),
+        });
+        // console.log(this.stopPlayData);
 
-          //要停止回放的数据的数据操作
-          this.stopPlayData.push({
-            FileName: this.replay[index].FileName,
-            PlayChannelIndex: parseInt(this.replay[index].RecordChannelIndex),
-          });
-          // console.log(this.stopPlayData);
+        //要停止录制的相关数据操作
+        this.stopRcordData.push({
+          FileName: item.FileName,
+          PlayChannelIndex: item.RecordChannelIndex,
+        });
+        // console.log(this.stopPlayData);
 
-          //要停止录制的相关数据操作
-          this.stopRcordData.push({
-            FileName: item.FileName,
-            PlayChannelIndex: item.RecordChannelIndex,
-          });
-          // console.log(this.stopPlayData);
+        //查询使用的办卡ID的数据相关操作
+        this.queryIndex = {
+          FileName: this.replay[index].FileName,
+          PlayChannelIndexs: parseInt(this.replay[index].RecordChannelIndex),
+        };
+        // console.log(this.queryIndex);
 
-          //查询使用的办卡ID的数据相关操作
-          this.queryIndex = {
-            FileName: this.replay[index].FileName,
-            PlayChannelIndexs: parseInt(this.replay[index].RecordChannelIndex),
-          };
-          // console.log(this.queryIndex);
-
-          //组合下发判断是否选择的是一样的数据
-          this.FileName.push(item.FileName);
-          // console.log(this.FileName);
-        } else {
-          e.target.checked = false;
-          this.replayboolen = false;
-        }
+        //组合下发判断是否选择的是一样的数据
+        this.FileName.push(item.FileName);
+        // console.log(this.FileName);
       } else {
         this.IndexList.splice(this.IndexList.indexOf(ChannelIndex), 1);
+        this.playData.splice(this.IndexList.indexOf(ChannelIndex), 1);
         this.removeData.splice(this.IndexList.indexOf(ChannelIndex), 1);
         this.stopPlayData.splice(this.IndexList.indexOf(ChannelIndex), 1);
         this.stopRcordData.splice(this.IndexList.indexOf(ChannelIndex), 1);
@@ -628,9 +648,6 @@ export default {
 
               //关闭TCP连接
               ws.close();
-              ws.onclose = function (e) {
-                console.log(e);
-              };
             };
             //socket请求----
           })
@@ -638,6 +655,14 @@ export default {
             this.replay.checked = false;
             console.log(err);
           });
+
+        setTimeout(() => {
+          this.removeData = [];
+          this.stopRcordData = [];
+          this.playData = [];
+          this.stopPlayData = [];
+          this.FileName = [];
+        }, 1000);
       } else {
         return;
       }
@@ -665,28 +690,6 @@ export default {
           });
         }
       }, 1000);
-
-      //提示不要频繁点击
-
-      // if (this.replayboolen == true) {
-      //   this.$confirm("确定要删除这条信息吗？")
-      //     .then((_) => {
-      //       for (var i = 0; i < this.replayid.length; i++) {
-      //         this.axios
-      //           .delete("/QueryFileInfo/" + this.replayid[i])
-      //           .then((res) => {
-      //             this.getReplay();
-      //             this.replayboolen = false;
-      //           });
-      //       }
-      //     })
-      //     .catch((err) => {
-      //       this.replay.checked = false;
-      //       console.log(err);
-      //     });
-      // } else {
-      //   return;
-      // }
     },
     showplay(index) {
       // if (this.replayboolen == true) {
@@ -801,6 +804,14 @@ export default {
         //提示不要频繁点击
 
         this.replayboolen = false;
+
+        setTimeout(() => {
+          this.removeData = [];
+          this.stopRcordData = [];
+          this.playData = [];
+          this.stopPlayData = [];
+          this.FileName = [];
+        }, 1000);
       } else {
         return;
       }
@@ -812,69 +823,102 @@ export default {
       if (this.replayboolen == true) {
         var FileName;
         var data;
-        setTimeout(() => {
-          //定时器是因为vue框架默认的对你数组进行，立马存立马取，取不到，用定时器就可以取到
-          data = this.playData;
-          FileName = this.FileName;
-          console.log(FileName);
-          if (FileName[0].split("#")[0] != FileName[1].split("#")[0]) {
-            this.$message({
-              message: "Synchronous playback file selection error!", //同步回放文件选择错误
-              type: "warning",
-            });
-          } else {
-            //socket请求----
-            var ws = new WebSocket("ws://192.168.1.203:9001");
-            ws.onopen = function (e) {
-              ws.send(
-                JSON.stringify({
-                  cmd: {
-                    APIName: "StartPlay",
-                    FileInformations: data,
-                  },
-                })
-              );
-            };
-            var that = this;
-            ws.onmessage = function (e) {
-              if (JSON.parse(e.data).cmd.APIName == "GenericErr") {
-                that.$message.error("General error!"); //通用错误
-              } else {
-                var statu = JSON.parse(e.data).cmd.ResultCode;
-                switch (statu) {
-                  case 0:
-                    that.$message({
-                      message: "success", //成功
-                      type: "success",
-                    });
-                    break;
-                  case 1:
-                    that.$message.error("file does not exist!"); //文件不存在
-                    break;
-                  case 2:
-                    that.$message({
-                      message: "Card ID is already in use!", //板卡ID已被使用
-                      type: "warning",
-                    });
-                    break;
-                  case 3:
-                    that.$message({
-                      message: "Other failures!", //其他失败
-                      type: "warning",
-                    });
-                    break;
-                }
-              }
+        if (this.playData.length > 2) {
+          this.$message({
+            message: "Select up to two files with different cards", //最多选择两条不同卡的文件
+            type: "warning",
+            duration: 4000,
+          });
+        } else {
+          for (var i = 0; i < this.playData.length; i++) {
+            console.log(this.playData[i].RecordChannelIndex);
+            if (
+              this.playData[0].RecordChannelIndex ==
+              this.playData[1].RecordChannelIndex
+            ) {
+              this.$message({
+                message: "Please select two files of different cards", //请选择两条不同板卡的文件
+                type: "warning",
+              });
+            }
+            if (
+              (this.playData[0].RecordChannelIndex == 0 &&
+                this.playData[1].RecordChannelIndex == 1) ||
+              (this.playData[0].RecordChannelIndex == 1 &&
+                this.playData[1].RecordChannelIndex == 0)
+            ) {
+              this.playData.map(function (item) {
+                //删除RecordChannelIndex
+                delete item.RecordChannelIndex;
+              });
+              console.log(this.playData);
+              setTimeout(() => {
+                //定时器是因为vue框架默认的对你数组进行，立马存立马取，取不到，用定时器就可以取到
+                data = this.playData;
+                FileName = this.FileName;
+                console.log(FileName);
+                if (FileName[0].split("#")[0] != FileName[1].split("#")[0]) {
+                  this.$message({
+                    message: "Synchronous playback file selection error!", //同步回放文件选择错误
+                    type: "warning",
+                    duration: 5000,
+                  });
+                } else {
+                  //socket请求----
+                  var ws = new WebSocket("ws://192.168.1.203:9001");
+                  ws.onopen = function (e) {
+                    ws.send(
+                      JSON.stringify({
+                        cmd: {
+                          APIName: "StartPlay",
+                          FileInformations: data,
+                        },
+                      })
+                    );
+                  };
+                  var that = this;
+                  ws.onmessage = function (e) {
+                    if (JSON.parse(e.data).cmd.APIName == "GenericErr") {
+                      that.$message.error("General error!"); //通用错误
+                    } else {
+                      var statu = JSON.parse(e.data).cmd.ResultCode;
+                      switch (statu) {
+                        case 0:
+                          that.$message({
+                            message: "success", //成功
+                            type: "success",
+                          });
+                          break;
+                        case 1:
+                          that.$message.error("file does not exist!"); //文件不存在
+                          break;
+                        case 2:
+                          that.$message({
+                            message: "Card ID is already in use!", //板卡ID已被使用
+                            type: "warning",
+                          });
+                          break;
+                        case 3:
+                          that.$message({
+                            message: "Other failures!", //其他失败
+                            type: "warning",
+                          });
+                          break;
+                      }
+                    }
 
-              //关闭TCP连接
-              ws.close();
-              ws.onclose = function (e) {
-                console.log(e);
-              };
-            };
+                    //关闭TCP连接
+                    ws.close();
+                    ws.onclose = function (e) {
+                      console.log(e);
+                    };
+                  };
+                }
+              }, 800);
+              //socket请求----
+            }
           }
-        }, 800);
-        //socket请求----
+        }
 
         //取消所有的复选框的勾选
         this.$refs.checkbox.map(function (item) {
@@ -898,6 +942,14 @@ export default {
         //提示不要频繁点击
 
         this.replayboolen = false;
+
+        setTimeout(() => {
+          this.removeData = [];
+          this.stopRcordData = [];
+          this.playData = [];
+          this.stopPlayData = [];
+          this.FileName = [];
+        }, 1000);
       } else {
         return;
       }
@@ -978,6 +1030,13 @@ export default {
         //提示不要频繁点击
 
         this.replayboolen = false;
+        setTimeout(() => {
+          this.removeData = [];
+          this.stopRcordData = [];
+          this.playData = [];
+          this.stopPlayData = [];
+          this.FileName = [];
+        }, 1000);
       } else {
         return;
       }
@@ -1063,6 +1122,13 @@ export default {
         //提示不要频繁点击
 
         this.replayboolen = false;
+        setTimeout(() => {
+          this.removeData = [];
+          this.stopRcordData = [];
+          this.playData = [];
+          this.stopPlayData = [];
+          this.FileName = [];
+        }, 1000);
       } else {
         return;
       }
@@ -1140,6 +1206,13 @@ export default {
         //提示不要频繁点击
 
         this.replayboolen = false;
+        setTimeout(() => {
+          this.removeData = [];
+          this.stopRcordData = [];
+          this.playData = [];
+          this.stopPlayData = [];
+          this.FileName = [];
+        }, 1000);
       } else {
         return;
       }
@@ -1227,6 +1300,13 @@ export default {
         //提示不要频繁点击
 
         this.replayboolen = false;
+        setTimeout(() => {
+          this.removeData = [];
+          this.stopRcordData = [];
+          this.playData = [];
+          this.stopPlayData = [];
+          this.FileName = [];
+        }, 1000);
       } else {
         return;
       }
@@ -1256,7 +1336,21 @@ table td {
   border-bottom: 1px solid gainsboro;
   color: rgb(151, 151, 146);
 }
-
+table tr td:nth-child(4) {
+  /* background-color: palegreen; */
+  width: 10%;
+  text-align: center;
+}
+table tr td:nth-child(4) div {
+  width: 80%;
+  /* background-color: pink; */
+  color: rgb(37, 141, 222);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  margin-left: 30px;
+}
 .replay >>> table .el-checkbox__input.is-checked .el-checkbox__inner {
   width: 16px;
   height: 16px;
@@ -1305,6 +1399,9 @@ table td {
   border: none;
   background: none;
 }
+#Showore {
+  font-size: 1.7rem;
+}
 
 @media screen and (min-width: 500px) and (max-width: 1297px) {
   table {
@@ -1341,7 +1438,7 @@ table td {
 }
 @media screen and (min-width: 500px) and (max-width: 899px) {
   table {
-    width: 290%;
+    width: 390%;
     height: auto;
   }
   .replay >>> .el-dialog {
@@ -1350,8 +1447,9 @@ table td {
 }
 @media screen and (min-width: 100px) and (max-width: 500px) {
   table {
-    width: 300%;
+    width: 600%;
     height: auto;
+    background-color: pink;
   }
   .replay >>> .el-dialog {
     width: 70%;
