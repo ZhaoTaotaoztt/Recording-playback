@@ -344,7 +344,11 @@ export default {
       }
 
       this.$alert(
-        "<p><strong>RecordXRgain&nbsp;:&nbsp;</strong>" + RecordRXGain + "</p><p><strong>Storage location&nbsp;:&nbsp;</strong>" + save + "</p>",
+        "<p><strong>RecordXRgain&nbsp;:&nbsp;</strong>" +
+          RecordRXGain +
+          "</p><p><strong>Storage location&nbsp;:&nbsp;</strong>" +
+          save +
+          "</p>",
         "View more information",
         {
           confirmButtonText: "Close",
@@ -385,7 +389,11 @@ export default {
       var that = this;
       ws.onmessage = function (e) {
         if (JSON.parse(e.data).cmd.APIName == "GenericErr") {
-          that.$message.error("General error!"); //通用错误
+          that.$message.error({
+            message: "General error!",
+            duration: 0,
+            showClose: true,
+          }); //通用错误
         } else {
           that.replay = JSON.parse(e.data).cmd.FileInformations;
 
@@ -469,7 +477,11 @@ export default {
         var that = this;
         ws.onmessage = function (e) {
           if (JSON.parse(e.data).cmd.APIName == "GenericErr") {
-            that.$message.error("General error!"); //通用错误
+            that.$message.error({
+              message: "General error!",
+              duration: 0,
+              showClose: true,
+            }); //通用错误
           } else {
             var statu = JSON.parse(e.data).cmd.FileInformations
               .PlayChannelIndexs;
@@ -482,18 +494,24 @@ export default {
                 that.$message({
                   message: statu,
                   type: "success",
+                  duration: 0,
+                  showClose: true,
                 });
                 break;
               case 1:
                 that.$message({
                   message: statu,
                   type: "success",
+                  duration: 0,
+                  showClose: true,
                 });
                 break;
               case (statu.length = 0):
                 that.$message({
                   message: "No results found!", //未查询到结果
                   type: "warning",
+                  duration: 0,
+                  showClose: true,
                 });
                 break;
             }
@@ -618,7 +636,11 @@ export default {
             var that = this;
             ws.onmessage = function (e) {
               if (JSON.parse(e.data).cmd.APIName == "GenericErr") {
-                that.$message.error("General error!"); //通用错误
+                that.$message.error({
+                  message: "General error!",
+                  duration: 0,
+                  showClose: true,
+                }); //通用错误
               } else {
                 var statu = JSON.parse(e.data).cmd.ResultCode;
                 switch (statu) {
@@ -626,21 +648,31 @@ export default {
                     that.$message({
                       message: "success", //成功
                       type: "success",
+                      duration: 0,
+                      showClose: true,
                     });
                     break;
                   case 1:
-                    that.$message.error("file does not exist!"); //文件不存在
+                    that.$message.error({
+                      message: "file does not exist!",
+                      duration: 0,
+                      showClose: true,
+                    }); //文件不存在
                     break;
                   case 2:
                     that.$message({
                       message: "The file is being recorded!", //文件正在录制
                       type: "warning",
+                      duration: 0,
+                      showClose: true,
                     });
                     break;
                   case 3:
                     that.$message({
                       message: "File playback in progress!", //文件正在回放
                       type: "warning",
+                      duration: 0,
+                      showClose: true,
                     });
                     break;
                 }
@@ -744,7 +776,11 @@ export default {
         ws.onmessage = function (e) {
           console.log(e.data);
           if (JSON.parse(e.data).cmd.APIName == "GenericErr") {
-            that.$message.error("General error!"); //通用错误
+            that.$message.error({
+              message: "General error!",
+              duration: 0,
+              showClose: true,
+            }); //通用错误
           } else {
             var statu = JSON.parse(e.data).cmd.ResultCode;
             switch (statu) {
@@ -752,21 +788,31 @@ export default {
                 that.$message({
                   message: "success", //成功
                   type: "success",
+                  duration: 0,
+                  showClose: true,
                 });
                 break;
               case 1:
-                that.$message.error("file does not exist!"); //文件不存在
+                that.$message.error({
+                  message: "file does not exist!",
+                  duration: 0,
+                  showClose: true,
+                }); //文件不存在
                 break;
               case 2:
                 that.$message({
                   message: "Card ID is already in use!", //板卡ID已被使用
                   type: "warning",
+                  duration: 0,
+                  showClose: true,
                 });
                 break;
               case 3:
                 that.$message({
                   message: "Other failures!", //其他失败
                   type: "warning",
+                  duration: 0,
+                  showClose: true,
                 });
                 break;
             }
@@ -827,7 +873,8 @@ export default {
           this.$message({
             message: "Select up to two files with different cards", //最多选择两条不同卡的文件
             type: "warning",
-            duration: 4000,
+            duration: 0,
+            showClose: true,
           });
         } else {
           for (var i = 0; i < this.playData.length; i++) {
@@ -839,6 +886,8 @@ export default {
               this.$message({
                 message: "Please select two files of different cards", //请选择两条不同板卡的文件
                 type: "warning",
+                duration: 0,
+                showClose: true,
               });
             }
             if (
@@ -861,7 +910,8 @@ export default {
                   this.$message({
                     message: "Synchronous playback file selection error!", //同步回放文件选择错误
                     type: "warning",
-                    duration: 5000,
+                    duration: 0,
+                    showClose: true,
                   });
                 } else {
                   //socket请求----
@@ -879,7 +929,11 @@ export default {
                   var that = this;
                   ws.onmessage = function (e) {
                     if (JSON.parse(e.data).cmd.APIName == "GenericErr") {
-                      that.$message.error("General error!"); //通用错误
+                      that.$message.error({
+                        message: "General error!",
+                        duration: 0,
+                        showClose: true,
+                      }); //通用错误
                     } else {
                       var statu = JSON.parse(e.data).cmd.ResultCode;
                       switch (statu) {
@@ -887,21 +941,31 @@ export default {
                           that.$message({
                             message: "success", //成功
                             type: "success",
+                            duration: 0,
+                            showClose: true,
                           });
                           break;
                         case 1:
-                          that.$message.error("file does not exist!"); //文件不存在
+                          that.$message.error({
+                            message: "file does not exist!",
+                            duration: 0,
+                            showClose: true,
+                          }); //文件不存在
                           break;
                         case 2:
                           that.$message({
                             message: "Card ID is already in use!", //板卡ID已被使用
                             type: "warning",
+                            duration: 0,
+                            showClose: true,
                           });
                           break;
                         case 3:
                           that.$message({
                             message: "Other failures!", //其他失败
                             type: "warning",
+                            duration: 0,
+                            showClose: true,
                           });
                           break;
                       }
@@ -983,7 +1047,11 @@ export default {
         var that = this;
         ws.onmessage = function (e) {
           if (JSON.parse(e.data).cmd.APIName == "GenericErr") {
-            that.$message.error("General error!"); //通用错误
+            that.$message.error({
+              message: "General error!",
+              duration: 0,
+              showClose: true,
+            }); //通用错误
           } else {
             var statu = JSON.parse(e.data).cmd.ResultCode;
             switch (statu) {
@@ -991,10 +1059,16 @@ export default {
                 that.$message({
                   message: "success", //成功
                   type: "success",
+                  duration: 0,
+                  showClose: true,
                 });
                 break;
               case 1:
-                that.$message.error("file does not exist!"); //文件不存在
+                that.$message.error({
+                  message: "file does not exist!",
+                  duration: 0,
+                  showClose: true,
+                }); //文件不存在
                 break;
             }
           }
@@ -1056,6 +1130,8 @@ export default {
             this.$message({
               message: "Synchronous playback file selection error!", //同步回放文件选择错误
               type: "warning",
+              duration: 0,
+              showClose: true,
             });
           } else {
             //socket请求----
@@ -1074,7 +1150,11 @@ export default {
             var that = this;
             ws.onmessage = function (e) {
               if (JSON.parse(e.data).cmd.APIName == "GenericErr") {
-                that.$message.error("General error!"); //通用错误
+                that.$message.error({
+                  message: "General error!",
+                  duration: 0,
+                  showClose: true,
+                }); //通用错误
               } else {
                 var statu = JSON.parse(e.data).cmd.ResultCode;
                 switch (statu) {
@@ -1082,10 +1162,16 @@ export default {
                     that.$message({
                       message: "success", //成功
                       type: "success",
+                      duration: 0,
+                      showClose: true,
                     });
                     break;
                   case 1:
-                    that.$message.error("file does not exist!"); //文件不存在
+                    that.$message.error({
+                      message: "file does not exist!",
+                      duration: 0,
+                      showClose: true,
+                    }); //文件不存在
                     break;
                 }
               }
@@ -1159,7 +1245,11 @@ export default {
         var that = this;
         ws.onmessage = function (e) {
           if (JSON.parse(e.data).cmd.APIName == "GenericErr") {
-            that.$message.error("General error!"); //通用错误
+            that.$message.error({
+              message: "General error!",
+              duration: 0,
+              showClose: true,
+            }); //通用错误
           } else {
             var statu = JSON.parse(e.data).cmd.ResultCode;
             switch (statu) {
@@ -1167,10 +1257,16 @@ export default {
                 that.$message({
                   message: "success", //成功
                   type: "success",
+                  duration: 0,
+                  showClose: true,
                 });
                 break;
               case 1:
-                that.$message.error("fail!"); //失败
+                that.$message.error({
+                  message: "fail!",
+                  duration: 0,
+                  showClose: true,
+                }); //失败
                 break;
             }
           }
@@ -1233,6 +1329,8 @@ export default {
             this.$message({
               message: "Error selecting sync recording file!", //同步录制文件选择错误
               type: "warning",
+              duration: 0,
+              showClose: true,
             });
           } else {
             //socket请求----
@@ -1251,7 +1349,11 @@ export default {
             var that = this;
             ws.onmessage = function (e) {
               if (JSON.parse(e.data).cmd.APIName == "GenericErr") {
-                that.$message.error("General error!"); //通用错误
+                that.$message.error({
+                  message: "General error!",
+                  duration: 0,
+                  showClose: true,
+                }); //通用错误
               } else {
                 var statu = JSON.parse(e.data).cmd.ResultCode;
                 switch (statu) {
@@ -1259,10 +1361,16 @@ export default {
                     that.$message({
                       message: "success", //成功
                       type: "success",
+                      duration: 0,
+                      showClose: true,
                     });
                     break;
                   case 1:
-                    that.$message.error("fail!"); //失败
+                    that.$message.error({
+                      message: "fail!",
+                      duration: 0,
+                      showClose: true,
+                    }); //失败
                     break;
                 }
               }
@@ -1420,7 +1528,7 @@ table tr td:nth-child(4) div {
 
 @media screen and (min-width: 1356px) and (max-width: 1460px) {
   table {
-    width: 160%;
+    width: 170%;
     height: auto;
   }
 }

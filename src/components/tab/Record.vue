@@ -1,4 +1,3 @@
-
 <template>
   <div class="record">
     <div id="table">
@@ -110,13 +109,27 @@
     </div>
 
     <p>
-      <el-button id="btn" @click="StartRecord" v-preventReClick="30000"
+      <el-button id="btn" @click="StartRecord" v-preventReClick="10000"
         >Start Record</el-button
       >
-      <el-button id="btn" @click="StartSynRecord" v-preventReClick="30000"
+      <el-button id="btn" @click="StartSynRecord" v-preventReClick="10000"
         >Start SynRecord</el-button
       >
     </p>
+
+    <p>
+      <a href="" id="a">click here to download your file</a>
+      <!-- //导出文件 -->
+      <el-button @click="download(exportdata, 'file.txt', 'text/plain/utf-8')">
+        Export profile
+      </el-button>
+      <!-- //导入文件 -->
+      <el-button id="father">
+        Import profile
+        <input type="file" @change="showFile($event)" id="child"
+      /></el-button>
+    </p>
+
 
     <!-- 嵌套的表单 -->
     <el-dialog
@@ -257,6 +270,8 @@ export default {
           isUseExDisk: 0,
         },
       ],
+
+      exportdata: "",
       modal: false, //不要蒙层
       ChannelIndex: [], //板卡
       RemainHarddiskSize: 0, //用来存储磁盘大小
@@ -290,6 +305,10 @@ export default {
     };
   },
   created() {
+    var data = JSON.parse(window.localStorage.getItem("recordData"));
+    this.exportdata = JSON.stringify(data);
+    console.log(this.exportdata);
+
     this.Availablespace = this.$store.state.Availablespace;
     this.ChannelIndex = this.$store.state.ChannelIndex;
 
@@ -300,6 +319,7 @@ export default {
 
     var cache = JSON.parse(window.localStorage.getItem("recordData")); //获取localStorage本地存储的数据
     // console.log(cache);
+
     if (cache != null) {
       this.record = cache;
     }
@@ -311,7 +331,50 @@ export default {
       $("#dialogrecord").draggable();
     });
   },
+
   methods: {
+    //读取txtx文件里面的内容
+
+    showFile(input) {
+      //return false;
+      if (window.FileReader) {
+        var file = input.target.files[0];
+        var reader = new FileReader();
+
+        reader.readAsText(file, "GB2312");
+        reader.onload = (res) => {
+          //显示文件
+          console.log(1111);
+          console.log(res); //打印
+          var result = res.result;
+          console.log(res.target.result);
+          this.record = JSON.parse(res.target.result);
+           //存数据
+            window.localStorage.setItem(
+              "recordData",
+              JSON.stringify(this.record)
+            );
+        };
+      } else {
+        alert("FileReader Not supported by your browser!");
+      }
+    },
+
+    //数据下载为txt文件
+    download(text, name, type) {
+      var a = document.getElementById("a");
+      var file = new Blob([text], {
+        type: type,
+      });
+      a.href = URL.createObjectURL(file);
+      a.download = name;
+      a.dispatchEvent(
+        new MouseEvent("click", {
+          bubbles: false,
+          cancelable: true,
+        })
+      );
+    },
     getRemainHarddiskSize() {
       // //socket请求----
       // var ws = new WebSocket("ws://192.168.1.203:9001");
@@ -427,8 +490,10 @@ export default {
           this.$message({
             message: "ID already exists, please re-enter！", //id 已经存在，请重新输入
             type: "warning",
+            duration: 0,
+            showClose: true,
           });
-                    this.recordform = {
+          this.recordform = {
             id: this.recordform.id,
             RecordChannelIndex: this.recordform.RecordChannelIndex,
             FileSize: this.recordform.FileSize,
@@ -443,38 +508,53 @@ export default {
         } else {
           console.log(111);
           console.log(this.recordform);
-          this.record.push(this.recordform);
-
-          //加进去的按照顺序的往下排序，始终按照12345这样的顺序排下去
-          this.record.forEach((item, index) => {
-            // console.log(item);
-            item.id = index + 1;
-            // console.log(index);
+          var commont = this.record.findIndex((item) => {
+            return (
+              item.FileSize == this.recordform.FileSize &&
+              item.BitNumber == this.recordform.BitNumber &&
+              item.SampleRate == this.recordform.SampleRate &&
+              item.RecordBandwidth == this.recordform.RecordBandwidth &&
+              item.RecordRXFrequency == this.recordform.RecordRXFrequency &&
+              item.RecordRXGain == this.recordform.RecordRXGain
+            );
           });
-
-          this.recordform = {
-            id: this.recordform.id,
-            RecordChannelIndex: this.recordform.RecordChannelIndex,
-            FileSize: this.recordform.FileSize,
-            BitNumber: this.recordform.BitNumber,
-            SampleRate: this.recordform.SampleRate,
-            RecordBandwidth: this.recordform.RecordBandwidth,
-            RecordRXFrequency: this.recordform.RecordRXFrequency,
-            RecordRXGain: this.recordform.RecordRXGain,
-            Describe: this.recordform.Describe,
-            isUseExDisk: "0",
-          };
-
-          //存数据
-          window.localStorage.setItem(
-            "recordData",
-            JSON.stringify(this.record)
-          );
-
-          // console.log(111);
-          console.log(window.localStorage.getItem("recordData"));
-
-          this.record = this.record.sort((a, b) => a.id - b.id); //进行排序
+          console.log(commont);
+          if (commont !== -1) {
+            this.$message({
+              message: "Duplicate recording file configuration！", //录制文件配置重复
+              type: "warning",
+              duration: 0,
+              showClose: true,
+            });
+          } else {
+            this.record.push(this.recordform);
+            //加进去的按照顺序的往下排序，始终按照12345这样的顺序排下去
+            this.record.forEach((item, index) => {
+              // console.log(item);
+              item.id = index + 1;
+              // console.log(index);
+            });
+            this.recordform = {
+              id: this.recordform.id,
+              RecordChannelIndex: this.recordform.RecordChannelIndex,
+              FileSize: this.recordform.FileSize,
+              BitNumber: this.recordform.BitNumber,
+              SampleRate: this.recordform.SampleRate,
+              RecordBandwidth: this.recordform.RecordBandwidth,
+              RecordRXFrequency: this.recordform.RecordRXFrequency,
+              RecordRXGain: this.recordform.RecordRXGain,
+              Describe: this.recordform.Describe,
+              isUseExDisk: "0",
+            };
+            //存数据
+            window.localStorage.setItem(
+              "recordData",
+              JSON.stringify(this.record)
+            );
+            // console.log(111);
+            console.log(window.localStorage.getItem("recordData"));
+            this.record = this.record.sort((a, b) => a.id - b.id); //进行排序
+          }
         }
       }
     },
@@ -583,6 +663,8 @@ export default {
           this.$message({
             message: "Insufficient disk space！！！", //磁盘空间不足
             type: "warning",
+            duration: 0,
+            showClose: true,
           });
           this.RecordData = [];
         } else {
@@ -630,7 +712,11 @@ export default {
             };
             ws.onmessage = function (e) {
               if (JSON.parse(e.data).cmd.APIName == "GenericErr") {
-                that.$message.error("General error!"); //通用错误
+                that.$message.error({
+                  message: "General error!",
+                  duration: 0,
+                  showClose: true,
+                }); //通用错误
               } else {
                 console.log(JSON.parse(e.data).cmd.ResultCode);
                 var staut = parseInt(JSON.parse(e.data).cmd.ResultCode);
@@ -640,16 +726,24 @@ export default {
                     that.$message({
                       message: "success", //成功
                       type: "success",
+                      duration: 0,
+                      showClose: true,
                     });
                     break;
                   case 1:
-                    that.$message.error("Recording failed!"); //录制失败
+                    that.$message.error({
+                      message: "Recording failed!",
+                      duration: 0,
+                      showClose: true,
+                    }); //录制失败
                     break;
                   case 2:
                     that.$message({
-                      message: "The card channel ID has been used and can be modified or re added in the edit box!", //板卡板卡通道ID已经被使用，可在编辑框修改或者重新添加
+                      message:
+                        "The card channel ID has been used and can be modified or re added in the edit box!", //板卡板卡通道ID已经被使用，可在编辑框修改或者重新添加
                       type: "warning",
-                      duration:5000,
+                      duration: 0,
+                      showClose: true,
                     });
                     break;
                 }
@@ -680,12 +774,18 @@ export default {
               console.log(JSON.parse(e.data).cmd.ResultCode);
               console.log(JSON.parse(e.data).cmd.ResultCode);
               if (JSON.parse(e.data).cmd.APIName == "GenericErr") {
-                that.$message.error("General error!"); //通用错误
+                that.$message.error({
+                  message: "General error!",
+                  duration: 0,
+                  showClose: true,
+                }); //通用错误
               }
               if (JSON.parse(e.data).cmd.ResultCode == 0) {
                 that.$message({
                   message: "The extended hard disk does not exist!", //扩展硬盘不存在
                   type: "warning",
+                  duration: 0,
+                  showClose: true,
                 });
               }
               if (JSON.parse(e.data).cmd.ResultCode == 1) {
@@ -726,7 +826,11 @@ export default {
             console.log("外置配置");
             ws.onmessage = function (e) {
               if (JSON.parse(e.data).cmd.APIName == "GenericErr") {
-                that.$message.error("General error!"); //通用错误
+                that.$message.error({
+                  message: "General error!",
+                  duration: 0,
+                  showClose: true,
+                }); //通用错误
               } else {
                 console.log(111);
                 console.log(JSON.parse(e.data).cmd.ResultCode);
@@ -737,6 +841,8 @@ export default {
                     that.$message({
                       message: "success", //成功
                       type: "success",
+                      duration: 0,
+                      showClose: true,
                     });
                     break;
                   case 1:
@@ -744,9 +850,11 @@ export default {
                     break;
                   case 2:
                     that.$message({
-                      message: "The card channel ID has been used and can be modified or re added in the edit box!", //板卡板卡通道ID已经被使用，可在编辑框修改或者重新添加
+                      message:
+                        "The card channel ID has been used and can be modified or re added in the edit box!", //板卡板卡通道ID已经被使用，可在编辑框修改或者重新添加
                       type: "warning",
-                      duration:5000,
+                      duration: 0,
+                      showClose: true,
                     });
                     break;
                 }
@@ -778,6 +886,8 @@ export default {
           this.$message({
             message: "Please do not click frequently！", //请不要频繁点击
             type: "warning",
+            duration: 0,
+            showClose: true,
           });
         }
         //提示不要频繁点击
@@ -798,16 +908,32 @@ export default {
           this.$message({
             message: "Insufficient disk space！！！", //磁盘空间不足
             type: "warning",
+            duration: 0,
+            showClose: true,
           });
         } else {
           var data;
-          if (this.RecordData.length > 2) {
+          if (this.RecordData.length != 2) {
             this.$message({
-              message: "Select up to two files with different cards", //最多选择两条不同卡的文件
+              message: "Please select two files with different cards", //请选择两条不同卡的文件
               type: "warning",
-              duration: 4000,
+              duration: 0,
+              showClose: true,
             });
-          } else {
+            //取消所有的复选框的勾选
+            this.$refs.checkbox.map(function (item) {
+              item.checked = false;
+            });
+            this.IndexList = [];
+            //取消所有的复选框的勾选
+
+            //操作数据清空
+            setTimeout(() => {
+              this.RecordData = [];
+              this.removeData;
+            }, 1000);
+          }
+          if (this.RecordData.length <= 2) {
             for (var i = 0; i < this.RecordData.length; i++) {
               // console.log(this.RecordData[0].RecordChannelIndex);
               console.log(this.RecordData[1].RecordChannelIndex);
@@ -815,9 +941,12 @@ export default {
                 this.RecordData[0].RecordChannelIndex ==
                 this.RecordData[1].RecordChannelIndex
               ) {
+                console.log(12345);
                 this.$message({
                   message: "Please select two files of different cards", //请选择两条不同板卡的文件
                   type: "warning",
+                  duration: 0,
+                  showClose: true,
                 });
               }
               if (
@@ -869,7 +998,11 @@ export default {
 
                       ws.onmessage = function (e) {
                         if (JSON.parse(e.data).cmd.APIName == "GenericErr") {
-                          that.$message.error("General error!"); //通用错误
+                          that.$message.error({
+                            message: "General error!",
+                            duration: 0,
+                            showClose: true,
+                          }); //通用错误
                         } else {
                           console.log(JSON.parse(e.data).cmd.ResultCode);
                           var staut = parseInt(
@@ -881,16 +1014,24 @@ export default {
                               that.$message({
                                 message: "success", //成功
                                 type: "success",
+                                duration: 0,
+                                showClose: true,
                               });
                               break;
                             case 1:
-                              that.$message.error("Recording failed!"); //录制失败
+                              that.$message.error({
+                                message: "Recording failed!",
+                                duration: 0,
+                                showClose: true,
+                              }); //录制失败
                               break;
                             case 2:
                               that.$message({
-                                message: "The card channel ID has been used and can be modified or re added in the edit box!", //板卡板卡通道ID已经被使用，可在编辑框修改或者重新添加
+                                message:
+                                  "The card channel ID has been used and can be modified or re added in the edit box!", //板卡板卡通道ID已经被使用，可在编辑框修改或者重新添加
                                 type: "warning",
-                                duration:5000,
+                                duration: 0,
+                                showClose: true,
                               });
                               break;
                           }
@@ -917,12 +1058,18 @@ export default {
                       ws.onmessage = function (e) {
                         console.log(JSON.parse(e.data).cmd.ResultCode);
                         if (JSON.parse(e.data).cmd.APIName == "GenericErr") {
-                          that.$message.error("General error!"); //通用错误
+                          that.$message.error({
+                            message: "General error!",
+                            duration: 0,
+                            showClose: true,
+                          }); //通用错误
                         }
                         if (JSON.parse(e.data).cmd.ResultCode == 0) {
                           that.$message({
                             message: "The extended hard disk does not exist!", //扩展硬盘不存在
                             type: "warning",
+                            duration: 0,
+                            showClose: true,
                           });
                         }
                         if (JSON.parse(e.data).cmd.ResultCode == 1) {
@@ -951,6 +1098,8 @@ export default {
                         message:
                           "Please keep the storage location of combined recording consistent！", //组合录制的存储位置请保持一致！
                         type: "warning",
+                        duration: 0,
+                        showClose: true,
                       });
                     }
 
@@ -959,7 +1108,11 @@ export default {
                       console.log("外置配置");
                       ws.onmessage = function (e) {
                         if (JSON.parse(e.data).cmd.APIName == "GenericErr") {
-                          that.$message.error("General error!"); //通用错误
+                          that.$message.error({
+                            message: "General error!",
+                            duration: 0,
+                            showClose: true,
+                          }); //通用错误
                         } else {
                           console.log(JSON.parse(e.data).cmd.ResultCode);
                           var staut = parseInt(
@@ -971,16 +1124,24 @@ export default {
                               that.$message({
                                 message: "success", //成功
                                 type: "success",
+                                duration: 0,
+                                showClose: true,
                               });
                               break;
                             case 1:
-                              that.$message.error("Recording failed!"); //录制失败
+                              that.$message.error({
+                                message: "Recording failed!",
+                                duration: 0,
+                                showClose: true,
+                              }); //录制失败
                               break;
                             case 2:
                               that.$message({
-                                message: "The card channel ID has been used and can be modified or re added in the edit box!", //板卡板卡通道ID已经被使用，可在编辑框修改或者重新添加
+                                message:
+                                  "The card channel ID has been used and can be modified or re added in the edit box!", //板卡板卡通道ID已经被使用，可在编辑框修改或者重新添加
                                 type: "warning",
-                                duration:5000,
+                                duration: 0,
+                                showClose: true,
                               });
                               break;
                           }
@@ -1015,6 +1176,8 @@ export default {
           this.$message({
             message: "Please do not click frequently！", //请不要频繁点击
             type: "warning",
+            duration: 0,
+            showClose: true,
           });
         }
         //提示不要频繁点击
@@ -1036,6 +1199,22 @@ export default {
 
 
 <style scoped >
+#father {
+  position: relative;
+}
+#child {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
+  border: none;
+  opacity: 0;
+}
+
+#a {
+  display: none;
+}
 .record {
   list-style-type: none !important ;
 }
@@ -1072,7 +1251,7 @@ export default {
 }
 .table td .text {
   outline-color: rgb(37, 141, 222);
-  border: 1PX solid aliceblue;
+  border: 1px solid aliceblue;
   /* color: gray; */
   text-align: center;
   width: 95%;
