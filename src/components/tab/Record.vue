@@ -27,7 +27,7 @@
           <th>BitNum</th>
           <th>SampleRate(Hz)</th>
           <th>RecordBandWidth(Hz)</th>
-          <th>RecordXRgain</th>
+          <th>RecordRXgain</th>
           <th>More Info</th>
         </tr>
         <tr v-for="(item, index) in record" :key="index">
@@ -334,7 +334,6 @@ export default {
 
   methods: {
     //读取txtx文件里面的内容
-
     showFile(input) {
       //return false;
       if (window.FileReader) {
@@ -863,6 +862,7 @@ export default {
               //关闭TCP连接
               ws.close();
             };
+            outboolen = false;
           }
           //外置存储外置存储外置存储外置存储外置存储外置存储外置存储外置存储外置存储
         }
@@ -933,7 +933,7 @@ export default {
               this.removeData;
             }, 1000);
           }
-          if (this.RecordData.length <= 2) {
+          if (this.RecordData.length == 2) {
             for (var i = 0; i < this.RecordData.length; i++) {
               // console.log(this.RecordData[0].RecordChannelIndex);
               console.log(this.RecordData[1].RecordChannelIndex);
@@ -1149,6 +1149,7 @@ export default {
                         //关闭TCP连接
                         ws.close();
                       };
+                      outboolen == false
                     }
                     //外置存储外置存储外置
                   }
