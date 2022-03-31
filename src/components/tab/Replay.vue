@@ -22,12 +22,12 @@
           <!-- 删除按钮在这 -->
 
           <th>Describe</th>
-          <th>RecordChannelIndex</th>
-          <th>FileCurrentSize(Byte)</th>
-          <th>RecordFrequency(Hz)</th>
-          <th>BitNum</th>
-          <th>SampleRate(Hz)</th>
-          <th>RecordBandWidth(Hz)</th>
+          <th>ChannelIndex</th>
+          <th>FileCurrentSize(GB)</th>
+          <th>Center Frequency(MHz)</th>
+          <th>Bits</th>
+          <!-- <th>SampleRate(Hz)</th> -->
+          <th>Band Width(MHz)</th>
           <!-- <th>RecordRXGain(Hz)</th> -->
           <th>More Info</th>
         </tr>
@@ -71,11 +71,11 @@
             <div @click="ShowDes(item)">{{ item.Describe }}</div>
           </td>
           <td class="td">{{ item.RecordChannelIndex }}</td>
-          <td class="td">{{ item.FileCurrentSize }}</td>
-          <td class="td">{{ item.RecordRXFrequency }}</td>
+          <td class="td">{{ (item.FileCurrentSize/1000000000).toFixed(3) }}</td>
+          <td class="td">{{ (item.RecordRXFrequency/1000000).toFixed(3) }}</td>
           <td class="td">{{ item.BitNumber }}</td>
-          <td class="td">{{ item.SampleRate }}</td>
-          <td class="td">{{ item.RecordBandwidth }}</td>
+          <!-- <td class="td">{{ item.SampleRate }}</td> -->
+          <td class="td">{{ item.RecordBandwidth/1000000 }}</td>
           <!-- <td class="td">{{ item.RecordRXGain }}</td> -->
           <td class="td">
             <el-button
@@ -118,7 +118,17 @@
                 ></el-input>
               </el-form-item>
 
-              <el-form-item
+              <el-form-item label="PlayStartPos" :label-width="formLabelWidth">
+                <el-input
+                  autocomplete="off"
+                  v-model="PlayStartPos"
+                  placeholder="20"
+                  min="0"
+                  max="99"
+                ></el-input>
+              </el-form-item>
+
+              <!-- <el-form-item
                 label="PlayTXFrequency(Hz)"
                 :label-width="formLabelWidth"
               >
@@ -127,7 +137,7 @@
                   v-model="PlayTXFrequency"
                   placeholder="1575420000"
                 ></el-input>
-              </el-form-item>
+              </el-form-item> -->
             </el-form>
 
             <div slot="footer" class="dialog-footer">
@@ -140,13 +150,14 @@
       </table>
     </div>
 
-    <p>RemainHarddisk Size: &nbsp;&nbsp;&nbsp;{{ RemainHarddiskSize }} Byte</p>
+    <p>RemainHarddisk Size: &nbsp;&nbsp;&nbsp;{{ RemainHarddiskSize }} Byte
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:rgb(245,124,0);font-size:1.5rem">Playback progress:</span></p>
     <p>
       RemainExHarddiskSize: &nbsp;&nbsp;&nbsp;{{ RemainExHarddiskSize }} Byte
     </p>
-    <!-- <p>
-      RemainHarddisk Size: &nbsp;&nbsp;&nbsp;{{ RemainExHarddiskSize }} Byte
-    </p> -->
+  
 
     <p>
       <el-button class="btn query" @click="getReplay"
@@ -293,6 +304,7 @@ export default {
       ChannelIndex: [], //板卡
       dialogreplay: false, //对话框是否显示
 
+      Posbollen: false,
       replayboolen: false, //用来判断删除是否可点击
       formLabelWidth: "155px", //对话框的长度
       isclick: true, //用来判断提示不要频繁点击的布尔值
@@ -307,8 +319,8 @@ export default {
 
       //配置回放对话框绑定的数据
       PlayChannelIndex: 0,
-      PlayTXGain: "",
-      PlayTXFrequency: "",
+      PlayTXGain: 50,
+      PlayStartPos: 0,
 
       curren_index: "", //获取index，取到当下点击的是哪一条数据
     };
@@ -346,7 +358,7 @@ export default {
       this.$alert(
         "<p><strong>RecordXRgain&nbsp;:&nbsp;</strong>" +
           RecordRXGain +
-          "</p><p><strong>Storage location&nbsp;:&nbsp;</strong>" +
+          "(dB)</p><p><strong>Storage location&nbsp;:&nbsp;</strong>" +
           save +
           "</p>",
         "View more information",
@@ -363,10 +375,15 @@ export default {
       );
     },
     getReplay() {
-      this.ChannelIndex = this.$store.state.ChannelIndex;
-      console.log(this.ChannelIndex);
+      // this.ChannelIndex = this.$store.state.ChannelIndex;
+      // console.log(this.ChannelIndex);
       //获取数据
       // console.log(111);
+      console.log(this.replay);
+      var replaying=this.replay.filter((item)=>{
+        return item.isRecording == 0&&item.isPlaying == 1
+      })
+      console.log(replaying);
       //socket请求----
       var ws = new WebSocket("ws://192.168.1.203:9001");
       ws.onopen = function (e) {
@@ -413,14 +430,19 @@ export default {
           RecordData = arr.filter(function (item) {
             return item.isRecording == 1 && item.isPlaying == 0;
           });
+          that.$store.commit("getRecording", RecordData);
           if (RecordData.length > 0) {
+            console.log(111);
+            console.log(that.$store.state.Recording);
             for (var i = 0; i < RecordData.length; i++) {
-              console.log(RecordData[i].FileSize);
-              console.log(RecordData[i].FileCurrentSize);
+              // console.log(RecordData[i].FileSize);
+              // console.log(RecordData[i].FileCurrentSize);
               Availablespace =
                 Allspace -
                 (RecordData[i].FileSize - RecordData[i].FileCurrentSize);
               that.$store.commit("getAvailablespace", Availablespace);
+              // console.log(Availablespace);
+              // console.log(that.$store.state.Availablespace);
             }
           }
           // console.log(Allspace);
@@ -453,6 +475,7 @@ export default {
 
       if (this.replayboolen == true) {
         var data = this.queryIndex;
+        console.log(data);
         console.log(
           JSON.stringify({
             cmd: {
@@ -489,32 +512,51 @@ export default {
               JSON.parse(e.data).cmd.FileInformations.PlayChannelIndexs
             );
             console.log(statu);
-            switch (statu) {
-              case 0:
+            if (statu.length == 0) {
+              console.log("没有");
+              that.$message({
+                message: "No results found!", //未查询到结果
+                type: "warning",
+                duration: 0,
+                showClose: true,
+              });
+            } else {
+              console.log("有");
+              for (var i = 0; i < statu.length; i++) {
                 that.$message({
-                  message: statu,
+                  message: statu[i],
                   type: "success",
                   duration: 0,
                   showClose: true,
                 });
-                break;
-              case 1:
-                that.$message({
-                  message: statu,
-                  type: "success",
-                  duration: 0,
-                  showClose: true,
-                });
-                break;
-              case (statu.length = 0):
-                that.$message({
-                  message: "No results found!", //未查询到结果
-                  type: "warning",
-                  duration: 0,
-                  showClose: true,
-                });
-                break;
+              }
             }
+            // switch (statu) {
+            //   case 0:
+            //     that.$message({
+            //       message: statu,
+            //       type: "success",
+            //       duration: 0,
+            //       showClose: true,
+            //     });
+            //     break;
+            //   case 1:
+            //     that.$message({
+            //       message: statu,
+            //       type: "success",
+            //       duration: 0,
+            //       showClose: true,
+            //     });
+            //     break;
+            //   case (statu.length == 0):
+            //     that.$message({
+            //       message: "No results found!", //未查询到结果
+            //       type: "warning",
+            //       duration: 0,
+            //       showClose: true,
+            //     });
+            //     break;
+            // }
           }
 
           //关闭TCP连接
@@ -548,6 +590,14 @@ export default {
         // //提示不要频繁点击
 
         this.replayboolen = false;
+
+        setTimeout(() => {
+          this.removeData = [];
+          this.stopRcordData = [];
+          this.playData = [];
+          this.stopPlayData = [];
+          this.FileName = [];
+        }, 1000);
       } else {
         return;
       }
@@ -563,12 +613,20 @@ export default {
         // console.log(this.removeData);
 
         //要开始回放的数据操作
+        if (this.Posbollen == true) {
+          item.PlayStartPos = this.PlayStartPos;
+          this.Posbollen == false;
+        } else {
+          item.PlayStartPos = 0;
+          this.Posbollen == false;
+        }
         this.playData.push({
           RecordChannelIndex: item.RecordChannelIndex,
           FileName: item.FileName,
           PlayTXFrequency: parseInt(item.RecordRXFrequency),
           PlayTXGain: parseInt(item.RecordRXGain),
           PlayChannelIndex: parseInt(item.RecordChannelIndex),
+          PlayStartPos: parseInt(item.PlayStartPos),
         });
         console.log(this.playData);
 
@@ -589,7 +647,7 @@ export default {
         //查询使用的办卡ID的数据相关操作
         this.queryIndex = {
           FileName: this.replay[index].FileName,
-          PlayChannelIndexs: parseInt(this.replay[index].RecordChannelIndex),
+          PlayChannelIndexs: [],
         };
         // console.log(this.queryIndex);
 
@@ -733,6 +791,7 @@ export default {
       // }
     },
     Accept() {
+      this.Posbollen = true;
       //配置（对话框）
       console.log(this.replay[this.curren_index]);
 
@@ -740,9 +799,8 @@ export default {
         this.PlayChannelIndex
       );
       this.replay[this.curren_index].RecordRXGain = parseInt(this.PlayTXGain);
-      this.replay[this.curren_index].RecordRXFrequency = parseInt(
-        this.PlayTXFrequency
-      );
+      this.replay[this.curren_index].PlayStartPos = parseInt(this.PlayStartPos);
+      console.log(this.replay[this.curren_index].PlayStartPos);
       this.dialogreplay = false;
     },
     close() {
@@ -756,76 +814,91 @@ export default {
       if (this.replayboolen == true) {
         this.replayboolen = false;
 
-        //socket请求----
-        var ws = new WebSocket("ws://192.168.1.203:9001");
-        ws.onopen = function (e) {
-          console.log(ws.readyState);
-          for (var i = 0; i < data.length; i++) {
-            item = data[i];
-            ws.send(
-              JSON.stringify({
-                cmd: {
-                  APIName: "StartPlay",
-                  FileInformations: [item],
-                },
-              })
-            );
-          }
-        };
-        var that = this;
-        ws.onmessage = function (e) {
-          console.log(e.data);
-          if (JSON.parse(e.data).cmd.APIName == "GenericErr") {
-            that.$message.error({
-              message: "General error!",
-              duration: 0,
-              showClose: true,
-            }); //通用错误
-          } else {
-            var statu = JSON.parse(e.data).cmd.ResultCode;
-            switch (statu) {
-              case 0:
-                that.$message({
-                  message: "success", //成功
-                  type: "success",
-                  duration: 0,
-                  showClose: true,
-                });
-                break;
-              case 1:
-                that.$message.error({
-                  message: "file does not exist!",
-                  duration: 0,
-                  showClose: true,
-                }); //文件不存在
-                break;
-              case 2:
-                that.$message({
-                  message: "Card ID is already in use!", //板卡ID已被使用
-                  type: "warning",
-                  duration: 0,
-                  showClose: true,
-                });
-                break;
-              case 3:
-                that.$message({
-                  message: "Other failures!", //其他失败
-                  type: "warning",
-                  duration: 0,
-                  showClose: true,
-                });
-                break;
+        // console.log(this.replay);
+        var play = this.replay.filter((item) => {
+          return item.isRecording == 0 && item.isPlaying == 1;
+        });
+        // console.log(play);
+        // console.log(play.length);
+        if (data.length > 1 || play.length != 0) {
+          // console.log("回放全过程只允许操作一张卡");
+          this.$message.error({
+            message: "Only one card can be operated in the whole playback process!",//回放全过程只允许操作一张卡
+            duration: 0,
+            showClose: true,
+          }); 
+        } else {
+          //socket请求----
+          var ws = new WebSocket("ws://192.168.1.203:9001");
+          ws.onopen = function (e) {
+            // console.log(ws.readyState);
+            for (var i = 0; i < data.length; i++) {
+              item = data[i];
+              ws.send(
+                JSON.stringify({
+                  cmd: {
+                    APIName: "StartPlay",
+                    FileInformations: [item],
+                  },
+                })
+              );
             }
-          }
-
-          //关闭TCP连接
-          ws.close();
-          ws.onclose = function (e) {
-            console.log(e);
           };
-        };
+          var that = this;
+          ws.onmessage = function (e) {
+            // console.log(e.data);
+            if (JSON.parse(e.data).cmd.APIName == "GenericErr") {
+              that.$message.error({
+                message: "General error!",
+                duration: 0,
+                showClose: true,
+              }); //通用错误
+            } else {
+              var statu = JSON.parse(e.data).cmd.ResultCode;
+              switch (statu) {
+                case 0:
+                  that.$message({
+                    message: "success", //成功
+                    type: "success",
+                    duration: 0,
+                    showClose: true,
+                  });
+                  // console.log(that.replay);
+                  break;
+                case 1:
+                  that.$message.error({
+                    message: "file does not exist!",
+                    duration: 0,
+                    showClose: true,
+                  }); //文件不存在
+                  break;
+                case 2:
+                  that.$message({
+                    message: "Card ID is already in use!", //板卡ID已被使用
+                    type: "warning",
+                    duration: 0,
+                    showClose: true,
+                  });
+                  break;
+                case 3:
+                  that.$message({
+                    message: "Other failures!", //其他失败
+                    type: "warning",
+                    duration: 0,
+                    showClose: true,
+                  });
+                  break;
+              }
+            }
 
-        //socket请求----
+            //关闭TCP连接
+            ws.close();
+            ws.onclose = function (e) {
+              // console.log(e);
+            };
+          };
+          //socket请求----
+        }
 
         //取消所有的复选框的勾选
         this.$refs.checkbox.map(function (item) {
@@ -833,21 +906,6 @@ export default {
         });
         this.IndexList = [];
         //取消所有的复选框的勾选
-
-        //提示不要频繁点击
-        if (this.isclick) {
-          this.isclick = false;
-          setTimeout(() => {
-            this.isclick = true;
-            // this.replayboolen = true
-          }, 4000);
-        } else {
-          this.$message({
-            message: "Please do not click frequently！", //请不要频繁点击
-            type: "warning",
-          });
-        }
-        //提示不要频繁点击
 
         this.replayboolen = false;
 

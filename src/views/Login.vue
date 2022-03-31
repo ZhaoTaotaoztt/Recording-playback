@@ -61,8 +61,8 @@ export default {
     };
     return {
       loginForm: {
-        username: "admin",
-        password: "111111",
+        username: "",
+        password: "",
       },
       loginRules: {
         username: [
@@ -79,12 +79,59 @@ export default {
   },
   methods: {
     handleLogin() {
-      this.$refs.loginForm.validate((valid) => {
-        if (valid) {
-          this.$router.push("/home");
-          this.$store.commit("setUser", this.loginForm);
+      this.$refs.loginForm.validate((loginForm) => {
+        // console.log(this.loginForm.username);
+        if (loginForm) {
+          if (
+            this.loginForm.username == "admin" &&
+            this.loginForm.password == 111111
+          ) {
+            console.log("管理员登录");
+            // this.$store.commit("setUser", this.loginForm);
+            // console.log(this.$store.state.user);
+
+            this.$router.push("/home");
+
+            //存数据
+            window.localStorage.setItem("user", JSON.stringify(this.loginForm));
+            console.log(JSON.parse(window.localStorage.getItem("user")));
+          } else if (
+            this.loginForm.username == "user" &&
+            this.loginForm.password == 111111
+          ) {
+            console.log("用户登录");
+            // this.$store.commit("setUser", this.loginForm);
+            // console.log(this.$store.state.user);
+
+            this.$router.push("/home");
+
+            //存数据
+            window.localStorage.setItem("user", JSON.stringify(this.loginForm));
+            console.log(JSON.parse(window.localStorage.getItem("user")));
+          } else {
+            console.log("账号或者密码错误");
+            this.$message({
+              message: "Wrong account or password！", //账号或者密码错误
+              type: "warning",
+              duration: 0,
+              showClose: true,
+            });
+          }
+
+          setTimeout(() => {
+            this.loginForm = {
+              username: "",
+              password: "",
+            };
+          }, 200);
         } else {
           console.log("error submit!!");
+          setTimeout(() => {
+            this.loginForm = {
+              username: "",
+              password: "",
+            };
+          }, 200);
           return false;
         }
       });

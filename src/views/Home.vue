@@ -2,7 +2,7 @@
 <template>
   <div class="home">
     <div class="hearder">
-      <div class="left">Record and Replay Tool</div>
+      <div class="left">Recording and Replayback System(RPS)</div>
       <div class="right"></div>
     </div>
 
@@ -26,7 +26,7 @@ export default {
 
     };
   },
-
+  
 };
 </script>
 
@@ -51,7 +51,7 @@ export default {
   padding-top: 1rem;
 }
 .hearder > .left {
-  width: 40%;
+  width: 50%;
   height: 5rem;
   /* background-color: blue; */
   color: white;
