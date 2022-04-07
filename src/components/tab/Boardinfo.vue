@@ -48,7 +48,7 @@ export default {
       navactive: false,
       isclick: true, //用来判断提示不要频繁点击的布尔值
       showWarn: false,
-      showBoard: false,//是否有权限查看信息
+      showBoard: false, //是否有权限查看信息
     };
   },
   mounted() {
@@ -65,10 +65,8 @@ export default {
     //   console.log(item);
     // },
     getBoardinfo() {
-      if (this.showBoard == true) {
+      if (this.showBoard !== true) {
         // this.showBoard = false;
-        console.log("显示成功");
-      } else {
         console.log("您未有权限查看");
         this.showBoard = false;
         this.$message({
@@ -77,58 +75,59 @@ export default {
           duration: 0,
           showClose: true,
         });
+      } else {
+        console.log("显示成功");
+        //获取boardinfo数据
+        //socket请求----
+        var ws = new WebSocket("ws://192.168.1.203:9001");
+        ws.onopen = function (e) {
+          // console.log(ws.readyState);
+          ws.send(
+            JSON.stringify({
+              cmd: {
+                APIName: "QueryBoardInfo",
+                SN: "NA",
+                ChannelNumber: -1,
+                ChannelInformations: [
+                  {
+                    ChannelIndex: 0,
+                    ChannelStatus: "NA",
+                    BoardSN: "NA",
+                    BoardVersion: "NA",
+                    temperature: "0",
+                  },
+                ],
+              },
+            })
+          );
+        };
+        var that = this;
+        ws.onmessage = function (e) {
+          var obj = JSON.parse(e.data).cmd.ChannelInformations;
+          that.boardinfo = obj;
+
+          var arr = JSON.parse(e.data).cmd.ChannelInformations;
+          var data = arr.filter(function (item) {
+            return item.ChannelStatus == "idle";
+          });
+          var ChannelIndex = [];
+          for (var i = 0; i < data.length; i++) {
+            ChannelIndex.unshift({ ChannelIndex: data[i].ChannelIndex });
+          }
+
+          console.log(arr);
+          console.log(data);
+          console.log(ChannelIndex);
+          that.$store.commit("getChannelIndex", ChannelIndex);
+
+          //关闭TCP连接
+          ws.close();
+          ws.onclose = function (e) {
+            console.log(e);
+          };
+        };
+        //socket请求----
       }
-
-      //获取boardinfo数据
-      // //socket请求----
-      // var ws = new WebSocket("ws://192.168.1.203:9001");
-      // ws.onopen = function (e) {
-      //   // console.log(ws.readyState);
-      //   ws.send(
-      //     JSON.stringify({
-      //       cmd: {
-      //         APIName: "QueryBoardInfo",
-      //         SN: "NA",
-      //         ChannelNumber: -1,
-      //         ChannelInformations: [
-      //           {
-      //             ChannelIndex: 0,
-      //             ChannelStatus: "NA",
-      //             BoardSN: "NA",
-      //             BoardVersion: "NA",
-      //             temperature: "0",
-      //           },
-      //         ],
-      //       },
-      //     })
-      //   );
-      // };
-      // var that = this;
-      // ws.onmessage = function (e) {
-      //   var obj = JSON.parse(e.data).cmd.ChannelInformations;
-      //   that.boardinfo = obj;
-
-      //   var arr = JSON.parse(e.data).cmd.ChannelInformations;
-      //   var data = arr.filter(function (item) {
-      //     return item.ChannelStatus == "idle";
-      //   });
-      //   var ChannelIndex = [];
-      //   for (var i = 0; i < data.length; i++) {
-      //     ChannelIndex.unshift({ ChannelIndex: data[i].ChannelIndex });
-      //   }
-
-      //   console.log(arr);
-      //   console.log(data);
-      //   console.log(ChannelIndex);
-      //   that.$store.commit("getChannelIndex", ChannelIndex);
-
-      //   //关闭TCP连接
-      //   ws.close();
-      //   ws.onclose = function (e) {
-      //     console.log(e);
-      //   };
-      // };
-      // //socket请求----
     },
     Signout() {
       //退出登录
