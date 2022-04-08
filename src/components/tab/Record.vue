@@ -21,7 +21,7 @@
             ></el-button>
             <!-- 删除按钮在这 -->
           </th>
-          <th>ChannelIndex</th>
+          <th>RF Port</th>
           <!-- <th>Filesize(Byte)</th> -->
           <th>Center Frequency(MHz)</th>
           <th>Bits</th>
@@ -149,7 +149,7 @@
           ></el-input>
         </el-form-item>
 
-        <el-form-item label="RecordChannelIndex" :label-width="formLabelWidth">
+        <el-form-item label="RF Port" :label-width="formLabelWidth">
           <el-select v-model="recordform.RecordChannelIndex"  type="number">
             <el-option label="0" value="0"></el-option>
             <el-option label="1" value="1"></el-option>

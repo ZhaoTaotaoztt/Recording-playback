@@ -8,8 +8,8 @@
 
     <table>
       <tr>
-        <th>RF Port</th>
-        <th>ChannelStatus</th>
+        <th>Port</th>
+        <th>PortStatus</th>
         <th>BoardSN</th>
         <th>BoardVersion</th>
         <th>temperature</th>

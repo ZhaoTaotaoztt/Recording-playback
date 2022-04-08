@@ -22,7 +22,7 @@
           <!-- 删除按钮在这 -->
 
           <th>Describe</th>
-          <th>ChannelIndex</th>
+          <th>RF Port</th>
           <th>FileCurrentSize(GB)</th>
           <th>Center Frequency(MHz)</th>
           <th>Bits</th>
