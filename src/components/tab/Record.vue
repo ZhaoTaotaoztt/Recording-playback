@@ -356,7 +356,7 @@ export default {
         id: 1,
         RecordChannelIndex: 0,
         FileSize: 1000000000,
-        BitNumber: 2,
+        BitNumber: 8,
         // SampleRate: 122880000,
         RecordBandwidth: 15,
         RecordRXFrequency: "", //1575.42
@@ -456,6 +456,8 @@ export default {
       //拖拽事件
       $("#dialogrecord").draggable();
     });
+
+    this.getRemainHarddiskSize()
   },
 
   methods: {
@@ -530,40 +532,44 @@ export default {
       );
     },
     getRemainHarddiskSize() {
-      // //socket请求----
-      // var ws = new WebSocket("ws://192.168.1.203:9001");
-      // ws.onopen = function (e) {
-      //   ws.send(
-      //     JSON.stringify({
-      //       cmd: {
-      //         APIName: "QueryFileInfo",
-      //         RemainHarddiskSize: -1,
-      //         FileNumber: -1,
-      //         FileInformations: [
-      //           {
-      //             FileName: "NA",
-      //             FileSize: 0,
-      //           },
-      //         ],
-      //       },
-      //     })
-      //   );
-      // };
-      // var that = this;
-      // ws.onmessage = function (e) {
-      //   if (JSON.parse(e.data).APIName == "GenericErr") {
-      //     that.$message.error("通用错误!");
-      //   } else {
-      //     that.RemainHarddiskSize = JSON.parse(e.data).cmd.RemainHarddiskSize;
-      //     // console.log(that.RemainHarddiskSize);
-      //   }
-      //   //关闭socket连接
-      //   ws.close();
-      //   ws.onclose = function (e) {
-      //     console.log(e);
-      //   };
-      // };
-      // //socket请求----
+      //socket请求----
+      var ws = new WebSocket("ws://192.168.1.203:9001");
+      ws.onopen = function (e) {
+        ws.send(
+          JSON.stringify({
+            cmd: {
+              APIName: "QueryFileInfo",
+              RemainHarddiskSize: -1,
+              FileNumber: -1,
+              FileInformations: [
+                {
+                  FileName: "NA",
+                  FileSize: 0,
+                },
+              ],
+            },
+          })
+        );
+      };
+      var that = this;
+      ws.onmessage = function (e) {
+        if (JSON.parse(e.data).APIName == "GenericErr") {
+          that.$message.error("通用错误!");
+        } else {
+          var size = JSON.parse(e.data).cmd.RemainHarddiskSize;
+          this.RemainHarddiskSize=size-1000000000
+          console.log(size);
+          console.log(this.RemainHarddiskSize);
+
+          // console.log(that.RemainHarddiskSize);
+        }
+        //关闭socket连接
+        ws.close();
+        ws.onclose = function (e) {
+          console.log(e);
+        };
+      };
+      //socket请求----
     },
     ShowDes(item) {
       var Describe = item.Describe;
@@ -725,7 +731,7 @@ export default {
         //需要录制的数据
         this.RecordData.push({
           FileName: "NA",
-          FileSize: 5000000000,
+          FileSize: parseInt(this.RemainHarddiskSize/2),
           BitNumber: parseInt(item.BitNumber),
           // SampleRate: parseInt(item.SampleRate),
           RecordBandwidth: parseInt(item.RecordBandwidth) * 1000000,
