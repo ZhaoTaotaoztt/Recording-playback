@@ -154,7 +154,7 @@ body {
 }
 .home >>> .el-form {
   width: 40%;
-  height: 300px;
+  height: 0px;
   /* background-color: pink; */
   margin: 150px auto;
 }
@@ -189,7 +189,7 @@ body {
 @media screen and (min-width: 200px) and (max-width: 1500px) {
   .home >>> .el-form {
     width: 80%;
-    height: 300px;
+    height: 0px;
     /* background-color: pink; */
     margin: 150px auto;
   }

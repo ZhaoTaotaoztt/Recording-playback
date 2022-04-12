@@ -142,7 +142,7 @@
       <el-form>
         <el-form-item label="ID" :label-width="formLabelWidth">
           <el-input
-           type="number"
+            type="number"
             v-model="recordform.id"
             autocomplete="off"
             suffix-icon="xxxx"
@@ -150,7 +150,11 @@
         </el-form-item>
 
         <el-form-item label="RF Port" :label-width="formLabelWidth">
-          <el-select v-model="recordform.RecordChannelIndex"  type="number">
+          <el-select
+            v-model="recordform.RecordChannelIndex"
+            type="number"
+            class="select"
+          >
             <el-option label="0" value="0"></el-option>
             <el-option label="1" value="1"></el-option>
           </el-select>
@@ -158,7 +162,7 @@
 
         <el-form-item label="Filesize(Byte)" :label-width="formLabelWidth">
           <el-input
-           type="number"
+            type="number"
             v-model="recordform.FileSize"
             autocomplete="off"
             suffix-icon="xxxx"
@@ -166,7 +170,11 @@
         </el-form-item>
 
         <el-form-item label="BitNum" :label-width="formLabelWidth">
-          <el-select v-model="recordform.BitNumber"  type="number">
+          <el-select
+            v-model="recordform.BitNumber"
+            type="number"
+            class="select"
+          >
             <el-option label="2" value="2"></el-option>
             <el-option label="4" value="4"></el-option>
             <el-option label="8" value="8"></el-option>
@@ -178,7 +186,12 @@
           label="RecordBandWidth(MHz)"
           :label-width="formLabelWidth"
         >
-          <el-select v-model="recordform.RecordBandwidth" :label="20"  type="number">
+          <el-select
+            v-model="recordform.RecordBandwidth"
+            :label="20"
+            type="number"
+            class="select"
+          >
             <el-option label="8" value="8"></el-option>
             <el-option label="15" value="15"></el-option>
             <el-option label="25" value="25"></el-option>
@@ -187,18 +200,55 @@
           </el-select>
         </el-form-item>
 
-        <!-- <el-form-item
-          label="RecordBandWidth(MHz)"
-          :label-width="formLabelWidth"
-        >
+        <el-form-item label="Frequency(MHz)" :label-width="formLabelWidth">
+          <!-- 第一个下拉框 -->
+          <el-select
+            v-model="frequencyForm.title"
+            :label="20"
+            type="number"
+            class="select"
+            @change="changeSelect($event)"
+            placeholder="Please select"
+          >
+            <el-option
+              v-for="(item, index) in frequencyTitle"
+              :key="index"
+              :label="item"
+              :value="item"
+            ></el-option>
+          </el-select>
+          &nbsp;&nbsp;&nbsp;&nbsp;
+          <!-- 第二个下拉框 -->
+          <el-select
+            v-model="frequencyForm.data"
+            :label="20"
+            type="number"
+            class="select"
+            placeholder="Please select"
+            @change="getfrenquencyData($event)"
+          >
+            <el-option
+              v-for="(item, index) in frequencydataList"
+              :key="index"
+              :label="item.title"
+              :value="item.data"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+
+        <el-form-item label=" " :label-width="formLabelWidth">
+          <!-- 第三个输入框 -->
           <el-input
-            v-model="recordform.RecordBandwidth"
+            type="number"
             autocomplete="off"
             suffix-icon="xxxx"
+            id="edit"
+            :disabled="editDisabled"
+            v-model="recordform.RecordRXFrequency"
           ></el-input>
-        </el-form-item> -->
+        </el-form-item>
 
-        <el-form-item
+        <!-- <el-form-item
           label="RecordFrequency(MHz)"
           :label-width="formLabelWidth"
         >
@@ -208,11 +258,11 @@
             autocomplete="off"
             suffix-icon="xxxx"
           ></el-input>
-        </el-form-item>
+        </el-form-item> -->
 
         <el-form-item label="RecordXRgain(dB)" :label-width="formLabelWidth">
           <el-input
-           type="number"
+            type="number"
             v-model="recordform.RecordRXGain"
             autocomplete="off"
             suffix-icon="xxxx"
@@ -222,7 +272,9 @@
         <el-form-item label="isUseExDisk" :label-width="formLabelWidth">
           <el-select
             v-model="recordform.isUseExDisk"
-            placeholder="Please select"  type="number"
+            placeholder="Please select"
+            type="number"
+            class="select"
           >
             <el-option label="YES" value="1"></el-option>
             <el-option label="NO" value="0"></el-option>
@@ -309,13 +361,78 @@ export default {
         BitNumber: 2,
         // SampleRate: 122880000,
         RecordBandwidth: 15,
-        RecordRXFrequency: 1575.42,
+        RecordRXFrequency: '',//1575.42
         RecordRXGain: 40,
         Describe: "",
         isUseExDisk: "0",
       },
 
       formLabelWidth: "175px", //控制对话框的长度
+
+      //gnss频率的名字
+      frequencyTitle: [
+        "GPS",
+        "GLONASS",
+        "Galileo",
+        "BeiDou",
+        "NAVIC",
+        "SBAS",
+        "QZSS",
+        "UserCustom",
+      ],
+
+      //gnss频率的名字 对应的详细数据
+      frequencyData: {
+        GPS: [
+          { title: "L1C/A:1575.42", data: 1575.42 },
+          { title: "L1C:1575.42", data: 1575.42 },
+          { title: "L2C:1227.6", data: 1227.6 },
+          { title: "L2P:1227.6", data: 1227.6 },
+          { title: "L5:1176.45", data: 1176.45 },
+        ],
+        GLONASS: [
+          { title: "L1C/A:1598.0625~1609.3125", data: 1598.0625 },
+          { title: "L2C:1242.9375~1251.6875", data: 1242.9375 },
+          { title: "L2P:1242.9375~1251.6875", data: 1242.9375 },
+          { title: "L3 OC:1202.025", data: 1202.025 },
+        ],
+        Galileo: [
+          { title: "E1:1575.42", data: 1575.42 },
+          { title: "E5a:1176.45", data: 1176.45 },
+          { title: "E5b:1207.14", data: 1207.14 },
+          { title: "E5 AltBOC:1191.795", data: 1191.795 },
+          { title: "E6:1278.75", data: 1278.75 },
+        ],
+        BeiDou: [
+          { title: "B1l:1561.098", data: 1561.098 },
+          { title: "B2l:1207.14", data: 1207.14 },
+          { title: "B3l:1268.52", data: 1268.52 },
+          { title: "B1C:1575.42", data: 1575.42 },
+          { title: "B2a:1176.45", data: 1176.45 },
+          { title: "B2b:1207.14", data: 1207.14 },
+        ],
+        NAVIC: [{ title: "L5:1176.45", data: 1176.45 }],
+        SBAS: [
+          { title: "L1:1575.42", data: 1575.42 },
+          { title: "L5:1176.45", data: 1176.45 },
+        ],
+        QZSS: [
+          { title: "L1C/A:1575.42", data: 1575.42 },
+          { title: "L1C:1575.42", data: 1575.42 },
+          { title: "L1S:1575.42", data: 1575.42 },
+          { title: "L2C:1227.6", data: 1227.6 },
+          { title: "L5:1176.45", data: 1176.45 },
+          { title: "L6:1278.75", data: 1278.75 },
+        ],
+      },
+      frequencydataList: [], //用来判断名字相同的，把对应的数据装在这个空数组里面
+
+      //用来获取一级下拉框，之后再显示二级下拉框
+      frequencyForm: {
+        title: "",
+        data: "",
+      },
+      editDisabled:true,//用来控制频率的输入款是否可编辑
     };
   },
   created() {
@@ -344,6 +461,36 @@ export default {
   },
 
   methods: {
+    //联动的第一个下拉框事件
+    changeSelect(event) {
+      console.log(event);
+      if(event!=="UserCustom"&&event!=="GLONASS"){
+        console.log("不可以编辑");
+        console.log(this.editDisabled);
+        this.editDisabled=true
+      }else{
+        console.log("需要编辑");
+        console.log(this.editDisabled);
+        this.editDisabled=false
+      }
+      // 清空手机型号内容
+      this.frequencyForm.data = "";
+
+      // 遍历手机品牌的下拉选项数组
+      for (const k in this.frequencyTitle) {
+        // 手机品牌内容 是否等于 手机品牌的下拉选择数组中的某一项
+        if (this.frequencyForm.title === this.frequencyTitle[k]) {
+          this.frequencydataList = this.frequencyData[this.frequencyForm.title];
+        }
+      }
+    },
+
+    //联动的第二个下拉框事件
+    getfrenquencyData(event){
+      this.recordform.RecordRXFrequency=event
+      console.log(event);
+    },
+
     //读取txtx文件里面的内容
     showFile(input) {
       //return false;
@@ -464,6 +611,7 @@ export default {
       console.log(this.ChannelIndex);
     },
     addRecordData(id) {
+      this.editDisabled=true
       //添加新的数据到record
       this.dialogrecord = false;
       this.recordform = {
@@ -1365,8 +1513,21 @@ export default {
 #Showore {
   font-size: 1.7rem;
 }
-.record >>>.el-input__suffix{
-  margin-right: -60px;
+.record >>> .el-input__suffix {
+  margin-right: -41px;
+}
+.record[data-v-d8b20e8a] .ui-widget-content {
+  height: 85%;
+}
+.record >>> .select {
+  /* background-color: pink; */
+  margin-left: 5px;
+  width: 35%;
+}
+.record >>> #edit {
+  /* background-color: pink; */
+  width: 6rem;
+  margin-left: 50px;
 }
 @media screen and (min-width: 1353px) and (max-width: 1683px) {
   .record >>> .el-select > .el-input {
