@@ -557,9 +557,9 @@ export default {
           that.$message.error("通用错误!");
         } else {
           var size = JSON.parse(e.data).cmd.RemainHarddiskSize;
-          this.RemainHarddiskSize=size-1000000000
+          that.RemainHarddiskSize=size-1000000000
           console.log(size);
-          console.log(this.RemainHarddiskSize);
+          console.log(that.RemainHarddiskSize);
 
           // console.log(that.RemainHarddiskSize);
         }
@@ -742,6 +742,7 @@ export default {
           isUseExDisk: parseInt(item.isUseExDisk),
         });
         console.log(this.RecordData);
+        console.log(this.RemainHarddiskSize/2);
       } else {
         this.IndexList.splice(this.IndexList.indexOf(index), 1);
         this.RecordData.splice(this.IndexList.indexOf(index), 1);
