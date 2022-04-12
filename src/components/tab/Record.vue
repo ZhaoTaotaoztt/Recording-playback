@@ -159,7 +159,7 @@
             <el-option label="1" value="1"></el-option>
           </el-select>
         </el-form-item>
-
+<!-- 
         <el-form-item label="Filesize(Byte)" :label-width="formLabelWidth">
           <el-input
             type="number"
@@ -167,7 +167,7 @@
             autocomplete="off"
             suffix-icon="xxxx"
           ></el-input>
-        </el-form-item>
+        </el-form-item> -->
 
         <el-form-item label="BitNum" :label-width="formLabelWidth">
           <el-select
@@ -175,8 +175,8 @@
             type="number"
             class="select"
           >
-            <el-option label="2" value="2"></el-option>
-            <el-option label="4" value="4"></el-option>
+            <!-- <el-option label="2" value="2"></el-option> -->
+            <!-- <el-option label="4" value="4"></el-option> -->
             <el-option label="8" value="8"></el-option>
             <el-option label="16" value="16"></el-option>
           </el-select>
@@ -313,7 +313,6 @@ export default {
       record: [
         {
           RecordChannelIndex: 1,
-          FileSize: 5000000000,
           BitNumber: 2,
           // SampleRate: 122880000,
           RecordBandwidth: 15,
@@ -325,7 +324,6 @@ export default {
         },
         {
           RecordChannelIndex: 0,
-          FileSize: 5000000000,
           BitNumber: 8,
           // SampleRate: 122880000,
           RecordBandwidth: 15,
@@ -361,7 +359,7 @@ export default {
         BitNumber: 2,
         // SampleRate: 122880000,
         RecordBandwidth: 15,
-        RecordRXFrequency: '',//1575.42
+        RecordRXFrequency: "", //1575.42
         RecordRXGain: 40,
         Describe: "",
         isUseExDisk: "0",
@@ -432,7 +430,7 @@ export default {
         title: "",
         data: "",
       },
-      editDisabled:true,//用来控制频率的输入款是否可编辑
+      editDisabled: true, //用来控制频率的输入款是否可编辑
     };
   },
   created() {
@@ -464,21 +462,20 @@ export default {
     //联动的第一个下拉框事件
     changeSelect(event) {
       console.log(event);
-      if(event!=="UserCustom"&&event!=="GLONASS"){
+      if (event !== "UserCustom" && event !== "GLONASS") {
         console.log("不可以编辑");
         console.log(this.editDisabled);
-        this.editDisabled=true
-      }else{
+        this.editDisabled = true;
+      } else {
         console.log("需要编辑");
         console.log(this.editDisabled);
-        this.editDisabled=false
+        this.editDisabled = false;
       }
-      // 清空手机型号内容
+      // 清空具体频率的内容
       this.frequencyForm.data = "";
 
-      // 遍历手机品牌的下拉选项数组
+      // 遍历频率的名字下拉选项数组
       for (const k in this.frequencyTitle) {
-        // 手机品牌内容 是否等于 手机品牌的下拉选择数组中的某一项
         if (this.frequencyForm.title === this.frequencyTitle[k]) {
           this.frequencydataList = this.frequencyData[this.frequencyForm.title];
         }
@@ -486,12 +483,12 @@ export default {
     },
 
     //联动的第二个下拉框事件
-    getfrenquencyData(event){
-      this.recordform.RecordRXFrequency=event
+    getfrenquencyData(event) {
+      this.recordform.RecordRXFrequency = event;
       console.log(event);
     },
 
-    //读取txtx文件里面的内容
+    //读取.txt文件里面的内容
     showFile(input) {
       //return false;
       if (window.FileReader) {
@@ -611,7 +608,7 @@ export default {
       console.log(this.ChannelIndex);
     },
     addRecordData(id) {
-      this.editDisabled=true
+      this.editDisabled = true;
       //添加新的数据到record
       this.dialogrecord = false;
       this.recordform = {
@@ -1121,228 +1118,238 @@ export default {
             }, 1000);
           }
           if (this.RecordData.length == 2) {
-            for (var i = 0; i < this.RecordData.length; i++) {
-              // console.log(this.RecordData[0].RecordChannelIndex);
-              console.log(this.RecordData[1].RecordChannelIndex);
-              if (
-                this.RecordData[0].RecordChannelIndex ==
-                this.RecordData[1].RecordChannelIndex
-              ) {
-                console.log(12345);
-                this.$message({
-                  message: "Please select two files of different cards", //请选择两条不同板卡的文件
-                  type: "warning",
-                  duration: 0,
-                  showClose: true,
+            // for (var i = 0; i < this.RecordData.length; i++) {
+            // console.log(this.RecordData[0].RecordChannelIndex);
+            // console.log(this.RecordData[1].RecordChannelIndex);
+            if (
+              this.RecordData[0].RecordChannelIndex ==
+              this.RecordData[1].RecordChannelIndex
+            ) {
+              // console.log(12345);
+              this.$message({
+                message: "Please select two files of different cards", //请选择两条不同板卡的文件
+                type: "warning",
+                duration: 0,
+                showClose: true,
+              });
+            }
+            if (
+              (this.RecordData[0].RecordChannelIndex == 0 &&
+                this.RecordData[1].RecordChannelIndex == 1) ||
+              (this.RecordData[0].RecordChannelIndex == 1 &&
+                this.RecordData[1].RecordChannelIndex == 0)
+            ) {
+              // console.log("ok");
+              setTimeout(() => {
+                data = this.RecordData;
+                // console.log(data);
+                // console.log(
+                //   JSON.stringify({
+                //     cmd: {
+                //       APIName: "AddFileInfo",
+                //       FileInformations: data,
+                //     },
+                //   })
+                // );
+                //存储内置数据
+                var int = data.filter(function (i) {
+                  return i.isUseExDisk == 0;
                 });
-              }
-              if (
-                (this.RecordData[0].RecordChannelIndex == 0 &&
-                  this.RecordData[1].RecordChannelIndex == 1) ||
-                (this.RecordData[0].RecordChannelIndex == 1 &&
-                  this.RecordData[1].RecordChannelIndex == 0)
-              ) {
-                console.log("ok");
-                setTimeout(() => {
-                  data = this.RecordData;
-                  console.log(data);
-                  console.log(
-                    JSON.stringify({
-                      cmd: {
-                        APIName: "AddFileInfo",
-                        FileInformations: data,
-                      },
-                    })
-                  );
-                  //存储内置数据
-                  var int = data.filter(function (i) {
-                    return i.isUseExDisk == 0;
-                  });
-                  //存储外置数据
-                  var out = data.filter(function (i) {
-                    return i.isUseExDisk == 1;
-                  });
-                  var that = this;
-                  var outboolen = false;
+                //存储外置数据
+                var out = data.filter(function (i) {
+                  return i.isUseExDisk == 1;
+                });
+                var that = this;
+                var outboolen = false;
 
-                  // //socket请求----
-                  var ws = new WebSocket("ws://192.168.1.203:9001");
-                  for (var i = 0; i < data.length; i++) {
-                    console.log(data[i].isUseExDisk);
+                console.log(1111);
+                console.log(int);
+                // //socket请求----
+                var ws = new WebSocket("ws://192.168.1.203:9001");
+                for (var i = 0; i < data.length; i++) {
+                  // console.log(data[i].isUseExDisk);
 
-                    //内置存储内置存储内置存储内置存储内置存储内置存储内置存储内置存储内置存储
-                    if (data[0].isUseExDisk == 0 && data[1].isUseExDisk == 0) {
-                      ws.onopen = function (e) {
+                  //内置存储内置存储内置存储内置存储内置存储内置存储内置存储内置存储内置存储
+                  if (data[0].isUseExDisk == 0 && data[1].isUseExDisk == 0) {
+                    console.log(
+                      JSON.stringify({
+                        cmd: {
+                          APIName: "AddFileInfo",
+                          FileInformations: int,
+                        },
+                      })
+                    );
+                    ws.onopen = function (e) {
+                      ws.send(
+                        JSON.stringify({
+                          cmd: {
+                            APIName: "AddFileInfo",
+                            FileInformations: int,
+                          },
+                        })
+                      );
+                    };
+
+                    ws.onmessage = function (e) {
+                      if (JSON.parse(e.data).cmd.APIName == "GenericErr") {
+                        that.$message.error({
+                          message: "General error!",
+                          duration: 0,
+                          showClose: true,
+                        }); //通用错误
+                      } else {
+                        console.log(JSON.parse(e.data).cmd.ResultCode);
+                        var staut = parseInt(
+                          JSON.parse(e.data).cmd.ResultCode
+                        );
+                        // console.log(this.boardinfo);
+                        switch (staut) {
+                          case 0:
+                            that.$message({
+                              message: "success", //成功
+                              type: "success",
+                              duration: 0,
+                              showClose: true,
+                            });
+                            break;
+                          case 1:
+                            that.$message.error({
+                              message: "Recording failed!",
+                              duration: 0,
+                              showClose: true,
+                            }); //录制失败
+                            break;
+                          case 2:
+                            that.$message({
+                              message:
+                                "The card channel ID has been used and can be modified or re added in the edit box!", //板卡板卡通道ID已经被使用，可在编辑框修改或者重新添加
+                              type: "warning",
+                              duration: 0,
+                              showClose: true,
+                            });
+                            break;
+                        }
+                      }
+
+                      //关闭TCP连接
+                      ws.close();
+                    };
+                  }
+                  //内置存储内置存储内置存储内置存储内置存储内置存储内置存储内置存储内置存储
+
+                  //外置存储外置存储外置存储外置存储外置存储外置存储外置存储外置存储外置存储
+                  if (data[0].isUseExDisk == 1 && data[1].isUseExDisk == 1) {
+                    ws.onopen = function (e) {
+                      ws.send(
+                        JSON.stringify({
+                          cmd: {
+                            APIName: "QueryExDisk",
+                          },
+                        })
+                      );
+                    };
+
+                    ws.onmessage = function (e) {
+                      // console.log(JSON.parse(e.data).cmd.ResultCode);
+                      if (JSON.parse(e.data).cmd.APIName == "GenericErr") {
+                        that.$message.error({
+                          message: "General error!",
+                          duration: 0,
+                          showClose: true,
+                        }); //通用错误
+                      }
+                      if (JSON.parse(e.data).cmd.ResultCode == 0) {
+                        that.$message({
+                          message: "The extended hard disk does not exist!", //扩展硬盘不存在
+                          type: "warning",
+                          duration: 0,
+                          showClose: true,
+                        });
+                      }
+                      if (JSON.parse(e.data).cmd.ResultCode == 1) {
+                        outboolen = true;
                         ws.send(
                           JSON.stringify({
                             cmd: {
                               APIName: "AddFileInfo",
-                              FileInformations: int,
+                              FileInformations: out,
                             },
                           })
                         );
-                      };
+                      }
 
-                      ws.onmessage = function (e) {
-                        if (JSON.parse(e.data).cmd.APIName == "GenericErr") {
-                          that.$message.error({
-                            message: "General error!",
-                            duration: 0,
-                            showClose: true,
-                          }); //通用错误
-                        } else {
-                          console.log(JSON.parse(e.data).cmd.ResultCode);
-                          var staut = parseInt(
-                            JSON.parse(e.data).cmd.ResultCode
-                          );
-                          // console.log(this.boardinfo);
-                          switch (staut) {
-                            case 0:
-                              that.$message({
-                                message: "success", //成功
-                                type: "success",
-                                duration: 0,
-                                showClose: true,
-                              });
-                              break;
-                            case 1:
-                              that.$message.error({
-                                message: "Recording failed!",
-                                duration: 0,
-                                showClose: true,
-                              }); //录制失败
-                              break;
-                            case 2:
-                              that.$message({
-                                message:
-                                  "The card channel ID has been used and can be modified or re added in the edit box!", //板卡板卡通道ID已经被使用，可在编辑框修改或者重新添加
-                                type: "warning",
-                                duration: 0,
-                                showClose: true,
-                              });
-                              break;
-                          }
-                        }
-
-                        //关闭TCP连接
-                        ws.close();
-                      };
-                    }
-                    //内置存储内置存储内置存储内置存储内置存储内置存储内置存储内置存储内置存储
-
-                    //外置存储外置存储外置存储外置存储外置存储外置存储外置存储外置存储外置存储
-                    if (data[0].isUseExDisk == 1 && data[1].isUseExDisk == 1) {
-                      ws.onopen = function (e) {
-                        ws.send(
-                          JSON.stringify({
-                            cmd: {
-                              APIName: "QueryExDisk",
-                            },
-                          })
-                        );
-                      };
-
-                      ws.onmessage = function (e) {
-                        console.log(JSON.parse(e.data).cmd.ResultCode);
-                        if (JSON.parse(e.data).cmd.APIName == "GenericErr") {
-                          that.$message.error({
-                            message: "General error!",
-                            duration: 0,
-                            showClose: true,
-                          }); //通用错误
-                        }
-                        if (JSON.parse(e.data).cmd.ResultCode == 0) {
-                          that.$message({
-                            message: "The extended hard disk does not exist!", //扩展硬盘不存在
-                            type: "warning",
-                            duration: 0,
-                            showClose: true,
-                          });
-                        }
-                        if (JSON.parse(e.data).cmd.ResultCode == 1) {
-                          outboolen = true;
-                          ws.send(
-                            JSON.stringify({
-                              cmd: {
-                                APIName: "AddFileInfo",
-                                FileInformations: out,
-                              },
-                            })
-                          );
-                        }
-
-                        //关闭TCP连接
-                        ws.close();
-                      };
-                    }
-                    //外置存储外置存储外置存储外置存储外置存储外置存储外置存储外置存储外置存储
-
-                    if (
-                      (data[0].isUseExDisk == 0 && data[1].isUseExDisk == 1) ||
-                      (data[0].isUseExDisk == 1 && data[1].isUseExDisk == 0)
-                    ) {
-                      this.$message({
-                        message:
-                          "Please keep the storage location of combined recording consistent！", //组合录制的存储位置请保持一致！
-                        type: "warning",
-                        duration: 0,
-                        showClose: true,
-                      });
-                    }
-
-                    //外置存储外置存储外置
-                    if (outboolen == true) {
-                      console.log("外置配置");
-                      ws.onmessage = function (e) {
-                        if (JSON.parse(e.data).cmd.APIName == "GenericErr") {
-                          that.$message.error({
-                            message: "General error!",
-                            duration: 0,
-                            showClose: true,
-                          }); //通用错误
-                        } else {
-                          console.log(JSON.parse(e.data).cmd.ResultCode);
-                          var staut = parseInt(
-                            JSON.parse(e.data).cmd.ResultCode
-                          );
-                          // console.log(this.boardinfo);
-                          switch (staut) {
-                            case 0:
-                              that.$message({
-                                message: "success", //成功
-                                type: "success",
-                                duration: 0,
-                                showClose: true,
-                              });
-                              break;
-                            case 1:
-                              that.$message.error({
-                                message: "Recording failed!",
-                                duration: 0,
-                                showClose: true,
-                              }); //录制失败
-                              break;
-                            case 2:
-                              that.$message({
-                                message:
-                                  "The card channel ID has been used and can be modified or re added in the edit box!", //板卡板卡通道ID已经被使用，可在编辑框修改或者重新添加
-                                type: "warning",
-                                duration: 0,
-                                showClose: true,
-                              });
-                              break;
-                          }
-                        }
-                        //关闭TCP连接
-                        ws.close();
-                      };
-                      outboolen == false;
-                    }
-                    //外置存储外置存储外置
+                      //关闭TCP连接
+                      ws.close();
+                    };
                   }
-                }, 800);
-              }
+                  //外置存储外置存储外置存储外置存储外置存储外置存储外置存储外置存储外置存储
+
+                  if (
+                    (data[0].isUseExDisk == 0 && data[1].isUseExDisk == 1) ||
+                    (data[0].isUseExDisk == 1 && data[1].isUseExDisk == 0)
+                  ) {
+                    this.$message({
+                      message:
+                        "Please keep the storage location of combined recording consistent！", //组合录制的存储位置请保持一致！
+                      type: "warning",
+                      duration: 0,
+                      showClose: true,
+                    });
+                  }
+
+                  //外置存储外置存储外置
+                  if (outboolen == true) {
+                    console.log("外置配置");
+                    ws.onmessage = function (e) {
+                      if (JSON.parse(e.data).cmd.APIName == "GenericErr") {
+                        that.$message.error({
+                          message: "General error!",
+                          duration: 0,
+                          showClose: true,
+                        }); //通用错误
+                      } else {
+                        console.log(JSON.parse(e.data).cmd.ResultCode);
+                        var staut = parseInt(JSON.parse(e.data).cmd.ResultCode);
+                        // console.log(this.boardinfo);
+                        switch (staut) {
+                          case 0:
+                            that.$message({
+                              message: "success", //成功
+                              type: "success",
+                              duration: 0,
+                              showClose: true,
+                            });
+                            break;
+                          case 1:
+                            that.$message.error({
+                              message: "Recording failed!",
+                              duration: 0,
+                              showClose: true,
+                            }); //录制失败
+                            break;
+                          case 2:
+                            that.$message({
+                              message:
+                                "The card channel ID has been used and can be modified or re added in the edit box!", //板卡板卡通道ID已经被使用，可在编辑框修改或者重新添加
+                              type: "warning",
+                              duration: 0,
+                              showClose: true,
+                            });
+                            break;
+                        }
+                      }
+                      //关闭TCP连接
+                      ws.close();
+                    };
+                    outboolen == false;
+                  }
+                  //外置存储外置存储外置
+                }
+              }, 800);
             }
+            // }
+            // console.log(22222);
+            // console.log(int);
           }
         }
         //socket请求----
@@ -1407,12 +1414,13 @@ export default {
   list-style-type: none !important ;
 }
 #table {
-  width: 100%;
+  width: 98%;
   height: auto;
+  margin: 0rem auto;
   overflow-x: scroll;
 }
 .table {
-  width: 110%;
+  width: 100%;
   height: auto;
   /* background-color: pink; */
   margin: 0rem auto;
@@ -1537,7 +1545,7 @@ export default {
     width: 40%;
   }
   .table {
-    width: 130%;
+    width: 95%;
     height: auto;
     /* background-color: pink; */
     margin: 0rem auto;
@@ -1551,7 +1559,7 @@ export default {
     width: 60%;
   }
   .table {
-    width: 160%;
+    width: 100%;
     height: auto;
     /* background-color: pink; */
     margin: 0rem auto;
@@ -1572,7 +1580,7 @@ export default {
     width: 110%;
   }
   .table {
-    width: 240%;
+    width: 150%;
     height: auto;
     /* background-color: pink; */
     margin: 0rem auto;
@@ -1580,7 +1588,7 @@ export default {
 }
 @media screen and (min-width: 100px) and (max-width: 600px) {
   .table {
-    width: 350%;
+    width: 200%;
     height: auto;
     /* background-color: pink; */
     margin: 0rem auto;

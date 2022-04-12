@@ -204,98 +204,98 @@ export default {
   data() {
     return {
       replay: [
-        // {
-        //   FileName: "gnss_3345678683688856_20211227_103250_325_115910_456.bin",
-        //   FileSize: 154090653200,
-        //   BitNumber: 16,
-        //   SampleRate: 122880000,
-        //   RecordBandwidth: 10000000,
-        //   RecordRXFrequency: 1575420000,
-        //   RecordRXGain: 40,
-        //   RecordChannelIndex: 0,
-        //   Describe: "GPS,Shenzhen Skyworth Industrial Park",
-        //   FileCurrentSize: 154090653200,
-        //   isRecording: 0,
-        //   isPlaying: 1,
-        //   isUseExDisk: 1,
-        // },
-        // {
-        //   FileName: "gnss_3345678683656779_20211527_160150_115.bin",
-        //   FileSize: 8541255667,
-        //   BitNumber: 16,
-        //   SampleRate: 122880000,
-        //   RecordBandwidth: 10000000,
-        //   RecordRXFrequency: 1575420000,
-        //   RecordRXGain: 40,
-        //   RecordChannelIndex: 0,
-        //   Describe: "GPS,Shenzhen Skyworth Industrial Park",
-        //   FileCurrentSize: 32461111,
-        //   isRecording: 1,
-        //   isPlaying: 0,
-        //   isUseExDisk: 1,
-        // },
-        // {
-        //   FileName:
-        //     "gnss_3345678683688856#0_20211227_103250_325_115910_456.bin",
-        //   FileSize: 154090653200,
-        //   BitNumber: 16,
-        //   SampleRate: 122880000,
-        //   RecordBandwidth: 10000000,
-        //   RecordRXFrequency: 1575420000,
-        //   RecordRXGain: 40,
-        //   RecordChannelIndex: 0,
-        //   Describe: "GPS,Shenzhen Skyworth Industrial Park",
-        //   FileCurrentSize: 154090653200,
-        //   isRecording: 0,
-        //   isPlaying: 0,
-        //   isUseExDisk: 0,
-        // },
-        // {
-        //   FileName:
-        //     "gnss_3345678683688856#1_20211227_103250_325_115910_456.bin",
-        //   FileSize: 154090653200,
-        //   BitNumber: 16,
-        //   SampleRate: 122880000,
-        //   RecordBandwidth: 10000000,
-        //   RecordRXFrequency: 1575420000,
-        //   RecordRXGain: 40,
-        //   RecordChannelIndex: 1,
-        //   Describe: "GPS,Shenzhen Skyworth Industrial Park",
-        //   FileCurrentSize: 154090653200,
-        //   isRecording: 0,
-        //   isPlaying: 0,
-        //   isUseExDisk: 0,
-        // },
-        // {
-        //   FileName: "gnss_3345678683656779#0_20211527_160150_115.bin",
-        //   FileSize: 8541255666,
-        //   BitNumber: 16,
-        //   SampleRate: 122880000,
-        //   RecordBandwidth: 10000000,
-        //   RecordRXFrequency: 1575420000,
-        //   RecordRXGain: 40,
-        //   RecordChannelIndex: 0,
-        //   Describe: "GPS,Shenzhen Skyworth Industrial Park",
-        //   FileCurrentSize: 568733,
-        //   isRecording: 1,
-        //   isPlaying: 0,
-        //   isUseExDisk: 1,
-        // },
-        // {
-        //   FileName: "gnss_3345678683656779#1_20211527_160150_115.bin",
-        //   FileSize: 8541255666,
-        //   BitNumber: 16,
-        //   SampleRate: 122880000,
-        //   RecordBandwidth: 10000000,
-        //   RecordRXFrequency: 1575420000,
-        //   RecordRXGain: 40,
-        //   RecordChannelIndex: 1,
-        //   Describe: "GPS,Shenzhen Skyworth Industrial Park",
-        //   FileCurrentSize: 568733,
-        //   isRecording: 1,
-        //   isPlaying: 0,
-        //   isUseExDisk: 1,
-        // },
+        {
+          FileName: "gnss_3345678683688856_20211227_103250_325_115910_456.bin",
+          FileSize: 154090653200,
+          BitNumber: 16,
+          SampleRate: 122880000,
+          RecordBandwidth: 10000000,
+          RecordRXFrequency: 1575420000,
+          RecordRXGain: 40,
+          RecordChannelIndex: 0,
+          Describe: "GPS,Shenzhen Skyworth Industrial Park",
+          FileCurrentSize: 154090653200,
+          isRecording: 0,
+          isPlaying: 1,
+          isUseExDisk: 1,
+        },
+        {
+          FileName: "gnss_3345678683656779_20211527_160150_115.bin",
+          FileSize: 8541255667,
+          BitNumber: 16,
+          SampleRate: 122880000,
+          RecordBandwidth: 10000000,
+          RecordRXFrequency: 1575420000,
+          RecordRXGain: 40,
+          RecordChannelIndex: 0,
+          Describe: "GPS,Shenzhen Skyworth Industrial Park",
+          FileCurrentSize: 32461111,
+          isRecording: 1,
+          isPlaying: 0,
+          isUseExDisk: 1,
+        },
+        {
+          FileName:
+            "gnss_3345678683688856#0_20211227_103250_325_115910_456.bin",
+          FileSize: 154090653200,
+          BitNumber: 16,
+          SampleRate: 122880000,
+          RecordBandwidth: 10000000,
+          RecordRXFrequency: 1575420000,
+          RecordRXGain: 40,
+          RecordChannelIndex: 0,
+          Describe: "GPS,Shenzhen Skyworth Industrial Park",
+          FileCurrentSize: 154090653200,
+          isRecording: 0,
+          isPlaying: 0,
+          isUseExDisk: 0,
+        },
+        {
+          FileName:
+            "gnss_3345678683688856#1_20211227_103250_325_115910_456.bin",
+          FileSize: 154090653200,
+          BitNumber: 16,
+          SampleRate: 122880000,
+          RecordBandwidth: 10000000,
+          RecordRXFrequency: 1575420000,
+          RecordRXGain: 40,
+          RecordChannelIndex: 1,
+          Describe: "GPS,Shenzhen Skyworth Industrial Park",
+          FileCurrentSize: 154090653200,
+          isRecording: 0,
+          isPlaying: 0,
+          isUseExDisk: 0,
+        },
+        {
+          FileName: "gnss_3345678683656779#0_20211527_160150_115.bin",
+          FileSize: 8541255666,
+          BitNumber: 16,
+          SampleRate: 122880000,
+          RecordBandwidth: 10000000,
+          RecordRXFrequency: 1575420000,
+          RecordRXGain: 40,
+          RecordChannelIndex: 0,
+          Describe: "GPS,Shenzhen Skyworth Industrial Park",
+          FileCurrentSize: 568733,
+          isRecording: 1,
+          isPlaying: 0,
+          isUseExDisk: 1,
+        },
+        {
+          FileName: "gnss_3345678683656779#1_20211527_160150_115.bin",
+          FileSize: 8541255666,
+          BitNumber: 16,
+          SampleRate: 122880000,
+          RecordBandwidth: 10000000,
+          RecordRXFrequency: 1575420000,
+          RecordRXGain: 40,
+          RecordChannelIndex: 1,
+          Describe: "GPS,Shenzhen Skyworth Industrial Park",
+          FileCurrentSize: 568733,
+          isRecording: 1,
+          isPlaying: 0,
+          isUseExDisk: 1,
+        },
       ],
       modal: false, //不要蒙层
       RemainHarddiskSize: 0, //用来存储磁盘大小
@@ -332,6 +332,7 @@ export default {
     });
   },
   methods: {
+    //显示描述
     ShowDes(item) {
       var Describe = item.Describe;
 
@@ -344,6 +345,7 @@ export default {
         }
       );
     },
+    //显示更多
     ShowMore(item) {
       console.log(item);
       console.log(item.RecordRXGain);
@@ -374,11 +376,58 @@ export default {
         }
       );
     },
+    
+    //获取查询信息
     getReplay() {
       // this.ChannelIndex = this.$store.state.ChannelIndex;
       // console.log(this.ChannelIndex);
       //获取数据
-      // console.log(111);
+      console.log(this.replay[2].FileName);
+       var fileTime=this.replay[2].FileName
+    // console.log(fileTime);
+    // a=fileTime.split("_")[3]
+    // b=fileTime.split("_")[5]
+    // c=fileTime.split("_")[2]
+    // console.log(a);
+    // console.log(b);
+    // console.log(c);
+    // console.log(b-a);
+    // var time=c+(b-a)
+    // console.log(time);
+
+    // setInterval(() => {
+    //     console.log(1);
+
+    //     var now = new Date()
+    //     console.log(now);
+
+    //     var years = now.getFullYear()
+    //     console.log(years);
+
+    //     var month = "0" + now.getMonth()
+    //     console.log(month);
+
+    //     var day = now.getDate()
+    //     console.log(day);
+
+    //     var hours = now.getHours()
+    //     console.log(hours);
+
+    //     var mins = now.getMinutes()
+    //     console.log(mins);
+
+    //     var seconds = now.getSeconds()
+    //     console.log(seconds);
+
+    //     var nowDate = years + month + day + hours + mins + seconds
+    //     console.log(nowDate);
+
+    //     var x = Number(time / nowDate * 100).toFixed(3) + "%"
+    //     console.log(x);
+    // }, 10000);
+
+
+
       console.log(this.replay);
       var replaying=this.replay.filter((item)=>{
         return item.isRecording == 0&&item.isPlaying == 1
@@ -1485,11 +1534,14 @@ export default {
 #table {
   width: 100%;
   height: auto;
-  overflow-x: scroll;
+  overflow: scroll;
+  margin: 0rem auto;
 }
 table {
-  width: 140%;
+  width: 100%;
   height: auto;
+  /* background-color: pink */
+  margin: 0rem auto;
 }
 table th {
   height: 5rem;
@@ -1568,11 +1620,18 @@ table tr td:nth-child(4) div {
 #Showore {
   font-size: 1.7rem;
 }
-
+@media screen and (max-width: 1356px) and (min-width: 500px){
+    table {
+    width: 165% !important;
+    height: auto;
+    /* background-color: pink; */
+  }
+}
 @media screen and (min-width: 500px) and (max-width: 1297px) {
   table {
-    width: 200%;
+    width: 240%;
     height: auto;
+    /* background-color: pink; */
   }
   .replay >>> .el-dialog {
     width: 40%;
@@ -1588,24 +1647,28 @@ table tr td:nth-child(4) div {
   table {
     width: 170%;
     height: auto;
+    /* background-color: pink; */
   }
 }
-@media screen and (min-width: 500px) and (max-width: 1356px) {
+@media screen and (min-width: 1000px) and (max-width: 1356px) {
   table {
-    width: 220%;
+    width: 250%;
     height: auto;
+    /* background-color: pink; */
   }
 }
 @media screen and (min-width: 899px) and (max-width: 1029px) {
   table {
-    width: 260%;
+    width: 280%;
     height: auto;
+    /* background-color: pink; */
   }
 }
 @media screen and (min-width: 500px) and (max-width: 899px) {
   table {
-    width: 390%;
+    width:1000%;
     height: auto;
+    /* background-color: pink; */
   }
   .replay >>> .el-dialog {
     width: 50%;
@@ -1613,9 +1676,9 @@ table tr td:nth-child(4) div {
 }
 @media screen and (min-width: 100px) and (max-width: 500px) {
   table {
-    width: 600%;
+    width: 700%;
     height: auto;
-    background-color: pink;
+    /* background-color: pink; */
   }
   .replay >>> .el-dialog {
     width: 70%;
