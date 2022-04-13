@@ -457,7 +457,10 @@ export default {
       $("#dialogrecord").draggable();
     });
 
-    this.getRemainHarddiskSize()
+    // setInterval(() => {
+      this.getRemainHarddiskSize()
+    // }, 3000);
+    
   },
 
   methods: {
@@ -557,7 +560,7 @@ export default {
           that.$message.error("通用错误!");
         } else {
           var size = JSON.parse(e.data).cmd.RemainHarddiskSize;
-          that.RemainHarddiskSize=parseInt(size)-600000000
+          that.RemainHarddiskSize=parseInt(size)-6000000000
           console.log(size);
           console.log(that.RemainHarddiskSize);
 
