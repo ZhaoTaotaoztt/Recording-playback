@@ -313,7 +313,7 @@ export default {
       record: [
         {
           RecordChannelIndex: 1,
-          BitNumber: 2,
+          BitNumber: 16,
           // SampleRate: 122880000,
           RecordBandwidth: 15,
           RecordRXFrequency: 1575.42,
@@ -335,7 +335,7 @@ export default {
         },
       ],
 
-      exportdata: "",
+      exportdata: "",//导出的数据，所用位置在html中
       modal: false, //不要蒙层
       ChannelIndex: [], //板卡
       RemainHarddiskSize: 0, //用来存储磁盘大小
@@ -557,7 +557,7 @@ export default {
           that.$message.error("通用错误!");
         } else {
           var size = JSON.parse(e.data).cmd.RemainHarddiskSize;
-          that.RemainHarddiskSize=size-1000000000
+          that.RemainHarddiskSize=parseInt(size)-600000000
           console.log(size);
           console.log(that.RemainHarddiskSize);
 
@@ -566,7 +566,7 @@ export default {
         //关闭socket连接
         ws.close();
         ws.onclose = function (e) {
-          console.log(e);
+          // console.log(e);
         };
       };
       //socket请求----
@@ -731,7 +731,7 @@ export default {
         //需要录制的数据
         this.RecordData.push({
           FileName: "NA",
-          FileSize: parseInt(this.RemainHarddiskSize/2),
+          FileSize: parseInt(this.RemainHarddiskSize),
           BitNumber: parseInt(item.BitNumber),
           // SampleRate: parseInt(item.SampleRate),
           RecordBandwidth: parseInt(item.RecordBandwidth) * 1000000,
@@ -741,8 +741,12 @@ export default {
           Describe: item.Describe,
           isUseExDisk: parseInt(item.isUseExDisk),
         });
+        //录制的文件大小，总大小减去6G处以数组的长度
+        for(var i=0;i<this.RecordData.length;i++){
+          this.RecordData[i].FileSize=parseInt(this.RemainHarddiskSize/this.RecordData.length)
+        }
         console.log(this.RecordData);
-        console.log(this.RemainHarddiskSize/2);
+        console.log(this.RecordData[0].FileSize);
       } else {
         this.IndexList.splice(this.IndexList.indexOf(index), 1);
         this.RecordData.splice(this.IndexList.indexOf(index), 1);
@@ -1389,7 +1393,7 @@ export default {
         //操作数据清空
         setTimeout(() => {
           this.RecordData = [];
-          this.removeData;
+          this.removeData=[];
         }, 1000);
       } else {
         return;

@@ -71,11 +71,15 @@
             <div @click="ShowDes(item)">{{ item.Describe }}</div>
           </td>
           <td class="td">{{ item.RecordChannelIndex }}</td>
-          <td class="td">{{ (item.FileCurrentSize/1000000000).toFixed(3) }}</td>
-          <td class="td">{{ (item.RecordRXFrequency/1000000).toFixed(3) }}</td>
+          <td class="td">
+            {{ (item.FileCurrentSize / 1000000000).toFixed(3) }}
+          </td>
+          <td class="td">
+            {{ (item.RecordRXFrequency / 1000000).toFixed(3) }}
+          </td>
           <td class="td">{{ item.BitNumber }}</td>
           <!-- <td class="td">{{ item.SampleRate }}</td> -->
-          <td class="td">{{ item.RecordBandwidth/1000000 }}</td>
+          <td class="td">{{ item.RecordBandwidth / 1000000 }}</td>
           <!-- <td class="td">{{ item.RecordRXGain }}</td> -->
           <td class="td">
             <el-button
@@ -150,14 +154,18 @@
       </table>
     </div>
 
-    <p>RemainHarddisk Size: &nbsp;&nbsp;&nbsp;{{ RemainHarddiskSize }} Byte
+    <p>
+      RemainHarddisk Size: &nbsp;&nbsp;&nbsp;{{ RemainHarddiskSize }} Byte
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-      &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:rgb(245,124,0);font-size:1.5rem">Playback progress:</span></p>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span
+        style="color: rgb(245, 124, 0); font-size: 1.5rem"
+        >Playback progress:&nbsp;<span>{{ playProgress }}%</span></span
+      >
+    </p>
     <p>
       RemainExHarddiskSize: &nbsp;&nbsp;&nbsp;{{ RemainExHarddiskSize }} Byte
     </p>
-  
 
     <p>
       <el-button class="btn query" @click="getReplay"
@@ -204,98 +212,98 @@ export default {
   data() {
     return {
       replay: [
-        {
-          FileName: "gnss_3345678683688856_20211227_103250_325_115910_456.bin",
-          FileSize: 154090653200,
-          BitNumber: 16,
-          SampleRate: 122880000,
-          RecordBandwidth: 10000000,
-          RecordRXFrequency: 1575420000,
-          RecordRXGain: 40,
-          RecordChannelIndex: 0,
-          Describe: "GPS,Shenzhen Skyworth Industrial Park",
-          FileCurrentSize: 154090653200,
-          isRecording: 0,
-          isPlaying: 1,
-          isUseExDisk: 1,
-        },
-        {
-          FileName: "gnss_3345678683656779_20211527_160150_115.bin",
-          FileSize: 8541255667,
-          BitNumber: 16,
-          SampleRate: 122880000,
-          RecordBandwidth: 10000000,
-          RecordRXFrequency: 1575420000,
-          RecordRXGain: 40,
-          RecordChannelIndex: 0,
-          Describe: "GPS,Shenzhen Skyworth Industrial Park",
-          FileCurrentSize: 32461111,
-          isRecording: 1,
-          isPlaying: 0,
-          isUseExDisk: 1,
-        },
-        {
-          FileName:
-            "gnss_3345678683688856#0_20211227_103250_325_115910_456.bin",
-          FileSize: 154090653200,
-          BitNumber: 16,
-          SampleRate: 122880000,
-          RecordBandwidth: 10000000,
-          RecordRXFrequency: 1575420000,
-          RecordRXGain: 40,
-          RecordChannelIndex: 0,
-          Describe: "GPS,Shenzhen Skyworth Industrial Park",
-          FileCurrentSize: 154090653200,
-          isRecording: 0,
-          isPlaying: 0,
-          isUseExDisk: 0,
-        },
-        {
-          FileName:
-            "gnss_3345678683688856#1_20211227_103250_325_115910_456.bin",
-          FileSize: 154090653200,
-          BitNumber: 16,
-          SampleRate: 122880000,
-          RecordBandwidth: 10000000,
-          RecordRXFrequency: 1575420000,
-          RecordRXGain: 40,
-          RecordChannelIndex: 1,
-          Describe: "GPS,Shenzhen Skyworth Industrial Park",
-          FileCurrentSize: 154090653200,
-          isRecording: 0,
-          isPlaying: 0,
-          isUseExDisk: 0,
-        },
-        {
-          FileName: "gnss_3345678683656779#0_20211527_160150_115.bin",
-          FileSize: 8541255666,
-          BitNumber: 16,
-          SampleRate: 122880000,
-          RecordBandwidth: 10000000,
-          RecordRXFrequency: 1575420000,
-          RecordRXGain: 40,
-          RecordChannelIndex: 0,
-          Describe: "GPS,Shenzhen Skyworth Industrial Park",
-          FileCurrentSize: 568733,
-          isRecording: 1,
-          isPlaying: 0,
-          isUseExDisk: 1,
-        },
-        {
-          FileName: "gnss_3345678683656779#1_20211527_160150_115.bin",
-          FileSize: 8541255666,
-          BitNumber: 16,
-          SampleRate: 122880000,
-          RecordBandwidth: 10000000,
-          RecordRXFrequency: 1575420000,
-          RecordRXGain: 40,
-          RecordChannelIndex: 1,
-          Describe: "GPS,Shenzhen Skyworth Industrial Park",
-          FileCurrentSize: 568733,
-          isRecording: 1,
-          isPlaying: 0,
-          isUseExDisk: 1,
-        },
+        // {
+        //   FileName: "gnss_3345678683688856_20211227_103250_325_115910_456.bin",
+        //   FileSize: 154090653200,
+        //   BitNumber: 16,
+        //   SampleRate: 122880000,
+        //   RecordBandwidth: 10000000,
+        //   RecordRXFrequency: 1575420000,
+        //   RecordRXGain: 40,
+        //   RecordChannelIndex: 0,
+        //   Describe: "GPS,Shenzhen Skyworth Industrial Park",
+        //   FileCurrentSize: 154090653200,
+        //   isRecording: 0,
+        //   isPlaying: 1,
+        //   isUseExDisk: 1,
+        // },
+        // {
+        //   FileName: "gnss_3345678683656779_20211527_160150_115.bin",
+        //   FileSize: 8541255667,
+        //   BitNumber: 16,
+        //   SampleRate: 122880000,
+        //   RecordBandwidth: 10000000,
+        //   RecordRXFrequency: 1575420000,
+        //   RecordRXGain: 40,
+        //   RecordChannelIndex: 0,
+        //   Describe: "GPS,Shenzhen Skyworth Industrial Park",
+        //   FileCurrentSize: 32461111,
+        //   isRecording: 1,
+        //   isPlaying: 0,
+        //   isUseExDisk: 1,
+        // },
+        // {
+        //   FileName:
+        //     "gnss_3345678683688856#0_20211227_103250_325_115910_456.bin",
+        //   FileSize: 154090653200,
+        //   BitNumber: 16,
+        //   SampleRate: 122880000,
+        //   RecordBandwidth: 10000000,
+        //   RecordRXFrequency: 1575420000,
+        //   RecordRXGain: 40,
+        //   RecordChannelIndex: 0,
+        //   Describe: "GPS,Shenzhen Skyworth Industrial Park",
+        //   FileCurrentSize: 154090653200,
+        //   isRecording: 0,
+        //   isPlaying: 0,
+        //   isUseExDisk: 0,
+        // },
+        // {
+        //   FileName:
+        //     "gnss_3345678683688856#1_20211227_103250_325_115910_456.bin",
+        //   FileSize: 154090653200,
+        //   BitNumber: 16,
+        //   SampleRate: 122880000,
+        //   RecordBandwidth: 10000000,
+        //   RecordRXFrequency: 1575420000,
+        //   RecordRXGain: 40,
+        //   RecordChannelIndex: 1,
+        //   Describe: "GPS,Shenzhen Skyworth Industrial Park",
+        //   FileCurrentSize: 154090653200,
+        //   isRecording: 0,
+        //   isPlaying: 0,
+        //   isUseExDisk: 0,
+        // },
+        // {
+        //   FileName: "gnss_3345678683656779#0_20211527_160150_115.bin",
+        //   FileSize: 8541255666,
+        //   BitNumber: 16,
+        //   SampleRate: 122880000,
+        //   RecordBandwidth: 10000000,
+        //   RecordRXFrequency: 1575420000,
+        //   RecordRXGain: 40,
+        //   RecordChannelIndex: 0,
+        //   Describe: "GPS,Shenzhen Skyworth Industrial Park",
+        //   FileCurrentSize: 568733,
+        //   isRecording: 1,
+        //   isPlaying: 0,
+        //   isUseExDisk: 1,
+        // },
+        // {
+        //   FileName: "gnss_3345678683656779#1_20211527_160150_115.bin",
+        //   FileSize: 8541255666,
+        //   BitNumber: 16,
+        //   SampleRate: 122880000,
+        //   RecordBandwidth: 10000000,
+        //   RecordRXFrequency: 1575420000,
+        //   RecordRXGain: 40,
+        //   RecordChannelIndex: 1,
+        //   Describe: "GPS,Shenzhen Skyworth Industrial Park",
+        //   FileCurrentSize: 568733,
+        //   isRecording: 1,
+        //   isPlaying: 0,
+        //   isUseExDisk: 1,
+        // },
       ],
       modal: false, //不要蒙层
       RemainHarddiskSize: 0, //用来存储磁盘大小
@@ -323,6 +331,8 @@ export default {
       PlayStartPos: 0,
 
       curren_index: "", //获取index，取到当下点击的是哪一条数据
+      playProgress: 0,
+      playFileName: [],
     };
   },
   mounted() {
@@ -330,6 +340,8 @@ export default {
     $(function () {
       $("#dialogreplay").draggable();
     });
+
+    // this.getProgress()
   },
   methods: {
     //显示描述
@@ -376,62 +388,84 @@ export default {
         }
       );
     },
-    
+    getProgress() {
+      var settime = null;
+      console.log(this.replay);
+      var filename = this.replay.filter((item) => {
+        return item.isRecording == 0 && item.isPlaying == 1;
+      });
+      this.playFileName = filename;
+      if (this.playFileName == 0) {
+        console.log("xxxxxxxxxxxxxxxx");
+        this.playProgress = 0;
+        window.clearInterval(settime);
+      }
+      console.log(1234567);
+      console.log(this.playFileName);
+      console.log(this.playFileName[0].FileName); //.FileName当找不到正在回放的数据是，就会在报错，是因为没有找到，不会影响功能进行
+      var fileTime = this.playFileName[0].FileName;
+      console.log(fileTime);
+      var a = fileTime.split("_")[3];
+      var b = fileTime.split("_")[5];
+      var c = fileTime.split("_")[2];
+      console.log(a);
+      console.log(b);
+      console.log(c);
+      console.log(b - a);
+      var time = c + (b - a);
+      console.log(time);
+
+      settime = setInterval(() => {
+        console.log(1);
+
+        var now = new Date();
+        console.log(now); //
+
+        var years = now.getFullYear();
+        console.log(years); //
+
+        var month = "0" + now.getMonth();
+        console.log(month); //
+
+        var day = now.getDate();
+        console.log(day); //
+
+        var hours = now.getHours();
+        console.log(hours); //
+
+        var mins = now.getMinutes();
+        console.log(mins); //
+
+        var seconds = now.getSeconds();
+        console.log(seconds); //
+
+        var nowDate = years + month + day + hours + mins + seconds;
+        console.log(nowDate); //
+
+        var x = Number((time / nowDate) * 100).toFixed(3);
+        if (this.playFileName.length == 0) {
+          window.clearInterval(settime);
+          a = 0;
+          b = 0;
+          c = 0;
+          x = 0;
+        }
+        this.playProgress = x;
+        console.log(x);
+      }, 10000);
+    },
     //获取查询信息
     getReplay() {
+      this.playFileName = [];
+      console.log(this.playFileName);
       // this.ChannelIndex = this.$store.state.ChannelIndex;
       // console.log(this.ChannelIndex);
+
       //获取数据
-      console.log(this.replay[2].FileName);
-       var fileTime=this.replay[2].FileName
-    // console.log(fileTime);
-    // a=fileTime.split("_")[3]
-    // b=fileTime.split("_")[5]
-    // c=fileTime.split("_")[2]
-    // console.log(a);
-    // console.log(b);
-    // console.log(c);
-    // console.log(b-a);
-    // var time=c+(b-a)
-    // console.log(time);
-
-    // setInterval(() => {
-    //     console.log(1);
-
-    //     var now = new Date()
-    //     console.log(now);
-
-    //     var years = now.getFullYear()
-    //     console.log(years);
-
-    //     var month = "0" + now.getMonth()
-    //     console.log(month);
-
-    //     var day = now.getDate()
-    //     console.log(day);
-
-    //     var hours = now.getHours()
-    //     console.log(hours);
-
-    //     var mins = now.getMinutes()
-    //     console.log(mins);
-
-    //     var seconds = now.getSeconds()
-    //     console.log(seconds);
-
-    //     var nowDate = years + month + day + hours + mins + seconds
-    //     console.log(nowDate);
-
-    //     var x = Number(time / nowDate * 100).toFixed(3) + "%"
-    //     console.log(x);
-    // }, 10000);
-
-
-
-      console.log(this.replay);
-      var replaying=this.replay.filter((item)=>{
-        return item.isRecording == 0&&item.isPlaying == 1
-      })
+      // console.log(this.replay);
+      var replaying = this.replay.filter((item) => {
+        return item.isRecording == 0 && item.isPlaying == 1;
+      });
       console.log(replaying);
       //socket请求----
       var ws = new WebSocket("ws://192.168.1.203:9001");
@@ -462,6 +496,8 @@ export default {
           }); //通用错误
         } else {
           that.replay = JSON.parse(e.data).cmd.FileInformations;
+
+          that.getProgress(); //调用获取进度函数
 
           // that.replay = that.replay.sort((a, b) =>
           //   a.FileName > b.FileName ? 1 : b.FileName > a.FileName ? -1 : 0
@@ -502,7 +538,6 @@ export default {
         //关闭socket连接
         ws.close();
       };
-
       //socket请求----
 
       //取消所有的复选框的勾选
@@ -670,7 +705,7 @@ export default {
           this.Posbollen == false;
         }
         this.playData.push({
-          RecordChannelIndex: item.RecordChannelIndex,
+          // RecordChannelIndex: item.RecordChannelIndex,
           FileName: item.FileName,
           PlayTXFrequency: parseInt(item.RecordRXFrequency),
           PlayTXGain: parseInt(item.RecordRXGain),
@@ -872,10 +907,11 @@ export default {
         if (data.length > 1 || play.length != 0) {
           // console.log("回放全过程只允许操作一张卡");
           this.$message.error({
-            message: "Only one card can be operated in the whole playback process!",//回放全过程只允许操作一张卡
+            message:
+              "Only one card can be operated in the whole playback process!", //回放全过程只允许操作一张卡
             duration: 0,
             showClose: true,
-          }); 
+          });
         } else {
           //socket请求----
           var ws = new WebSocket("ws://192.168.1.203:9001");
@@ -984,111 +1020,115 @@ export default {
             showClose: true,
           });
         } else {
-          for (var i = 0; i < this.playData.length; i++) {
-            console.log(this.playData[i].RecordChannelIndex);
-            if (
-              this.playData[0].RecordChannelIndex ==
-              this.playData[1].RecordChannelIndex
-            ) {
-              this.$message({
-                message: "Please select two files of different cards", //请选择两条不同板卡的文件
-                type: "warning",
-                duration: 0,
-                showClose: true,
-              });
-            }
-            if (
-              (this.playData[0].RecordChannelIndex == 0 &&
-                this.playData[1].RecordChannelIndex == 1) ||
-              (this.playData[0].RecordChannelIndex == 1 &&
-                this.playData[1].RecordChannelIndex == 0)
-            ) {
-              this.playData.map(function (item) {
-                //删除RecordChannelIndex
-                delete item.RecordChannelIndex;
-              });
-              console.log(this.playData);
-              setTimeout(() => {
-                //定时器是因为vue框架默认的对你数组进行，立马存立马取，取不到，用定时器就可以取到
-                data = this.playData;
-                FileName = this.FileName;
-                console.log(FileName);
-                if (FileName[0].split("#")[0] != FileName[1].split("#")[0]) {
-                  this.$message({
-                    message: "Synchronous playback file selection error!", //同步回放文件选择错误
-                    type: "warning",
-                    duration: 0,
-                    showClose: true,
-                  });
-                } else {
-                  //socket请求----
-                  var ws = new WebSocket("ws://192.168.1.203:9001");
-                  ws.onopen = function (e) {
-                    ws.send(
-                      JSON.stringify({
-                        cmd: {
-                          APIName: "StartPlay",
-                          FileInformations: data,
-                        },
-                      })
-                    );
-                  };
-                  var that = this;
-                  ws.onmessage = function (e) {
-                    if (JSON.parse(e.data).cmd.APIName == "GenericErr") {
-                      that.$message.error({
-                        message: "General error!",
-                        duration: 0,
-                        showClose: true,
-                      }); //通用错误
-                    } else {
-                      var statu = JSON.parse(e.data).cmd.ResultCode;
-                      switch (statu) {
-                        case 0:
-                          that.$message({
-                            message: "success", //成功
-                            type: "success",
-                            duration: 0,
-                            showClose: true,
-                          });
-                          break;
-                        case 1:
-                          that.$message.error({
-                            message: "file does not exist!",
-                            duration: 0,
-                            showClose: true,
-                          }); //文件不存在
-                          break;
-                        case 2:
-                          that.$message({
-                            message: "Card ID is already in use!", //板卡ID已被使用
-                            type: "warning",
-                            duration: 0,
-                            showClose: true,
-                          });
-                          break;
-                        case 3:
-                          that.$message({
-                            message: "Other failures!", //其他失败
-                            type: "warning",
-                            duration: 0,
-                            showClose: true,
-                          });
-                          break;
-                      }
-                    }
-
-                    //关闭TCP连接
-                    ws.close();
-                    ws.onclose = function (e) {
-                      console.log(e);
-                    };
-                  };
-                }
-              }, 800);
-              //socket请求----
-            }
+          // for (var i = 0; i < this.playData.length; i++) {
+          if (
+            this.playData[0].PlayChannelIndex ==
+            this.playData[1].PlayChannelIndex
+          ) {
+            this.$message({
+              message: "Please select two files of different cards", //请选择两条不同板卡的文件
+              type: "warning",
+              duration: 0,
+              showClose: true,
+            });
           }
+          if (
+            (this.playData[0].PlayChannelIndex == 0 &&
+              this.playData[1].PlayChannelIndex == 1) ||
+            (this.playData[0].PlayChannelIndex == 1 &&
+              this.playData[1].PlayChannelIndex == 0)
+          ) {
+            setTimeout(() => {
+              //定时器是因为vue框架默认的对你数组进行，立马存立马取，取不到，用定时器就可以取到
+              data = this.playData;
+              FileName = this.FileName;
+              // console.log(FileName);
+              if (FileName[0].split("#")[0] != FileName[1].split("#")[0]) {
+                this.$message({
+                  message: "Synchronous playback file selection error!", //同步回放文件选择错误
+                  type: "warning",
+                  duration: 0,
+                  showClose: true,
+                });
+              } else {
+                //socket请求----
+                var ws = new WebSocket("ws://192.168.1.203:9001");
+                ws.onopen = function (e) {
+                  ws.send(
+                    JSON.stringify({
+                      cmd: {
+                        APIName: "StartPlay",
+                        FileInformations: data,
+                      },
+                    })
+                  );
+                  console.log(1234567789);
+                  console.log(data);
+                  console.log(
+                    JSON.stringify({
+                      cmd: {
+                        APIName: "StartPlay",
+                        FileInformations: data,
+                      },
+                    })
+                  );
+                };
+                var that = this;
+                ws.onmessage = function (e) {
+                  if (JSON.parse(e.data).cmd.APIName == "GenericErr") {
+                    that.$message.error({
+                      message: "General error!",
+                      duration: 0,
+                      showClose: true,
+                    }); //通用错误
+                  } else {
+                    var statu = JSON.parse(e.data).cmd.ResultCode;
+                    switch (statu) {
+                      case 0:
+                        that.$message({
+                          message: "success", //成功
+                          type: "success",
+                          duration: 0,
+                          showClose: true,
+                        });
+                        break;
+                      case 1:
+                        that.$message.error({
+                          message: "file does not exist!",
+                          duration: 0,
+                          showClose: true,
+                        }); //文件不存在
+                        break;
+                      case 2:
+                        that.$message({
+                          message: "Card ID is already in use!", //板卡ID已被使用
+                          type: "warning",
+                          duration: 0,
+                          showClose: true,
+                        });
+                        break;
+                      case 3:
+                        that.$message({
+                          message: "Other failures!", //其他失败
+                          type: "warning",
+                          duration: 0,
+                          showClose: true,
+                        });
+                        break;
+                    }
+                  }
+
+                  //关闭TCP连接
+                  ws.close();
+                  ws.onclose = function (e) {
+                    console.log(e);
+                  };
+                };
+              }
+            }, 800);
+            //socket请求----
+          }
+          // }
         }
 
         //取消所有的复选框的勾选
@@ -1620,8 +1660,8 @@ table tr td:nth-child(4) div {
 #Showore {
   font-size: 1.7rem;
 }
-@media screen and (max-width: 1356px) and (min-width: 500px){
-    table {
+@media screen and (max-width: 1356px) and (min-width: 500px) {
+  table {
     width: 165% !important;
     height: auto;
     /* background-color: pink; */
@@ -1666,7 +1706,7 @@ table tr td:nth-child(4) div {
 }
 @media screen and (min-width: 500px) and (max-width: 899px) {
   table {
-    width:1000%;
+    width: 1000%;
     height: auto;
     /* background-color: pink; */
   }
