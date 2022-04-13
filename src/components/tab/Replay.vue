@@ -155,7 +155,7 @@
     </div>
 
     <p>
-      RemainHarddisk Size: &nbsp;&nbsp;&nbsp;{{ RemainHarddiskSize }} Byte
+      RemainHarddisk Size: &nbsp;&nbsp;&nbsp;{{(RemainHarddiskSize / 1000000000).toFixed(3) }} GB
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
       &nbsp;&nbsp;&nbsp;&nbsp;<span
@@ -164,7 +164,7 @@
       >
     </p>
     <p>
-      RemainExHarddiskSize: &nbsp;&nbsp;&nbsp;{{ RemainExHarddiskSize }} Byte
+      RemainExHarddiskSize: &nbsp;&nbsp;&nbsp;{{ (RemainExHarddiskSize / 1000000000).toFixed(3) }} GB
     </p>
 
     <p>
@@ -497,7 +497,7 @@ export default {
         } else {
           that.replay = JSON.parse(e.data).cmd.FileInformations;
 
-          that.getProgress(); //调用获取进度函数
+         
 
           // that.replay = that.replay.sort((a, b) =>
           //   a.FileName > b.FileName ? 1 : b.FileName > a.FileName ? -1 : 0
@@ -533,6 +533,7 @@ export default {
           // console.log(Allspace);
           // console.log(RecordData);
           // console.log(Availablespace);
+           that.getProgress(); //调用获取进度函数
         }
 
         //关闭socket连接
