@@ -159,7 +159,7 @@
             <el-option label="1" value="1"></el-option>
           </el-select>
         </el-form-item>
-<!-- 
+        <!-- 
         <el-form-item label="Filesize(Byte)" :label-width="formLabelWidth">
           <el-input
             type="number"
@@ -335,7 +335,7 @@ export default {
         },
       ],
 
-      exportdata: "",//导出的数据，所用位置在html中
+      exportdata: "", //导出的数据，所用位置在html中
       modal: false, //不要蒙层
       ChannelIndex: [], //板卡
       RemainHarddiskSize: 0, //用来存储磁盘大小
@@ -434,18 +434,17 @@ export default {
     };
   },
   created() {
+    //获取本地存储里面的数据在created等函数里面，不为空的时候再取值，这样不刷新的时候也可以去得到
     var data = JSON.parse(window.localStorage.getItem("recordData"));
-    this.exportdata = JSON.stringify(data);
+    if (data != null) {
+      this.exportdata = JSON.stringify(data);
+    }
     // console.log(this.exportdata);
 
     this.ChannelIndex = this.$store.state.ChannelIndex;
 
-    //加进去的按照顺序的往下排序,始终按照12345这样的顺序排下去
-    // this.record.forEach((item, index) => {
-    //   item.id = index + 1;
-    // });
-
-    var cache = JSON.parse(window.localStorage.getItem("recordData")); //获取localStorage本地存储的数据
+    //获取本地存储里面的数据在created等函数里面，不为空的时候再取值，这样不刷新的时候也可以去得到
+    var cache = JSON.parse(window.localStorage.getItem("recordData"));
     if (cache != null) {
       this.record = cache;
     }
@@ -458,9 +457,8 @@ export default {
     });
 
     // setInterval(() => {
-      this.getRemainHarddiskSize()
+    this.getRemainHarddiskSize();
     // }, 3000);
-    
   },
 
   methods: {
@@ -521,6 +519,7 @@ export default {
 
     //数据下载为txt文件
     download(text, name, type) {
+      console.log(text);
       var a = document.getElementById("a");
       var file = new Blob([text], {
         type: type,
@@ -560,7 +559,7 @@ export default {
           that.$message.error("通用错误!");
         } else {
           var size = JSON.parse(e.data).cmd.RemainHarddiskSize;
-          that.RemainHarddiskSize=parseInt(size)-6000000000
+          that.RemainHarddiskSize = parseInt(size) - 6000000000;
           console.log(size);
           console.log(that.RemainHarddiskSize);
 
@@ -710,7 +709,7 @@ export default {
               Describe: this.recordform.Describe,
               isUseExDisk: "0",
             };
-            //存数据
+            //添加的新数据存储到localstroge
             window.localStorage.setItem(
               "recordData",
               JSON.stringify(this.record)
@@ -718,6 +717,10 @@ export default {
             // console.log(111);
             console.log(window.localStorage.getItem("recordData"));
             this.record = this.record.sort((a, b) => a.id - b.id); //进行排序
+
+            //导出的数据加进去的时候就需要存储了
+            var data = JSON.parse(window.localStorage.getItem("recordData"));
+            this.exportdata = JSON.stringify(data);
           }
         }
       }
@@ -745,8 +748,10 @@ export default {
           isUseExDisk: parseInt(item.isUseExDisk),
         });
         //录制的文件大小，总大小减去6G处以数组的长度
-        for(var i=0;i<this.RecordData.length;i++){
-          this.RecordData[i].FileSize=parseInt(this.RemainHarddiskSize/this.RecordData.length)
+        for (var i = 0; i < this.RecordData.length; i++) {
+          this.RecordData[i].FileSize = parseInt(
+            this.RemainHarddiskSize / this.RecordData.length
+          );
         }
         console.log(this.RecordData);
         console.log(this.RecordData[0].FileSize);
@@ -1213,9 +1218,7 @@ export default {
                         }); //通用错误
                       } else {
                         console.log(JSON.parse(e.data).cmd.ResultCode);
-                        var staut = parseInt(
-                          JSON.parse(e.data).cmd.ResultCode
-                        );
+                        var staut = parseInt(JSON.parse(e.data).cmd.ResultCode);
                         // console.log(this.boardinfo);
                         switch (staut) {
                           case 0:
@@ -1396,7 +1399,7 @@ export default {
         //操作数据清空
         setTimeout(() => {
           this.RecordData = [];
-          this.removeData=[];
+          this.removeData = [];
         }, 1000);
       } else {
         return;
@@ -1548,7 +1551,7 @@ export default {
 }
 .record >>> #edit {
   /* background-color: pink; */
-  width: 6rem;
+  width: 8rem;
   margin-left: 50px;
 }
 @media screen and (min-width: 1353px) and (max-width: 1683px) {
