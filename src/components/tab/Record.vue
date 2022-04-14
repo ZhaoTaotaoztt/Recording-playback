@@ -423,14 +423,14 @@ export default {
           { title: "L6:1278.75", data: 1278.75 },
         ],
       },
-      frequencydataList: [], //用来判断名字相同的，把对应的数据装在这个空数组里面
+      frequencydataList: [], //用来判断联动下拉框名字是否相同，相同的把对应的详细数据装在这个空数组里面，第二级下拉框绑定这个数组就可以实现联动了
 
       //用来获取一级下拉框，之后再显示二级下拉框
       frequencyForm: {
         title: "",
         data: "",
       },
-      editDisabled: true, //用来控制频率的输入款是否可编辑
+      editDisabled: true, //用来控制频率的输入框是否可编辑
     };
   },
   created() {
@@ -451,14 +451,14 @@ export default {
 
     this.record = this.record.sort((a, b) => a.id - b.id); //进行排序
 
+    //对话框拖拽事件
     $(function () {
-      //拖拽事件
       $("#dialogrecord").draggable();
     });
 
-    // setInterval(() => {
+
     this.getRemainHarddiskSize();
-    // }, 3000);
+
   },
 
   methods: {
@@ -533,6 +533,8 @@ export default {
         })
       );
     },
+
+    //获取磁盘大小，用来作为下发录制的参数
     getRemainHarddiskSize() {
       //socket请求----
       var ws = new WebSocket("ws://192.168.1.203:9001");
@@ -573,6 +575,8 @@ export default {
       };
       //socket请求----
     },
+
+    //显示描述信息
     ShowDes(item) {
       var Describe = item.Describe;
 
@@ -585,6 +589,8 @@ export default {
         }
       );
     },
+
+    //显示更多信息
     ShowMore(item) {
       console.log(item.isUseExDisk);
       var save;
@@ -610,11 +616,20 @@ export default {
         }
       );
     },
+
+    //显示对话框
     Showdialog() {
       this.dialogrecord = true;
       this.ChannelIndex = this.$store.state.ChannelIndex;
       console.log(this.ChannelIndex);
     },
+
+    //关闭对话框
+    close() {
+      this.dialogrecord = false;
+    },
+
+    //对话框的确认按钮
     addRecordData(id) {
       this.editDisabled = true;
       //添加新的数据到record
@@ -725,6 +740,8 @@ export default {
         }
       }
     },
+
+    //多选框选中的事件
     Checkedrecord(e, item) {
       let index = item.RecordChannelIndex;
       if (e.target.checked == true) {
@@ -763,6 +780,8 @@ export default {
         // console.log(this.RecordData);
       }
     },
+
+    //删除信息事件
     Deletrecord() {
       var arr = this.record;
       var ids = this.removeData;
@@ -820,6 +839,8 @@ export default {
       this.IndexList = [];
       //取消所有的复选框的勾选
     },
+
+    //页面中的输入框失去焦点事件
     Blur() {
       //存数据
       console.log(111);
@@ -828,9 +849,8 @@ export default {
       //取数据
       this.record = JSON.parse(window.localStorage.getItem("recordData"));
     },
-    close() {
-      this.dialogrecord = false;
-    },
+
+    //单独下发录制文件
     StartRecord() {
       if (this.recordboolen == true) {
         this.Availablespace = this.$store.state.Availablespace;
@@ -1104,6 +1124,8 @@ export default {
         return;
       }
     },
+
+    //组合下发录制文件
     StartSynRecord() {
       if (this.recordboolen == true) {
         this.Availablespace = this.$store.state.Availablespace;
@@ -1158,7 +1180,7 @@ export default {
               (this.RecordData[0].RecordChannelIndex == 1 &&
                 this.RecordData[1].RecordChannelIndex == 0)
             ) {
-              // console.log("ok");
+              
               setTimeout(() => {
                 data = this.RecordData;
                 // console.log(data);
@@ -1203,7 +1225,7 @@ export default {
                         JSON.stringify({
                           cmd: {
                             APIName: "AddFileInfo",
-                            FileInformations: int,
+                            FileInformations: int,  
                           },
                         })
                       );
@@ -1362,11 +1384,9 @@ export default {
                   }
                   //外置存储外置存储外置
                 }
+                this.getRemainHarddiskSize()
               }, 800);
             }
-            // }
-            // console.log(22222);
-            // console.log(int);
           }
         }
         //socket请求----

@@ -155,8 +155,10 @@
     </div>
 
     <p>
-      RemainHarddisk Size: &nbsp;&nbsp;&nbsp;{{(RemainHarddiskSize / 1000000000).toFixed(3) }} GB
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      RemainHarddisk Size: &nbsp;&nbsp;&nbsp;{{
+        (RemainHarddiskSize / 1000000000).toFixed(3)
+      }}
+      GB &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
       &nbsp;&nbsp;&nbsp;&nbsp;<span
         style="color: rgb(245, 124, 0); font-size: 1.5rem"
@@ -164,7 +166,10 @@
       >
     </p>
     <p>
-      RemainExHarddiskSize: &nbsp;&nbsp;&nbsp;{{ (RemainExHarddiskSize / 1000000000).toFixed(3) }} GB
+      RemainExHarddiskSize: &nbsp;&nbsp;&nbsp;{{
+        (RemainExHarddiskSize / 1000000000).toFixed(3)
+      }}
+      GB
     </p>
 
     <p>
@@ -187,7 +192,7 @@
       >
     </p>
     <p>
-      <el-button class="btn query" @click="StartSynPlay" v-preventReClick="5000"
+      <el-button class="btn query" @click="StartSynPlay"
         >Start SynReplay</el-button
       >
       <el-button class="btn query" @click="StopSynPlay" v-preventReClick="5000"
@@ -207,6 +212,7 @@
 import $ from "jquery";
 import "jquery-ui-dist/jquery-ui";
 import "jquery-ui-dist/jquery-ui.min.css";
+import { formatDate } from "@/utils/formatDate";
 
 export default {
   data() {
@@ -331,8 +337,16 @@ export default {
       PlayStartPos: 0,
 
       curren_index: "", //获取index，取到当下点击的是哪一条数据
-      playProgress: 0,
       playFileName: [],
+
+      playProgress: 0,
+      time: {
+        nStartTime: 0,
+        nEndTime: 0,
+        FileTime: 0,
+        setinterTime: "",
+        boolen: false,
+      },
     };
   },
   mounted() {
@@ -341,7 +355,12 @@ export default {
       $("#dialogreplay").draggable();
     });
 
-    // this.getProgress()
+    console.log(formatDate("hhmmss"));
+  },
+
+  beforeDestroy() {
+    clearInterval(this.time.setinterTime);
+    this.timer = null;
   },
   methods: {
     //显示描述
@@ -390,83 +409,64 @@ export default {
     },
     getProgress() {
       var settime = null;
-      console.log(this.replay);
+      // console.log(this.replay);
       var filename = this.replay.filter((item) => {
         return item.isRecording == 0 && item.isPlaying == 1;
       });
       this.playFileName = filename;
-      if (this.playFileName == 0) {
-        console.log("xxxxxxxxxxxxxxxx");
-        this.playProgress = 0;
-        window.clearInterval(settime);
-      }
-      console.log(1234567);
-      console.log(this.playFileName);
-      console.log(this.playFileName[0].FileName); //.FileName当找不到正在回放的数据是，就会在报错，是因为没有找到，不会影响功能进行
+      // console.log(1234567);
+      // console.log(this.playFileName);
+      // console.log(this.playFileName[0].FileName); //.FileName当找不到正在回放的数据是，就会在报错，是因为没有找到，不会影响功能进行
       var fileTime = this.playFileName[0].FileName;
-      console.log(fileTime);
+      // console.log(fileTime);
       var a = fileTime.split("_")[3];
       var b = fileTime.split("_")[5];
       var c = fileTime.split("_")[2];
-      console.log(a);
-      console.log(b);
-      console.log(c);
-      console.log(b - a);
-      var time = c + (b - a);
-      console.log(time);
+      // console.log(a);
+      // console.log(b);
+      // console.log(c);
+      // console.log(b - a);
+      var time = b - a;
+      console.log("文件时间为" + time);
 
-      settime = setInterval(() => {
-        console.log(1);
+      var that = this;
+      this.time.setinterTime = setInterval(() => {
+        that.time.nEndTime = formatDate("hhmmss");
+        console.log("End为" + that.time.nEndTime);
+        console.log("Start为" + that.time.nStartTime);
+        console.log("差为" + (that.time.nEndTime - that.time.nStartTime));
 
-        var now = new Date();
-        console.log(now); //
-
-        var years = now.getFullYear();
-        console.log(years); //
-
-        var month = "0" + now.getMonth();
-        console.log(month); //
-
-        var day = now.getDate();
-        console.log(day); //
-
-        var hours = now.getHours();
-        console.log(hours); //
-
-        var mins = now.getMinutes();
-        console.log(mins); //
-
-        var seconds = now.getSeconds();
-        console.log(seconds); //
-
-        var nowDate = years + month + day + hours + mins + seconds;
-        console.log(nowDate); //
-
-        var x = Number((time / nowDate) * 100).toFixed(3);
-        if (this.playFileName.length == 0) {
-          window.clearInterval(settime);
-          a = 0;
-          b = 0;
-          c = 0;
-          x = 0;
+        that.playProgress = (
+          ((that.time.nEndTime - that.time.nStartTime) / time) *
+          1000
+        ).toFixed(3);
+        console.log("进度为" + that.playProgress);
+        if (that.time.boolen == true) {
+          that.time.boolen == false;
+          console.log("bollen为" + that.time.boolen);
+          clearInterval(that.time.setinterTime);
+          that.playProgress = 0;
         }
-        this.playProgress = x;
-        console.log(x);
-      }, 10000);
+      }, 3000);
     },
     //获取查询信息
     getReplay() {
       this.playFileName = [];
-      console.log(this.playFileName);
-      // this.ChannelIndex = this.$store.state.ChannelIndex;
-      // console.log(this.ChannelIndex);
-
       //获取数据
       // console.log(this.replay);
-      var replaying = this.replay.filter((item) => {
+
+      var replaying = this.replay.filter(function (item) {
         return item.isRecording == 0 && item.isPlaying == 1;
       });
       console.log(replaying);
+      if (replaying.length == 0) {
+        console.log(346780987654321);
+        this.playProgress = 0;
+        this.time.boolen = true;
+      } else {
+        this.getProgress();
+      }
+
       //socket请求----
       var ws = new WebSocket("ws://192.168.1.203:9001");
       ws.onopen = function (e) {
@@ -496,8 +496,6 @@ export default {
           }); //通用错误
         } else {
           that.replay = JSON.parse(e.data).cmd.FileInformations;
-
-         
 
           // that.replay = that.replay.sort((a, b) =>
           //   a.FileName > b.FileName ? 1 : b.FileName > a.FileName ? -1 : 0
@@ -533,7 +531,7 @@ export default {
           // console.log(Allspace);
           // console.log(RecordData);
           // console.log(Availablespace);
-           that.getProgress(); //调用获取进度函数
+          //that.getProgress(); //调用获取进度函数
         }
 
         //关闭socket连接
@@ -949,7 +947,12 @@ export default {
                     duration: 0,
                     showClose: true,
                   });
-                  // console.log(that.replay);
+
+                  //用来计算回放进度的参数
+                  this.time.nStartTime = formatDate("hhmmss");
+                  console.log(formatDate("hhmmss"));
+                  this.getProgress();
+
                   break;
                 case 1:
                   that.$message.error({
@@ -1053,6 +1056,15 @@ export default {
                 });
               } else {
                 //socket请求----
+                console.log(data);
+                console.log(
+                  JSON.stringify({
+                    cmd: {
+                      APIName: "StartPlay",
+                      FileInformations: data,
+                    },
+                  })
+                );
                 var ws = new WebSocket("ws://192.168.1.203:9001");
                 ws.onopen = function (e) {
                   ws.send(
@@ -1064,15 +1076,6 @@ export default {
                     })
                   );
                   console.log(1234567789);
-                  console.log(data);
-                  console.log(
-                    JSON.stringify({
-                      cmd: {
-                        APIName: "StartPlay",
-                        FileInformations: data,
-                      },
-                    })
-                  );
                 };
                 var that = this;
                 ws.onmessage = function (e) {
@@ -1092,6 +1095,12 @@ export default {
                           duration: 0,
                           showClose: true,
                         });
+
+                        //用来计算回放进度的参数
+                        this.time.nStartTime = formatDate("hhmmss");
+                        console.log(formatDate("hhmmss"));
+                        this.getProgress();
+
                         break;
                       case 1:
                         that.$message.error({
