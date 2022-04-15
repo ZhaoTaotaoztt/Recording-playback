@@ -360,7 +360,7 @@ export default {
 
   beforeDestroy() {
     clearInterval(this.time.setinterTime);
-    this.timer = null;
+    this.time.setinterTime = null;
   },
   methods: {
     //显示描述
@@ -438,7 +438,7 @@ export default {
 
         that.playProgress = (
           ((that.time.nEndTime - that.time.nStartTime) / time) *
-          1000
+          100
         ).toFixed(3);
         console.log("进度为" + that.playProgress);
         if (that.time.boolen == true) {
@@ -464,6 +464,7 @@ export default {
         this.playProgress = 0;
         this.time.boolen = true;
       } else {
+        this.time.boolen = false
         this.getProgress();
       }
 
@@ -949,9 +950,9 @@ export default {
                   });
 
                   //用来计算回放进度的参数
-                  this.time.nStartTime = formatDate("hhmmss");
+                  that.time.nStartTime = formatDate("hhmmss");
                   console.log(formatDate("hhmmss"));
-                  this.getProgress();
+                  that.getProgress();
 
                   break;
                 case 1:
@@ -1097,9 +1098,9 @@ export default {
                         });
 
                         //用来计算回放进度的参数
-                        this.time.nStartTime = formatDate("hhmmss");
+                        that.time.nStartTime = formatDate("hhmmss");
                         console.log(formatDate("hhmmss"));
-                        this.getProgress();
+                        that.getProgress();
 
                         break;
                       case 1:
