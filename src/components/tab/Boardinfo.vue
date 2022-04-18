@@ -2,7 +2,7 @@
 <template>
   <div class="boardinfo">
     <div class="sn">
-      <P>SN:PR882533_20210102</P>
+      <P>SN:&nbsp;{{SN}}</P>
       <P>BoardInfo</P>
     </div>
 
@@ -44,6 +44,7 @@
 export default {
   data() {
     return {
+      SN:'',
       boardinfo: [],
       navactive: false,
       isclick: true, //用来判断提示不要频繁点击的布尔值
@@ -59,11 +60,45 @@ export default {
     } else {
       return;
     }
+        //socket请求
+        var ws = new WebSocket("ws://192.168.1.75:9001");
+        ws.onopen = function (e) {
+          // console.log(ws.readyState);
+          ws.send(
+            JSON.stringify({
+              cmd: {
+                APIName: "QueryBoardInfo",
+                SN: "NA",
+                ChannelNumber: -1,
+                ChannelInformations: [
+                  {
+                    ChannelIndex: 0,
+                    ChannelStatus: "NA",
+                    BoardSN: "NA",
+                    BoardVersion: "NA",
+                    temperature: "0",
+                  },
+                ],
+              },
+            })
+          );
+        };
+        var that = this;
+        ws.onmessage = function (e) {
+          that.SN=JSON.parse(e.data).cmd.SN
+          console.log(JSON.parse(e.data).cmd);
+
+          //关闭TCP连接
+          ws.close();
+          ws.onclose = function (e) {
+            // console.log(e);
+          };
+        };
+         //socket请求
+
   },
   methods: {
-    // test(item) {
-    //   console.log(item);
-    // },
+    //查询板卡信息
     getBoardinfo() {
       if (this.showBoard !== true) {
         // this.showBoard = false;
@@ -79,7 +114,7 @@ export default {
         console.log("显示成功");
         //获取boardinfo数据
         //socket请求----
-        var ws = new WebSocket("ws://192.168.1.203:9001");
+        var ws = new WebSocket("ws://192.168.1.75:9001");
         ws.onopen = function (e) {
           // console.log(ws.readyState);
           ws.send(
@@ -129,8 +164,10 @@ export default {
         //socket请求----
       }
     },
+    
+    //退出登录
     Signout() {
-      //退出登录
+     
       this.$confirm("Are you sure to close it？", {
         confirmButtonText: "Determine",
         cancelButtonText: "Cancel",

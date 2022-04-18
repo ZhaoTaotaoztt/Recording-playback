@@ -123,6 +123,7 @@
       <el-button @click="download(exportdata, 'file.txt', 'text/plain/utf-8')">
         Export profile
       </el-button>
+      <!-- exportdata是需要导出的数据；file.txt是到处时候的文件名字；text/plain/utf-8导出时的格式 -->
       <!-- //导入文件 -->
       <el-button id="father">
         Import profile
@@ -456,9 +457,7 @@ export default {
       $("#dialogrecord").draggable();
     });
 
-
     this.getRemainHarddiskSize();
-
   },
 
   methods: {
@@ -491,6 +490,23 @@ export default {
       console.log(event);
     },
 
+    //数据下载为txt文件
+    download(text, name, type) {
+      console.log(text);
+      var a = document.getElementById("a");
+      var file = new Blob([text], {
+        type: type,
+      });
+      a.href = URL.createObjectURL(file);
+      a.download = name;
+      a.dispatchEvent(
+        new MouseEvent("click", {
+          bubbles: false,
+          cancelable: true,
+        })
+      );
+    },
+
     //读取.txt文件里面的内容
     showFile(input) {
       //return false;
@@ -517,27 +533,10 @@ export default {
       }
     },
 
-    //数据下载为txt文件
-    download(text, name, type) {
-      console.log(text);
-      var a = document.getElementById("a");
-      var file = new Blob([text], {
-        type: type,
-      });
-      a.href = URL.createObjectURL(file);
-      a.download = name;
-      a.dispatchEvent(
-        new MouseEvent("click", {
-          bubbles: false,
-          cancelable: true,
-        })
-      );
-    },
-
     //获取磁盘大小，用来作为下发录制的参数
     getRemainHarddiskSize() {
       //socket请求----
-      var ws = new WebSocket("ws://192.168.1.203:9001");
+      var ws = new WebSocket("ws://192.168.1.75:9001");
       ws.onopen = function (e) {
         ws.send(
           JSON.stringify({
@@ -904,7 +903,7 @@ export default {
             var outboolen = false;
 
             // //socket请求----
-            var ws = new WebSocket("ws://192.168.1.203:9001");
+            var ws = new WebSocket("ws://192.168.1.75:9001");
 
             //内置存储内置存储内置存储内置存储内置存储内置存储内置存储内置存储
             if (int.length > 0) {
@@ -1180,7 +1179,6 @@ export default {
               (this.RecordData[0].RecordChannelIndex == 1 &&
                 this.RecordData[1].RecordChannelIndex == 0)
             ) {
-              
               setTimeout(() => {
                 data = this.RecordData;
                 // console.log(data);
@@ -1206,7 +1204,7 @@ export default {
                 console.log(1111);
                 console.log(int);
                 // //socket请求----
-                var ws = new WebSocket("ws://192.168.1.203:9001");
+                var ws = new WebSocket("ws://192.168.1.75:9001");
                 for (var i = 0; i < data.length; i++) {
                   // console.log(data[i].isUseExDisk);
 
@@ -1225,7 +1223,7 @@ export default {
                         JSON.stringify({
                           cmd: {
                             APIName: "AddFileInfo",
-                            FileInformations: int,  
+                            FileInformations: int,
                           },
                         })
                       );
@@ -1384,7 +1382,7 @@ export default {
                   }
                   //外置存储外置存储外置
                 }
-                this.getRemainHarddiskSize()
+                this.getRemainHarddiskSize();
               }, 800);
             }
           }
