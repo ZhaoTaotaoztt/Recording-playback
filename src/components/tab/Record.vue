@@ -311,6 +311,8 @@ import "jquery-ui-dist/jquery-ui.min.css";
 export default {
   data() {
     return {
+      ws: "192.168.1.75", //ip地址
+
       record: [
         {
           RecordChannelIndex: 1,
@@ -458,6 +460,10 @@ export default {
     });
 
     this.getRemainHarddiskSize();
+
+    //获取IP地址
+    this.ws = this.$store.state.ws;
+    console.log(this.ws);
   },
 
   methods: {
@@ -536,7 +542,7 @@ export default {
     //获取磁盘大小，用来作为下发录制的参数
     getRemainHarddiskSize() {
       //socket请求----
-      var ws = new WebSocket("ws://192.168.1.75:9001");
+      var ws = new WebSocket("ws://" + this.ws + ":9001");
       ws.onopen = function (e) {
         ws.send(
           JSON.stringify({
@@ -851,6 +857,10 @@ export default {
 
     //单独下发录制文件
     StartRecord() {
+      //获取IP地址
+      this.ws = this.$store.state.ws;
+      console.log(this.ws);
+
       if (this.recordboolen == true) {
         this.Availablespace = this.$store.state.Availablespace;
         console.log(this.$store.state.Recording);
@@ -903,7 +913,7 @@ export default {
             var outboolen = false;
 
             // //socket请求----
-            var ws = new WebSocket("ws://192.168.1.75:9001");
+            var ws = new WebSocket("ws://" + this.ws + ":9001");
 
             //内置存储内置存储内置存储内置存储内置存储内置存储内置存储内置存储
             if (int.length > 0) {
@@ -1126,6 +1136,10 @@ export default {
 
     //组合下发录制文件
     StartSynRecord() {
+      //获取IP地址
+      this.ws = this.$store.state.ws;
+      console.log(this.ws);
+
       if (this.recordboolen == true) {
         this.Availablespace = this.$store.state.Availablespace;
         if (parseInt(this.Availablespace) < 5220000000) {
@@ -1204,7 +1218,7 @@ export default {
                 console.log(1111);
                 console.log(int);
                 // //socket请求----
-                var ws = new WebSocket("ws://192.168.1.75:9001");
+                var ws = new WebSocket("ws://" + this.ws + ":9001");
                 for (var i = 0; i < data.length; i++) {
                   // console.log(data[i].isUseExDisk);
 
@@ -1482,11 +1496,12 @@ export default {
 }
 .table td .text {
   outline-color: rgb(37, 141, 222);
-  border: 1px solid aliceblue;
+  border: 1px solid rgb(231, 236, 247);
   /* color: gray; */
   text-align: center;
   width: 95%;
   height: 50%;
+  border-radius: 5px;
 }
 
 .record {

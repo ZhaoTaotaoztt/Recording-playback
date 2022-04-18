@@ -2,7 +2,8 @@
 <template>
   <div class="boardinfo">
     <div class="sn">
-      <P>SN:&nbsp;{{SN}}</P>
+      <P>WS:&nbsp;<input type="text" name="" id="saveid" v-model="ws" @change="SaveIP"></P>
+      <P>SN:&nbsp;{{ SN }}</P>
       <P>BoardInfo</P>
     </div>
 
@@ -44,12 +45,13 @@
 export default {
   data() {
     return {
-      SN:'',
+      SN: "",
       boardinfo: [],
       navactive: false,
       isclick: true, //用来判断提示不要频繁点击的布尔值
       showWarn: false,
       showBoard: false, //是否有权限查看信息
+      ws: "192.168.1.75",//ip地址
     };
   },
   mounted() {
@@ -60,42 +62,41 @@ export default {
     } else {
       return;
     }
-        //socket请求
-        var ws = new WebSocket("ws://192.168.1.75:9001");
-        ws.onopen = function (e) {
-          // console.log(ws.readyState);
-          ws.send(
-            JSON.stringify({
-              cmd: {
-                APIName: "QueryBoardInfo",
-                SN: "NA",
-                ChannelNumber: -1,
-                ChannelInformations: [
-                  {
-                    ChannelIndex: 0,
-                    ChannelStatus: "NA",
-                    BoardSN: "NA",
-                    BoardVersion: "NA",
-                    temperature: "0",
-                  },
-                ],
+    //socket请求
+    var ws = new WebSocket("ws://"+this.ws+":9001");
+    ws.onopen = function (e) {
+      // console.log(ws.readyState);
+      ws.send(
+        JSON.stringify({
+          cmd: {
+            APIName: "QueryBoardInfo",
+            SN: "NA",
+            ChannelNumber: -1,
+            ChannelInformations: [
+              {
+                ChannelIndex: 0,
+                ChannelStatus: "NA",
+                BoardSN: "NA",
+                BoardVersion: "NA",
+                temperature: "0",
               },
-            })
-          );
-        };
-        var that = this;
-        ws.onmessage = function (e) {
-          that.SN=JSON.parse(e.data).cmd.SN
-          console.log(JSON.parse(e.data).cmd);
+            ],
+          },
+        })
+      );
+    };
+    var that = this;
+    ws.onmessage = function (e) {
+      that.SN = JSON.parse(e.data).cmd.SN;
+      console.log(JSON.parse(e.data).cmd);
 
-          //关闭TCP连接
-          ws.close();
-          ws.onclose = function (e) {
-            // console.log(e);
-          };
-        };
-         //socket请求
-
+      //关闭TCP连接
+      ws.close();
+      ws.onclose = function (e) {
+        // console.log(e);
+      };
+    };
+    //socket请求
   },
   methods: {
     //查询板卡信息
@@ -114,7 +115,7 @@ export default {
         console.log("显示成功");
         //获取boardinfo数据
         //socket请求----
-        var ws = new WebSocket("ws://192.168.1.75:9001");
+        var ws = new WebSocket("ws://"+this.ws+":9001");
         ws.onopen = function (e) {
           // console.log(ws.readyState);
           ws.send(
@@ -164,10 +165,9 @@ export default {
         //socket请求----
       }
     },
-    
+
     //退出登录
     Signout() {
-     
       this.$confirm("Are you sure to close it？", {
         confirmButtonText: "Determine",
         cancelButtonText: "Cancel",
@@ -179,6 +179,14 @@ export default {
         .catch((err) => {
           console.log(err);
         });
+    },
+
+    //存储请求的IP地址
+    SaveIP(){
+      console.log(this.ws);
+      var ws=this.ws
+      this.$store.commit("getIP", ws)
+      console.log(this.$store.state.ws);
     },
   },
 };
@@ -233,5 +241,12 @@ table td {
   color: rgb(245, 124, 0);
   border-radius: 5px;
   border: rgb(245, 124, 0) solid 1px;
+}
+#saveid{
+  outline-color: rgb(35,141,222);
+  border: 1px solid rgb(231, 236, 247);
+  width: 15%;
+  height: 20%;
+  border-radius: 5px;
 }
 </style>

@@ -103,20 +103,23 @@
                 label="PlayChannelIndex"
                 :label-width="formLabelWidth"
               >
-                <el-select v-model="PlayChannelIndex">
+                <el-select v-model="ClientData[curren_index].PlayChannelIndex">
                   <el-option label="0" value="0"></el-option>
                   <el-option label="1" value="1"></el-option>
                 </el-select>
               </el-form-item>
 
               <el-form-item label="PlayTXGain" :label-width="formLabelWidth">
-                <el-input autocomplete="off" v-model="PlayTXGain"></el-input>
+                <el-input
+                  autocomplete="off"
+                  v-model="ClientData[curren_index].PlayTXGain"
+                ></el-input>
               </el-form-item>
 
               <el-form-item label="PlayStartPos" :label-width="formLabelWidth">
                 <el-input
                   autocomplete="off"
-                  v-model="PlayStartPos"
+                  v-model="ClientData[curren_index].PlayStartPos"
                   min="0"
                   max="99"
                 ></el-input>
@@ -196,6 +199,8 @@ import { formatDate } from "@/utils/formatDate";
 export default {
   data() {
     return {
+      ws: "192.168.1.75", //ip地址，
+
       replay: [
         // {
         //   FileName: "gnss_3345678683688856_20211227_103250_325_115910_456.bin",
@@ -316,19 +321,13 @@ export default {
       PlayStartPos: 0,
 
       //客户端操作的数据PlayChannelIndex，PlayTXGain，PlayStartPos
-      ClientData: [
-        {
-          PlayChannelIndex: 0,
-          PlayTXGain: 50,
-          PlayStartPos: 0,
-        },
-      ],
+      ClientData: [],
       count: 0,
 
-      curren_index: "", //获取index，取到当下点击的是哪一条数据
+      curren_index: 0, //获取index，取到当下点击的是哪一条数据
       playFileName: [],
 
-      playProgress: 0,
+      playProgress: 0, //回放进度
       time: {
         nStartTime: 0,
         nEndTime: 0,
@@ -345,10 +344,14 @@ export default {
     });
 
     console.log("count为" + this.count);
-    var status = window.localStorage.getItem("clientdata");
-    if (status != null) {
-      this.clientdata = JSON.stringify(status);
+    var clientdata = window.localStorage.getItem("clientdata");
+    if (clientdata != null) {
+      this.ClientData = JSON.stringify(clientdata);
     }
+
+    //获取IP地址
+    this.ws = this.$store.state.ws;
+    console.log(this.ws);
   },
 
   beforeDestroy() {
@@ -440,8 +443,12 @@ export default {
         }
       }, 3000);
     },
-    //获取查询信息
+    //获取查询所有信息
     getReplay() {
+      //获取IP地址
+      this.ws = this.$store.state.ws;
+      console.log(this.ws);
+
       this.playFileName = [];
       //获取数据
 
@@ -459,7 +466,7 @@ export default {
       }
 
       //socket请求----
-      var ws = new WebSocket("ws://192.168.1.75:9001");
+      var ws = new WebSocket("ws://" + this.ws + ":9001");
       ws.onopen = function (e) {
         ws.send(
           JSON.stringify({
@@ -486,40 +493,36 @@ export default {
             showClose: true,
           }); //通用错误
         } else {
-          that.count++;
-          console.log("count为" + that.count);
           that.replay = JSON.parse(e.data).cmd.FileInformations;
 
           //建一个数组用来存， PlayChannelIndex: 0, PlayTXGain: 50,PlayStartPos: 0,
-          if (that.replay.length !== 0) {
-            if (that.count == 1) {
-              console.log("我可以的");
-              var clientdata = [];
-              var index = null;
-              for (var i = 0; i < that.replay.length; i++) {
-                var x = JSON.stringify(that.replay[i].FileName);
-                index = that.replay[i].RecordChannelIndex;
-                // console.log(that.replay[i].FileName);
-                // console.log(that.replay[i].RecordChannelIndex);
-                clientdata.push({
-                  PlayChannelIndex: index,
-                  PlayTXGain: 50,
-                  PlayStartPos: 0,
-                });
-              }
-
+          if (that.count !== that.replay.length) {
+            that.count = that.replay.length;
+            console.log("我可以的");
+            var clientdata = [];
+            var index = null;
+            for (var i = 0; i < that.replay.length; i++) {
+              clientdata.push({
+                PlayChannelIndex: that.replay[i].RecordChannelIndex,
+                PlayTXGain: 50,
+                PlayStartPos: 0,
+              });
               window.localStorage.setItem(
                 "clientdata",
                 JSON.stringify(clientdata)
               );
-              
-            } else {
-              console.log("不允许再加了应该需要做一些判断");
+
+              that.ClientData = JSON.parse(
+                window.localStorage.getItem("clientdata")
+              );
             }
+            console.log(that.ClientData);
+          } else {
+            that.ClientData = JSON.parse(
+              window.localStorage.getItem("clientdata")
+            );
           }
-          this.ClientData = window.localStorage.getItem("clientdata");
-          console.log("data为" + this.ClientData);
-          console.log("local" + window.localStorage.getItem("clientdata"));
+          //建一个数组用来存， PlayChannelIndex: 0, PlayTXGain: 50,PlayStartPos: 0,
 
           that.RemainHarddiskSize = JSON.parse(e.data).cmd.RemainHarddiskSize;
           that.RemainExHarddiskSize = JSON.parse(
@@ -591,7 +594,7 @@ export default {
         );
 
         //socket请求----
-        var ws = new WebSocket("ws://192.168.1.75:9001");
+        var ws = new WebSocket("ws://" + this.ws + ":9001");
         ws.onopen = function (e) {
           ws.send(
             JSON.stringify({
@@ -717,9 +720,9 @@ export default {
           // RecordChannelIndex: item.RecordChannelIndex,
           FileName: item.FileName,
           PlayTXFrequency: parseInt(item.RecordRXFrequency),
-          PlayTXGain: parseInt(item.RecordRXGain),
-          PlayChannelIndex: parseInt(item.RecordChannelIndex),
-          PlayStartPos: parseInt(item.PlayStartPos),
+          PlayTXGain: parseInt(this.ClientData[index].PlayTXGain),
+          PlayChannelIndex: parseInt(this.ClientData[index].PlayChannelIndex),
+          PlayStartPos: parseInt(this.ClientData[index].PlayStartPos),
         });
         console.log(this.playData);
 
@@ -769,7 +772,7 @@ export default {
         this.$confirm("Are you sure you want to delete？") //确定要删除吗
           .then((_) => {
             //socket请求----
-            var ws = new WebSocket("ws://192.168.1.75:9001");
+            var ws = new WebSocket("ws://" + this.ws + ":9001");
             ws.onopen = function (e) {
               for (var i = 0; i < data.length; i++) {
                 item = data[i];
@@ -877,37 +880,34 @@ export default {
       }, 1000);
     },
 
-    //显示回放的板卡
+    //显示回放配置对话框
     showplay(index) {
-      // if (this.replayboolen == true) {
       this.curren_index = index;
       this.dialogreplay = true;
       console.log(this.curren_index);
 
       // console.log(window.localStorage.getItem("clientdata"));
-      this.ClientData = JSON.parse(window.localStorage.getItem("clientdata"));
-      console.log(this.ClientData);
-      console.log(this.ClientData.length);
-      console.log(this.ClientData[this.curren_index].PlayChannelIndex);
-
-      // } else {
-      //   return;
-      // }
     },
 
     //对话框的确认按钮
     Accept() {
       this.Posbollen = true;
       //配置（对话框）
-      console.log(this.replay[this.curren_index]);
 
-      this.replay[this.curren_index].RecordChannelIndex = parseInt(
-        this.PlayChannelIndex
-      );
-      this.replay[this.curren_index].RecordRXGain = parseInt(this.PlayTXGain);
-      this.replay[this.curren_index].PlayStartPos = parseInt(this.PlayStartPos);
-      console.log(this.replay[this.curren_index].PlayStartPos);
+      // this.replay[this.curren_index].RecordChannelIndex = parseInt(
+      //   this.PlayChannelIndex
+      // );
+      // this.replay[this.curren_index].RecordRXGain = parseInt(this.PlayTXGain);
+      // this.replay[this.curren_index].PlayStartPos = parseInt(this.PlayStartPos);
+      // console.log(this.replay[this.curren_index].PlayStartPos);
       this.dialogreplay = false;
+      console.log(this.ClientData);
+      window.localStorage.setItem(
+        "clientdata",
+        JSON.stringify(this.ClientData)
+      );
+      // console.log(this.ClientData[this.curren_index].PlayChannelIndex);
+      // console.log(this.ClientData);
     },
 
     //对话框的关闭按钮
@@ -940,7 +940,7 @@ export default {
           });
         } else {
           //socket请求----
-          var ws = new WebSocket("ws://192.168.1.75:9001");
+          var ws = new WebSocket("ws://" + this.ws + ":9001");
           ws.onopen = function (e) {
             // console.log(ws.readyState);
             for (var i = 0; i < data.length; i++) {
@@ -1095,7 +1095,7 @@ export default {
                     },
                   })
                 );
-                var ws = new WebSocket("ws://192.168.1.75:9001");
+                var ws = new WebSocket("ws://" + this.ws + ":9001");
                 ws.onopen = function (e) {
                   ws.send(
                     JSON.stringify({
@@ -1217,7 +1217,7 @@ export default {
       if (this.replayboolen == true) {
         this.replayboolen = false;
         //socket请求----
-        var ws = new WebSocket("ws://192.168.1.75:9001");
+        var ws = new WebSocket("ws://" + this.ws + ":9001");
         ws.onopen = function (e) {
           // console.log(ws.readyState);
           for (var i = 0; i < data.length; i++) {
@@ -1324,7 +1324,7 @@ export default {
             });
           } else {
             //socket请求----
-            var ws = new WebSocket("ws://192.168.1.75:9001");
+            var ws = new WebSocket("ws://" + this.ws + ":9001");
             ws.onopen = function (e) {
               // console.log(ws.readyState);
               ws.send(
@@ -1418,7 +1418,7 @@ export default {
 
       if (this.replayboolen == true) {
         //socket请求----
-        var ws = new WebSocket("ws://192.168.1.75:9001");
+        var ws = new WebSocket("ws://" + this.ws + ":9001");
         ws.onopen = function (e) {
           // console.log(ws.readyState);
           for (var i = 0; i < data.length; i++) {
@@ -1526,7 +1526,7 @@ export default {
             });
           } else {
             //socket请求----
-            var ws = new WebSocket("ws://192.168.1.75:9001");
+            var ws = new WebSocket("ws://" + this.ws + ":9001");
             ws.onopen = function (e) {
               // console.log(ws.readyState);
               ws.send(
