@@ -569,8 +569,6 @@ export default {
           that.RemainHarddiskSize = parseInt(size) - 6000000000;
           console.log(size);
           console.log(that.RemainHarddiskSize);
-
-          // console.log(that.RemainHarddiskSize);
         }
         //关闭socket连接
         ws.close();
@@ -748,6 +746,7 @@ export default {
 
     //多选框选中的事件
     Checkedrecord(e, item) {
+      this.getRemainHarddiskSize();
       let index = item.RecordChannelIndex;
       if (e.target.checked == true) {
         this.IndexList.unshift(index);
@@ -980,6 +979,7 @@ export default {
 
                 //关闭TCP连接
                 ws.close();
+                
               };
             }
             //内置存储内置存储内置存储内置存储内置存储内置存储内置存储内置存储
@@ -1047,6 +1047,7 @@ export default {
                 }
                 //关闭TCP连接
                 ws.close();
+                
               };
             }
 
@@ -1284,6 +1285,7 @@ export default {
 
                       //关闭TCP连接
                       ws.close();
+                      
                     };
                   }
                   //内置存储内置存储内置存储内置存储内置存储内置存储内置存储内置存储内置存储
@@ -1391,12 +1393,12 @@ export default {
                       }
                       //关闭TCP连接
                       ws.close();
+                      
                     };
                     outboolen == false;
                   }
                   //外置存储外置存储外置
                 }
-                this.getRemainHarddiskSize();
               }, 800);
             }
           }
@@ -1466,6 +1468,7 @@ export default {
   width: 98%;
   height: auto;
   margin: 0rem auto;
+  max-height: 800px;
   overflow-x: scroll;
 }
 .table {

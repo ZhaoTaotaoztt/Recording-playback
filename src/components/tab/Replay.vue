@@ -140,18 +140,19 @@
       RemainHarddisk Size: &nbsp;&nbsp;&nbsp;{{
         (RemainHarddiskSize / 1000000000).toFixed(3)
       }}
-      GB &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      GB &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      RemainExHarddiskSize: &nbsp;&nbsp;&nbsp;{{
+        (RemainExHarddiskSize / 1000000000).toFixed(3)
+      }}
+      GB
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
       &nbsp;&nbsp;&nbsp;&nbsp;<span
         style="color: rgb(245, 124, 0); font-size: 1.5rem"
         >Playback progress:&nbsp;<span>{{ playProgress }}%</span></span
       >
     </p>
     <p>
-      RemainExHarddiskSize: &nbsp;&nbsp;&nbsp;{{
-        (RemainExHarddiskSize / 1000000000).toFixed(3)
-      }}
-      GB
+      
     </p>
 
     <p>
@@ -187,6 +188,7 @@
         >Stop SynRecord</el-button
       >
     </p>
+    <!-- <button @click="getProgress">click</button> -->
   </div>
 </template>
 
@@ -203,7 +205,7 @@ export default {
 
       replay: [
         // {
-        //   FileName: "gnss_3345678683688856_20211227_103250_325_115910_456.bin",
+        //   FileName: "gnss_3345678683688856_20211227_103250_325_105910_456.bin",
         //   FileSize: 154090653200,
         //   BitNumber: 16,
         //   SampleRate: 122880000,
@@ -325,7 +327,7 @@ export default {
       count: 0,
 
       curren_index: 0, //获取index，取到当下点击的是哪一条数据
-      playFileName: [],
+      playFileName: [], //查询哪些在回放，获取当前回放文件的FileName,用来获取录制花费的时间
 
       playProgress: 0, //回放进度
       time: {
@@ -408,40 +410,115 @@ export default {
     getProgress() {
       var settime = null;
       // console.log(this.replay);
-      var filename = this.replay.filter((item) => {
+      var filename = [];
+      filename = this.replay.filter((item) => {
         return item.isRecording == 0 && item.isPlaying == 1;
       });
-      this.playFileName = filename;
-      // console.log(1234567);
-      // console.log(this.playFileName);
-      // console.log(this.playFileName[0].FileName); //.FileName当找不到正在回放的数据是，就会在报错，是因为没有找到，不会影响功能进行
-      var fileTime = this.playFileName[0].FileName;
-      // console.log(fileTime);
-      var a = fileTime.split("_")[3];
-      var b = fileTime.split("_")[5];
-      var c = fileTime.split("_")[2];
-      var time = b - a;
-      console.log("文件时间为" + time);
+      console.log("filename", filename.length);
+      if (filename.length == 0) {
+        this.playProgress = 0;
+        console.log("this.time.setinterTime", this.time.setinterTime);
+        clearInterval(this.time.setinterTime);
+        this.time.setinterTime = null;
+        return;
+      } else {
+        this.playFileName = filename;
+        console.log(this.playFileName);
+        console.log(this.playFileName[0].FileName); //.FileName当找不到正在回放的数据是，就会在报错，是因为没有找到，不会影响功能进行
+        var fileTime = this.playFileName[0].FileName;
+        var start = fileTime.split("_")[3];
+        var end = fileTime.split("_")[5];
+        var a = parseInt(
+          (start[0] + start[1]) * 60 +
+            (start[2] + start[3]) +
+            (start[4] + start[5]) / 60
+        );
+        var b = parseInt(
+          (end[0] + end[1]) * 60 + (end[2] + end[3]) + (end[4] + end[5]) / 60
+        );
+        console.log(a);
+        console.log(b);
+        var x = b - a;
 
-      var that = this;
-      this.time.setinterTime = setInterval(() => {
-        that.time.nEndTime = formatDate("hhmmss");
-        console.log("End为" + that.time.nEndTime);
-        console.log("Start为" + that.time.nStartTime);
-        console.log("差为" + (that.time.nEndTime - that.time.nStartTime));
+        if (x !== this.time.FileTime) {
+          this.time.FileTime = x;
+          console.log("FileTime", this.time.FileTime);
 
-        that.playProgress = (
-          ((that.time.nEndTime - that.time.nStartTime) / time) *
-          100
-        ).toFixed(3);
-        console.log("进度为" + that.playProgress);
-        if (that.time.boolen == true) {
-          that.time.boolen == false;
-          console.log("bollen为" + that.time.boolen);
-          clearInterval(that.time.setinterTime);
-          that.playProgress = 0;
+          //开始时间
+          var sTime = formatDate("hhmmss");
+          var sTimeA = parseInt(
+            (sTime[0] + sTime[1]) * 60 +
+              (sTime[2] + sTime[3]) +
+              (sTime[4] + sTime[5]) / 60
+          );
+          this.time.nStartTime = sTimeA;
+          console.log("sTime", sTime);
+          console.log("nStartTime", this.time.nStartTime);  
+
+          //每三秒显示一次,结束时间
+          var that = this;
+          this.time.setinterTime = setInterval(() => {
+            // console.log('this.time.setinterTime',that.time.setinterTime);
+            var time = formatDate("hhmmss");
+            console.log("hhmmss", time);
+            var a = parseInt(
+              (time[0] + time[1]) * 60 +
+                (time[2] + time[3]) +
+                (time[4] + time[5]) / 60
+            );
+            console.log("nEndTime", a);
+            that.time.nEndTime = a;
+
+            that.playProgress = (
+              ((that.time.nEndTime - that.time.nStartTime) /
+                that.time.FileTime) *
+              100
+            ).toFixed(3);
+            console.log("playProgress", that.playProgress);
+            if (that.playProgress < 0) {
+              that.playProgress = 100;
+              clearInterval(that.time.setinterTime);
+              that.time.setinterTime = null;
+            }
+            if (that.playProgress >= 100) {
+              that.playProgress = 100;
+              clearInterval(that.time.setinterTime);
+              that.time.setinterTime = null;
+            }
+          }, 10000);
+        } else {
+          //每三秒显示一次,结束时间
+          var that = this;
+          this.time.setinterTime = setInterval(() => {
+            var time = formatDate("hhmmss");
+            console.log("hhmmss", time);
+            var a = parseInt(
+              (time[0] + time[1]) * 60 +
+                (time[2] + time[3]) +
+                (time[4] + time[5]) / 60
+            );
+            console.log("nEndTime", a);
+            that.time.nEndTime = a;
+
+            that.playProgress = (
+              ((that.time.nEndTime - that.time.nStartTime) /
+                that.time.FileTime) *
+              100
+            ).toFixed(3);
+            console.log("playProgress", that.playProgress);
+            if (that.playProgress < 0) {
+              that.playProgress = 100;
+              clearInterval(that.time.setinterTime);
+              that.time.setinterTime = null;
+            }
+            if (that.playProgress >= 100) {
+              that.playProgress = 100;
+              clearInterval(that.time.setinterTime);
+              that.time.setinterTime = null;
+            }
+          }, 10000);
         }
-      }, 3000);
+      }
     },
     //获取查询所有信息
     getReplay() {
@@ -451,19 +528,6 @@ export default {
 
       this.playFileName = [];
       //获取数据
-
-      var replaying = this.replay.filter(function (item) {
-        return item.isRecording == 0 && item.isPlaying == 1;
-      });
-      // console.log(replaying);
-      if (replaying.length == 0) {
-        // console.log(346780987654321);
-        this.playProgress = 0;
-        this.time.boolen = true;
-      } else {
-        this.time.boolen = false;
-        this.getProgress();
-      }
 
       //socket请求----
       var ws = new WebSocket("ws://" + this.ws + ":9001");
@@ -494,6 +558,30 @@ export default {
           }); //通用错误
         } else {
           that.replay = JSON.parse(e.data).cmd.FileInformations;
+
+          //查询是否有正在回放的文件查询是否有正在回放的文件查询是否有正在回放的文件查询是否有正在回放的文件
+          var replaying = [];
+          replaying = that.replay.filter(function (item) {
+            return item.isRecording == 0 && item.isPlaying == 1;
+          });
+          // console.log(replaying);
+          console.log(346780987654321);
+          if (replaying.length == 0) {
+            console.log("this.time.setinterTime", that.time.setinterTime);
+            that.playProgress = 0;
+            that.time.boolen = true;
+            clearInterval(that.time.setinterTime);
+            that.time.setinterTime = null;
+          } else {
+            console.log("this.time.setinterTime", that.time.setinterTime);
+            that.time.boolen = false;
+            that.getProgress();
+          }
+          if (that.playProgress >= 100) {
+            clearInterval(that.time.setinterTime);
+            that.time.setinterTime = null;
+          }
+          //查询是否有正在回放的文件查询是否有正在回放的文件查询是否有正在回放的文件查询是否有正在回放的文件
 
           //建一个数组用来存， PlayChannelIndex: 0, PlayTXGain: 50,PlayStartPos: 0,
           if (that.count !== that.replay.length) {
@@ -554,7 +642,6 @@ export default {
           // console.log(Allspace);
           // console.log(RecordData);
           // console.log(Availablespace);
-          //that.getProgress(); //调用获取进度函数
         }
 
         //关闭socket连接
@@ -840,7 +927,8 @@ export default {
             //socket请求----
           })
           .catch((err) => {
-            this.replay.checked = false;
+            // console.log(this.replay.checked);
+            // this.replay.checked = false;
             console.log(err);
           });
 
@@ -854,8 +942,8 @@ export default {
       } else {
         return;
       }
-      this.getReplay();
-      this.replay.checked = false;
+      // this.getReplay();
+      // this.replay.checked = false;
 
       //取消所有的复选框的勾选
       this.$refs.checkbox.map(function (item) {
@@ -863,21 +951,6 @@ export default {
       });
       this.IndexList = [];
       //取消所有的复选框的勾选
-
-      //提示不要频繁点击
-      setTimeout(() => {
-        if (this.isclick) {
-          this.isclick = false;
-          setTimeout(() => {
-            this.isclick = true;
-          }, 4000);
-        } else {
-          this.$message({
-            message: "Please do not click frequently！", //请不要频繁点击
-            type: "warning",
-          });
-        }
-      }, 1000);
     },
 
     //显示回放配置对话框
@@ -976,8 +1049,6 @@ export default {
                   });
 
                   //用来计算回放进度的参数
-                  that.time.nStartTime = formatDate("hhmmss");
-                  console.log(formatDate("hhmmss"));
                   that.getProgress();
 
                   break;
@@ -1127,7 +1198,6 @@ export default {
                         });
 
                         //用来计算回放进度的参数
-                        that.time.nStartTime = formatDate("hhmmss");
                         that.getProgress();
 
                         break;
@@ -1619,6 +1689,7 @@ export default {
 #table {
   width: 100%;
   height: auto;
+  max-height: 800px;
   overflow: scroll;
   margin: 0rem auto;
 }
