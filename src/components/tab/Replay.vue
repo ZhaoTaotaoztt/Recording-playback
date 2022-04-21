@@ -188,7 +188,7 @@
         >Stop SynRecord</el-button
       >
     </p>
-    <!-- <button @click="getProgress">click</button> -->
+    <button @click="getProgress">click</button>
   </div>
 </template>
 
@@ -428,16 +428,19 @@ export default {
         var fileTime = this.playFileName[0].FileName;
         var start = fileTime.split("_")[3];
         var end = fileTime.split("_")[5];
-        var a = parseInt(
-          (start[0] + start[1]) * 60 +
-            (start[2] + start[3]) +
-            (start[4] + start[5]) / 60
-        );
-        var b = parseInt(
-          (end[0] + end[1]) * 60 + (end[2] + end[3]) + (end[4] + end[5]) / 60
-        );
-        console.log(a);
-        console.log(b);
+        var a = 
+          parseInt((start[0] + start[1]) * 3600) +
+            parseInt((start[2] + start[3]) *60)+
+            parseInt(start[4] + start[5]*1) 
+        ;
+        var b = 
+         parseInt((end[0] + end[1]) * 3600) + parseInt((end[2] + end[3])*60) + parseInt(end[4] + end[5])
+        ;
+        console.log('小时',(start[0] + start[1]) * 3600);
+        console.log('分',(start[2] + start[3]) * 60);
+        console.log('秒',(start[4] + start[5])*1);
+        console.log('a',a);
+        console.log('b',b);
         var x = b - a;
 
         if (x !== this.time.FileTime) {
@@ -446,11 +449,7 @@ export default {
 
           //开始时间
           var sTime = formatDate("hhmmss");
-          var sTimeA = parseInt(
-            (sTime[0] + sTime[1]) * 60 +
-              (sTime[2] + sTime[3]) +
-              (sTime[4] + sTime[5]) / 60
-          );
+          var sTimeA = parseInt((sTime[0] + sTime[1]) * 3600) + parseInt((sTime[2] + sTime[3])*60) + parseInt(sTime[4] + sTime[5])
           this.time.nStartTime = sTimeA;
           console.log("sTime", sTime);
           console.log("nStartTime", this.time.nStartTime);  
@@ -461,11 +460,7 @@ export default {
             // console.log('this.time.setinterTime',that.time.setinterTime);
             var time = formatDate("hhmmss");
             console.log("hhmmss", time);
-            var a = parseInt(
-              (time[0] + time[1]) * 60 +
-                (time[2] + time[3]) +
-                (time[4] + time[5]) / 60
-            );
+            var a = parseInt((time[0] + time[1]) * 3600) + parseInt((time[2] + time[3])*60) + parseInt(time[4] + time[5])
             console.log("nEndTime", a);
             that.time.nEndTime = a;
 
@@ -482,6 +477,7 @@ export default {
             }
             if (that.playProgress >= 100) {
               that.playProgress = 100;
+              that.time.FileTime=0
               clearInterval(that.time.setinterTime);
               that.time.setinterTime = null;
             }
@@ -492,11 +488,7 @@ export default {
           this.time.setinterTime = setInterval(() => {
             var time = formatDate("hhmmss");
             console.log("hhmmss", time);
-            var a = parseInt(
-              (time[0] + time[1]) * 60 +
-                (time[2] + time[3]) +
-                (time[4] + time[5]) / 60
-            );
+            var a = parseInt((time[0] + time[1]) * 3600) + parseInt((time[2] + time[3])*60) + parseInt(time[4] + time[5])
             console.log("nEndTime", a);
             that.time.nEndTime = a;
 
@@ -568,6 +560,9 @@ export default {
           console.log(346780987654321);
           if (replaying.length == 0) {
             console.log("this.time.setinterTime", that.time.setinterTime);
+            
+            that.time.nStartTime=0
+            console.log("that.time.nStartTime", that.time.nStartTime);
             that.playProgress = 0;
             that.time.boolen = true;
             clearInterval(that.time.setinterTime);
@@ -578,6 +573,7 @@ export default {
             that.getProgress();
           }
           if (that.playProgress >= 100) {
+            that.time.FileTime=0
             clearInterval(that.time.setinterTime);
             that.time.setinterTime = null;
           }
