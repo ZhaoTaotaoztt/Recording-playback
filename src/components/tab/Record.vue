@@ -348,7 +348,7 @@ export default {
       removeData: [], //需要删除的数据
       RecordData: [], //需要录制的数据
 
-      recordboolen: false, //用来石佛允许点击按钮的布尔值
+      recordboolen: false, //用来是否允许点击按钮的布尔值
 
       isclick: true, //用来判断提示不要频繁点击的布尔值
 
