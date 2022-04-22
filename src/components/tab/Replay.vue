@@ -144,26 +144,17 @@
       RemainExHarddiskSize: &nbsp;&nbsp;&nbsp;{{
         (RemainExHarddiskSize / 1000000000).toFixed(3)
       }}
-      GB
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-      &nbsp;&nbsp;&nbsp;&nbsp;<span
+      GB &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;<span
         style="color: rgb(245, 124, 0); font-size: 1.5rem"
         >Playback progress:&nbsp;<span>{{ playProgress }}%</span></span
       >
     </p>
-    <p>
-      
-    </p>
+    <p></p>
 
     <p>
       <el-button class="btn query" @click="getReplay"
         >Query File Info</el-button
       >
-      <el-button class="btn query" @click="QueryPlayId"
-        >Query Replaying ChannelIndex</el-button
-      >
-    </p>
-    <p>
       <el-button class="btn query" @click="StartPlay" v-preventReClick="5000"
         >Start Replay</el-button
       >
@@ -175,6 +166,9 @@
       >
     </p>
     <p>
+      <el-button class="btn query" @click="QueryPlayId"
+        >Query RF Port</el-button
+      >
       <el-button class="btn query" @click="StartSynPlay"
         >Start SynReplay</el-button
       >
@@ -188,7 +182,8 @@
         >Stop SynRecord</el-button
       >
     </p>
-    <button @click="getProgress">click</button>
+    <p></p>
+    <!-- <button @click="getProgress">click</button> -->
   </div>
 </template>
 
@@ -428,19 +423,19 @@ export default {
         var fileTime = this.playFileName[0].FileName;
         var start = fileTime.split("_")[3];
         var end = fileTime.split("_")[5];
-        var a = 
+        var a =
           parseInt((start[0] + start[1]) * 3600) +
-            parseInt((start[2] + start[3]) *60)+
-            parseInt(start[4] + start[5]*1) 
-        ;
-        var b = 
-         parseInt((end[0] + end[1]) * 3600) + parseInt((end[2] + end[3])*60) + parseInt(end[4] + end[5])
-        ;
-        console.log('小时',(start[0] + start[1]) * 3600);
-        console.log('分',(start[2] + start[3]) * 60);
-        console.log('秒',(start[4] + start[5])*1);
-        console.log('a',a);
-        console.log('b',b);
+          parseInt((start[2] + start[3]) * 60) +
+          parseInt(start[4] + start[5] * 1);
+        var b =
+          parseInt((end[0] + end[1]) * 3600) +
+          parseInt((end[2] + end[3]) * 60) +
+          parseInt(end[4] + end[5]);
+        console.log("小时", (start[0] + start[1]) * 3600);
+        console.log("分", (start[2] + start[3]) * 60);
+        console.log("秒", (start[4] + start[5]) * 1);
+        console.log("a", a);
+        console.log("b", b);
         var x = b - a;
 
         if (x !== this.time.FileTime) {
@@ -449,10 +444,13 @@ export default {
 
           //开始时间
           var sTime = formatDate("hhmmss");
-          var sTimeA = parseInt((sTime[0] + sTime[1]) * 3600) + parseInt((sTime[2] + sTime[3])*60) + parseInt(sTime[4] + sTime[5])
+          var sTimeA =
+            parseInt((sTime[0] + sTime[1]) * 3600) +
+            parseInt((sTime[2] + sTime[3]) * 60) +
+            parseInt(sTime[4] + sTime[5]);
           this.time.nStartTime = sTimeA;
           console.log("sTime", sTime);
-          console.log("nStartTime", this.time.nStartTime);  
+          console.log("nStartTime", this.time.nStartTime);
 
           //每三秒显示一次,结束时间
           var that = this;
@@ -460,7 +458,10 @@ export default {
             // console.log('this.time.setinterTime',that.time.setinterTime);
             var time = formatDate("hhmmss");
             console.log("hhmmss", time);
-            var a = parseInt((time[0] + time[1]) * 3600) + parseInt((time[2] + time[3])*60) + parseInt(time[4] + time[5])
+            var a =
+              parseInt((time[0] + time[1]) * 3600) +
+              parseInt((time[2] + time[3]) * 60) +
+              parseInt(time[4] + time[5]);
             console.log("nEndTime", a);
             that.time.nEndTime = a;
 
@@ -477,7 +478,7 @@ export default {
             }
             if (that.playProgress >= 100) {
               that.playProgress = 100;
-              that.time.FileTime=0
+              that.time.FileTime = 0;
               clearInterval(that.time.setinterTime);
               that.time.setinterTime = null;
             }
@@ -488,7 +489,10 @@ export default {
           this.time.setinterTime = setInterval(() => {
             var time = formatDate("hhmmss");
             console.log("hhmmss", time);
-            var a = parseInt((time[0] + time[1]) * 3600) + parseInt((time[2] + time[3])*60) + parseInt(time[4] + time[5])
+            var a =
+              parseInt((time[0] + time[1]) * 3600) +
+              parseInt((time[2] + time[3]) * 60) +
+              parseInt(time[4] + time[5]);
             console.log("nEndTime", a);
             that.time.nEndTime = a;
 
@@ -560,8 +564,8 @@ export default {
           console.log(346780987654321);
           if (replaying.length == 0) {
             console.log("this.time.setinterTime", that.time.setinterTime);
-            
-            that.time.nStartTime=0
+
+            that.time.nStartTime = 0;
             console.log("that.time.nStartTime", that.time.nStartTime);
             that.playProgress = 0;
             that.time.boolen = true;
@@ -573,18 +577,17 @@ export default {
             that.getProgress();
           }
           if (that.playProgress >= 100) {
-            that.time.FileTime=0
+            that.time.FileTime = 0;
             clearInterval(that.time.setinterTime);
             that.time.setinterTime = null;
           }
           //查询是否有正在回放的文件查询是否有正在回放的文件查询是否有正在回放的文件查询是否有正在回放的文件
 
-          //建一个数组用来存， PlayChannelIndex: 0, PlayTXGain: 50,PlayStartPos: 0,
+          //遍历replay长度，建一个数组用来存， PlayChannelIndex: 0, PlayTXGain: 50,PlayStartPos: 0,
           if (that.count !== that.replay.length) {
             that.count = that.replay.length;
             console.log("我可以的");
             var clientdata = [];
-            var index = null;
             for (var i = 0; i < that.replay.length; i++) {
               clientdata.push({
                 PlayChannelIndex: that.replay[i].RecordChannelIndex,
@@ -606,12 +609,10 @@ export default {
               window.localStorage.getItem("clientdata")
             );
           }
-          //建一个数组用来存， PlayChannelIndex: 0, PlayTXGain: 50,PlayStartPos: 0,
+          //遍历replay长度，建一个数组用来存， PlayChannelIndex: 0, PlayTXGain: 50,PlayStartPos: 0,
 
           that.RemainHarddiskSize = JSON.parse(e.data).cmd.RemainHarddiskSize;
-          that.RemainExHarddiskSize = JSON.parse(
-            e.data
-          ).cmd.RemainExHarddiskSize;
+          that.RemainExHarddiskSize = JSON.parse(e.data).cmd.RemainExHarddiskSize;
 
           var arr = JSON.parse(e.data).cmd.FileInformations;
           var Allspace = JSON.parse(e.data).cmd.RemainHarddiskSize;
@@ -660,7 +661,7 @@ export default {
       this.FileName = [];
     },
 
-    //查询板卡id
+    //查询正在回访的板卡id
     QueryPlayId() {
       //下发StartPlay API请求  多条下发
 
@@ -706,7 +707,7 @@ export default {
             if (statu.length == 0) {
               console.log("没有");
               that.$message({
-                message: "No results found!", //未查询到结果
+                message: "Replaying RF Port : No results found!", //未查询到结果
                 type: "warning",
                 duration: 0,
                 showClose: true,
@@ -715,7 +716,7 @@ export default {
               console.log("有");
               for (var i = 0; i < statu.length; i++) {
                 that.$message({
-                  message: statu[i],
+                  message: "Replaying RF Port : " + statu[i],
                   type: "success",
                   duration: 0,
                   showClose: true,
@@ -897,6 +898,7 @@ export default {
                       duration: 0,
                       showClose: true,
                     }); //文件不存在
+                    that.replay=[]//删除掉的文件后台删除了，客户端一直删除不掉不知道什么问题，就在这里进行删除不掉直接把这个数组清空，让用户从新query获取
                     break;
                   case 2:
                     that.$message({
@@ -1275,6 +1277,13 @@ export default {
     StopPlay() {
       //下发StartPlay API请求  单条数据下发
 
+      //停止回放的时候把开始时间清空
+      this.time.nStartTime = 0;
+      this.time.FileTime = 0;
+      clearInterval(this.time.setinterTime);
+      this.time.setinterTime = null;
+      //停止回放的时候把开始时间清空
+
       //this.stopPlayData
       console.log(this.stopPlayData);
       var data = this.stopPlayData;
@@ -1373,6 +1382,13 @@ export default {
     //停止组合回放
     StopSynPlay() {
       //下发StartPlay API请求  单条数据下发
+
+      //停止回放的时候把开始时间清空
+      this.time.nStartTime = 0;
+      this.time.FileTime = 0;
+      clearInterval(this.time.setinterTime);
+      this.time.setinterTime = null;
+      //停止回放的时候把开始时间清空
 
       if (this.replayboolen == true) {
         var data;
@@ -1737,8 +1753,8 @@ table tr td:nth-child(4) div {
   background-color: rgb(245, 154, 35);
   color: white;
   font-size: 1rem;
-  margin-left: 50px;
-  width: 250px;
+  margin-left: 20px;
+  width: 180px;
 }
 .replay >>> table .status {
   width: 22px;

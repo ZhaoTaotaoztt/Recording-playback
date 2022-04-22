@@ -66,10 +66,10 @@ export default {
       },
       loginRules: {
         username: [
-          { required: true, trigger: "blur", validator: validateUsername },
+          { required: true, trigger: "blur",message: "Please enter the account name!", validator: validateUsername },
         ],
         password: [
-          { required: true, trigger: "blur", validator: validatePassword },
+          { required: true, trigger: "blur", message: "The password length is 6 digits!",validator: validatePassword },
         ],
       },
       loading: false,
