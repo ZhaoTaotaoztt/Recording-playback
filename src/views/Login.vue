@@ -77,6 +77,7 @@ export default {
       redirect: undefined,
     };
   },
+
   methods: {
     handleLogin() {
       this.$refs.loginForm.validate((loginForm) => {
@@ -84,7 +85,7 @@ export default {
         if (loginForm) {
           if (
             this.loginForm.username == "admin" &&
-            this.loginForm.password == 111111
+            this.loginForm.password == 'changeself111111'
           ) {
             console.log("管理员登录");
             // this.$store.commit("setUser", this.loginForm);
@@ -96,7 +97,7 @@ export default {
             window.localStorage.setItem("user", JSON.stringify(this.loginForm));
             console.log(JSON.parse(window.localStorage.getItem("user")));
           } else if (
-            this.loginForm.username == "user" &&
+            this.loginForm.username == "admin" &&
             this.loginForm.password == 111111
           ) {
             console.log("用户登录");
@@ -164,9 +165,9 @@ body {
 }
 .home >>> .el-form .el-button {
   width: 92% !important;
-  background-color: rgb(245, 124, 0);
-  border-color: rgb(245, 124, 0);
-  color: black;
+  background-color: rgb(37,91,150);
+  border-color: rgb(37,91,150);
+  color: white;
   font-size: 20px;
 }
 .home >>> .el-form #logo {

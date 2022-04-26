@@ -13,7 +13,6 @@
           <!-- 删除按钮在这 -->
           <th>
             <el-button
-              type="warning"
               icon="el-icon-delete"
               circle
               @click="Deletreplay()"
@@ -40,7 +39,6 @@
           <td class="td">
             <!-- 配置按钮在这 -->
             <el-button
-              type="warning"
               icon="el-icon-document"
               circle
               @click="showplay(index)"
@@ -81,7 +79,6 @@
           <td class="td">{{ item.RecordBandwidth / 1000000 }}</td>
           <td class="td">
             <el-button
-              type="warning"
               class="btn query"
               circle
               @click="ShowMore(item)"
@@ -90,8 +87,9 @@
             >
           </td>
           <!-- 嵌套的表单 点击配置显示的对话框在这-->
+          <!-- 新建录制配置 -->
           <el-dialog
-            title="新建录制配置"
+            title="New recording configuration"
             :visible="dialogreplay"
             id="dialogreplay"
             :before-close="close"
@@ -99,10 +97,7 @@
             class="ui-widget-content"
           >
             <el-form>
-              <el-form-item
-                label="PlayChannelIndex"
-                :label-width="formLabelWidth"
-              >
+              <el-form-item label="Play RF port" :label-width="formLabelWidth">
                 <el-select v-model="ClientData[curren_index].PlayChannelIndex">
                   <el-option label="0" value="0"></el-option>
                   <el-option label="1" value="1"></el-option>
@@ -145,7 +140,7 @@
         (RemainExHarddiskSize / 1000000000).toFixed(3)
       }}
       GB &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;<span
-        style="color: rgb(245, 124, 0); font-size: 1.5rem"
+        style="color: rgb(37,91,150); font-size: 1.5rem"
         >Playback progress:&nbsp;<span>{{ playProgress }}%</span></span
       >
     </p>
@@ -518,6 +513,12 @@ export default {
     },
     //获取查询所有信息
     getReplay() {
+      console.log("ws", this.$store.state.ws);
+      //清楚定时器
+      clearInterval(this.time.setinterTime);
+      this.time.setinterTime = null;
+      console.log("that.time.setinterTime", this.time.setinterTime);
+
       //获取IP地址
       this.ws = this.$store.state.ws;
       console.log(this.ws);
@@ -564,20 +565,24 @@ export default {
           console.log(346780987654321);
           if (replaying.length == 0) {
             console.log("this.time.setinterTime", that.time.setinterTime);
-
+            that.time.nEndTime = 0;
             that.time.nStartTime = 0;
+            that.time.FileTime = 0;
             console.log("that.time.nStartTime", that.time.nStartTime);
             that.playProgress = 0;
             that.time.boolen = true;
             clearInterval(that.time.setinterTime);
             that.time.setinterTime = null;
           } else {
+            clearInterval(that.time.setinterTime);
+            that.time.setinterTime = null;
             console.log("this.time.setinterTime", that.time.setinterTime);
             that.time.boolen = false;
             that.getProgress();
           }
           if (that.playProgress >= 100) {
             that.time.FileTime = 0;
+            that.time.nStartTime = 0;
             clearInterval(that.time.setinterTime);
             that.time.setinterTime = null;
           }
@@ -612,7 +617,9 @@ export default {
           //遍历replay长度，建一个数组用来存， PlayChannelIndex: 0, PlayTXGain: 50,PlayStartPos: 0,
 
           that.RemainHarddiskSize = JSON.parse(e.data).cmd.RemainHarddiskSize;
-          that.RemainExHarddiskSize = JSON.parse(e.data).cmd.RemainExHarddiskSize;
+          that.RemainExHarddiskSize = JSON.parse(
+            e.data
+          ).cmd.RemainExHarddiskSize;
 
           var arr = JSON.parse(e.data).cmd.FileInformations;
           var Allspace = JSON.parse(e.data).cmd.RemainHarddiskSize;
@@ -853,7 +860,11 @@ export default {
       var item;
 
       if (this.replayboolen == true) {
-        this.$confirm("Are you sure you want to delete？") //确定要删除吗
+        this.$confirm("Are you sure you want to delete？", {
+          //确定要删除吗?
+          confirmButtonText: "ACCEPT",
+          cancelButtonText: "CANCEL",
+        }) //确定要删除吗
           .then((_) => {
             //socket请求----
             var ws = new WebSocket("ws://" + this.ws + ":9001");
@@ -898,7 +909,7 @@ export default {
                       duration: 0,
                       showClose: true,
                     }); //文件不存在
-                    that.replay=[]//删除掉的文件后台删除了，客户端一直删除不掉不知道什么问题，就在这里进行删除不掉直接把这个数组清空，让用户从新query获取
+                    that.replay = []; //删除掉的文件后台删除了，客户端一直删除不掉不知道什么问题，就在这里进行删除不掉直接把这个数组清空，让用户从新query获取
                     break;
                   case 2:
                     that.$message({
@@ -1276,14 +1287,6 @@ export default {
     //停止单独回放
     StopPlay() {
       //下发StartPlay API请求  单条数据下发
-
-      //停止回放的时候把开始时间清空
-      this.time.nStartTime = 0;
-      this.time.FileTime = 0;
-      clearInterval(this.time.setinterTime);
-      this.time.setinterTime = null;
-      //停止回放的时候把开始时间清空
-
       //this.stopPlayData
       console.log(this.stopPlayData);
       var data = this.stopPlayData;
@@ -1325,10 +1328,17 @@ export default {
                   duration: 0,
                   showClose: true,
                 });
+                //停止回放的时候把开始时间清空
+                that.time.nStartTime = 0;
+                that.time.FileTime = 0;
+                clearInterval(that.time.setinterTime);
+                that.time.setinterTime = null;
+                that.playProgress = 0;
+                //停止回放的时候把开始时间清空
                 break;
               case 1:
                 that.$message.error({
-                  message: "file does not exist!",
+                  message: "Stop playback failed!", //停止回放失败
                   duration: 0,
                   showClose: true,
                 }); //文件不存在
@@ -1382,14 +1392,6 @@ export default {
     //停止组合回放
     StopSynPlay() {
       //下发StartPlay API请求  单条数据下发
-
-      //停止回放的时候把开始时间清空
-      this.time.nStartTime = 0;
-      this.time.FileTime = 0;
-      clearInterval(this.time.setinterTime);
-      this.time.setinterTime = null;
-      //停止回放的时候把开始时间清空
-
       if (this.replayboolen == true) {
         var data;
         var FileName;
@@ -1436,10 +1438,17 @@ export default {
                       duration: 0,
                       showClose: true,
                     });
+                    //停止回放的时候把开始时间清空
+                    that.time.nStartTime = 0;
+                    that.time.FileTime = 0;
+                    clearInterval(that.time.setinterTime);
+                    that.time.setinterTime = null;
+                    that.playProgress = 0;
+                    //停止回放的时候把开始时间清空
                     break;
                   case 1:
                     that.$message.error({
-                      message: "file does not exist!",
+                      message: "Stop playback failed!", //停止回放失败
                       duration: 0,
                       showClose: true,
                     }); //文件不存在
@@ -1536,7 +1545,7 @@ export default {
                 break;
               case 1:
                 that.$message.error({
-                  message: "fail!",
+                  message: "Failed to stop recording!", //停止录制失败
                   duration: 0,
                   showClose: true,
                 }); //失败
@@ -1641,7 +1650,7 @@ export default {
                     break;
                   case 1:
                     that.$message.error({
-                      message: "fail!",
+                      message: "Failed to stop recording!", //停止录制失败
                       duration: 0,
                       showClose: true,
                     }); //失败
@@ -1750,11 +1759,15 @@ table tr td:nth-child(4) div {
   border: rgb(245, 154, 35) 2px solid;
 }
 .replay >>> p .el-button {
-  background-color: rgb(245, 154, 35);
+  background-color: rgb(37,91,150);
   color: white;
   font-size: 1rem;
   margin-left: 20px;
   width: 180px;
+}
+.replay >>>.el-button {
+  background-color: rgb(37,91,150);
+  color: white;
 }
 .replay >>> table .status {
   width: 22px;

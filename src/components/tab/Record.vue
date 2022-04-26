@@ -3,10 +3,9 @@
     <div id="table">
       <table class="table">
         <tr>
-          <th>id</th>
+          <th>ID</th>
           <th>
             <el-button
-              type="warning"
               icon="el-icon-circle-plus"
               circle
               @click="Showdialog"
@@ -14,7 +13,6 @@
 
             <!-- 删除按钮在这 -->
             <el-button
-              type="warning"
               icon="el-icon-delete"
               circle
               @click="Deletrecord()"
@@ -27,7 +25,7 @@
           <th>Bits</th>
           <!-- <th>SampleRate(Hz)</th> -->
           <th>Band Width(MHz)</th>
-          <th>RXgain(dB)</th>
+          <th>RXGain(dB)</th>
           <th>More Info</th>
         </tr>
         <tr v-for="(item, index) in record" :key="index">
@@ -46,20 +44,13 @@
           <!-- 复选框在这 -->
 
           <td>{{ item.RecordChannelIndex }}</td>
-          <!-- <td>
-            <input
-              type="text"
-              class="text"
-              v-model="item.FileSize"
-              @blur="Blur"
-            />
-          </td> -->
+
           <td>
             <input
               type="text"
               class="text"
               v-model="item.RecordRXFrequency"
-              @blur="Blur"
+              @blur="Blur('RecordRXFrequency', item.RecordRXFrequency)"
             />
           </td>
           <td>
@@ -67,23 +58,16 @@
               type="text"
               class="text"
               v-model="item.BitNumber"
-              @blur="Blur"
+              @blur="Blur('Bits', item.BitNumber)"
             />
           </td>
-          <!-- <td>
-            <input
-              type="text"
-              class="text"
-              v-model="item.SampleRate"
-              @blur="Blur"
-            />
-          </td> -->
+
           <td>
             <input
               type="text"
               class="text"
               v-model="item.RecordBandwidth"
-              @blur="Blur"
+              @blur="Blur('Width', item.RecordBandwidth)"
             />
           </td>
           <td>
@@ -91,12 +75,11 @@
               type="text"
               class="text"
               v-model="item.RecordRXGain"
-              @blur="Blur"
+              @blur="Blur('RXGain', item.RecordRXGain)"
             />
           </td>
           <td class="td">
             <el-button
-              type="warning"
               class="btn query"
               circle
               @click="ShowMore(item)"
@@ -109,10 +92,10 @@
     </div>
 
     <p>
-      <el-button id="btn" @click="StartRecord" v-preventReClick="10000"
+      <el-button id="btn" @click="getSize('one')" v-preventReClick="10000"
         >Start Record</el-button
       >
-      <el-button id="btn" @click="StartSynRecord" v-preventReClick="10000"
+      <el-button id="btn" @click="getSize('two')" v-preventReClick="10000"
         >Start SynRecord</el-button
       >
     </p>
@@ -120,7 +103,11 @@
     <p>
       <a href="" id="a">click here to download your file</a>
       <!-- //导出文件 -->
-      <el-button @click="download(exportdata, 'file.txt', 'text/plain/utf-8')">
+      <el-button
+        @click="
+          acceptFileName(exportdata, 'exportFileNmae.txt', 'text/plain/utf-8')
+        "
+      >
         Export profile
       </el-button>
       <!-- exportdata是需要导出的数据；file.txt是到处时候的文件名字；text/plain/utf-8导出时的格式 -->
@@ -132,8 +119,9 @@
     </p>
 
     <!-- 嵌套的表单 -->
+    <!-- 新建录制配置 -->
     <el-dialog
-      title="新建录制配置"
+      title="New recording configuration"
       id="dialogrecord"
       :visible.sync="dialogrecord"
       :before-close="close"
@@ -147,6 +135,8 @@
             v-model="recordform.id"
             autocomplete="off"
             suffix-icon="xxxx"
+            min="1"
+            max="300"
           ></el-input>
         </el-form-item>
 
@@ -160,15 +150,6 @@
             <el-option label="1" value="1"></el-option>
           </el-select>
         </el-form-item>
-        <!-- 
-        <el-form-item label="Filesize(Byte)" :label-width="formLabelWidth">
-          <el-input
-            type="number"
-            v-model="recordform.FileSize"
-            autocomplete="off"
-            suffix-icon="xxxx"
-          ></el-input>
-        </el-form-item> -->
 
         <el-form-item label="BitNum" :label-width="formLabelWidth">
           <el-select
@@ -249,24 +230,15 @@
           ></el-input>
         </el-form-item>
 
-        <!-- <el-form-item
-          label="RecordFrequency(MHz)"
-          :label-width="formLabelWidth"
-        >
-          <el-input
-            type="number"
-            v-model="recordform.RecordRXFrequency"
-            autocomplete="off"
-            suffix-icon="xxxx"
-          ></el-input>
-        </el-form-item> -->
-
-        <el-form-item label="RecordXRgain(dB)" :label-width="formLabelWidth">
+        <el-form-item label="RecordRXGain(dB)" :label-width="formLabelWidth">
           <el-input
             type="number"
             v-model="recordform.RecordRXGain"
             autocomplete="off"
             suffix-icon="xxxx"
+            min="30"
+            max="70"
+            @blur="Blur('RXGain', recordform.RecordRXGain)"
           ></el-input>
         </el-form-item>
 
@@ -294,12 +266,13 @@
       </el-form>
 
       <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogrecord = false">取 消</el-button>
+        <el-button @click="dialogrecord = false">CANCEL</el-button>
         <el-button type="primary" @click="addRecordData(recordform.id)"
-          >确 定</el-button
+          >ACCEPT</el-button
         >
       </div>
     </el-dialog>
+    <!-- 嵌套的表单 -->
   </div>
 </template>
 
@@ -459,8 +432,6 @@ export default {
       $("#dialogrecord").draggable();
     });
 
-    this.getRemainHarddiskSize();
-
     //获取IP地址
     this.ws = this.$store.state.ws;
     console.log(this.ws);
@@ -494,6 +465,28 @@ export default {
     getfrenquencyData(event) {
       this.recordform.RecordRXFrequency = event;
       console.log(event);
+    },
+
+    //文件下载时，先输入文件名字
+    acceptFileName(text, name, type) {
+      this.$alert(
+        "<p><strong>File name&nbsp;:&nbsp;</strong><input inputType='text' value='Record' id='acceptFileName' style='outline-color: rgb(35, 141, 222);border: 1px solid rgb(231, 236, 247);width: 50%;height: 30%;border-radius: 5px;'> .txt</p>",
+        "Download File",
+        {
+          confirmButtonText: "ACCEPT",
+          dangerouslyUseHTMLString: true,
+        }
+      )
+        .then((_) => {
+          var fileName = document.querySelector("#acceptFileName").value;
+          console.log("this.exportFileNmae", this.exportFileNmae);
+          var exportData=window.localStorage.getItem('recordData')
+          console.log(exportData);
+          this.download(exportData, fileName + ".txt", type);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
     },
 
     //数据下载为txt文件
@@ -539,8 +532,8 @@ export default {
       }
     },
 
-    //获取磁盘大小，用来作为下发录制的参数
-    getRemainHarddiskSize() {
+    //获取磁盘大小，用来作为下发录制文件大小的参数
+    getSize(value) {
       //socket请求----
       var ws = new WebSocket("ws://" + this.ws + ":9001");
       ws.onopen = function (e) {
@@ -566,9 +559,23 @@ export default {
           that.$message.error("通用错误!");
         } else {
           var size = JSON.parse(e.data).cmd.RemainHarddiskSize;
-          that.RemainHarddiskSize = parseInt(size) - 6000000000;
-          console.log(size);
-          console.log(that.RemainHarddiskSize);
+          that.RemainHarddiskSize = parseInt(size) - 12000000000;
+          console.log("原始大小", size);
+          console.log("减去12G", that.RemainHarddiskSize);
+
+          //录制的文件大小，总大小减去12G处以数组的长度
+          for (var i = 0; i < that.RecordData.length; i++) {
+            that.RecordData[i].FileSize = parseInt(
+              that.RemainHarddiskSize / that.RecordData.length
+            );
+          }
+          console.log(that.RecordData);
+          console.log("下发文件大小", that.RecordData[0].FileSize);
+          if(value=='one'){
+            that.StartRecord()
+          }else{
+            that.StartSynRecord()
+          }
         }
         //关闭socket连接
         ws.close();
@@ -661,7 +668,7 @@ export default {
         return -1;
       }
 
-      if (this.record.length > 150) {
+      if (this.record.length > 300) {
         this.$message({
           message: "Up to 150 rows can be configured！", //最多可配置150行
           type: "warning",
@@ -746,7 +753,6 @@ export default {
 
     //多选框选中的事件
     Checkedrecord(e, item) {
-      this.getRemainHarddiskSize();
       let index = item.RecordChannelIndex;
       if (e.target.checked == true) {
         this.IndexList.unshift(index);
@@ -754,8 +760,7 @@ export default {
 
         //需要删除的数据
         this.removeData.push(item.id);
-
-        //需要录制的数据
+        // //需要录制的数据
         this.RecordData.push({
           FileName: "NA",
           FileSize: parseInt(this.RemainHarddiskSize),
@@ -768,20 +773,28 @@ export default {
           Describe: item.Describe,
           isUseExDisk: parseInt(item.isUseExDisk),
         });
-        //录制的文件大小，总大小减去6G处以数组的长度
-        for (var i = 0; i < this.RecordData.length; i++) {
-          this.RecordData[i].FileSize = parseInt(
-            this.RemainHarddiskSize / this.RecordData.length
-          );
-        }
-        console.log(this.RecordData);
-        console.log(this.RecordData[0].FileSize);
+        // //录制的文件大小，总大小减去6G处以数组的长度
+        // for (var i = 0; i < this.RecordData.length; i++) {
+        //   this.RecordData[i].FileSize = parseInt(
+        //     this.RemainHarddiskSize / this.RecordData.length
+        //   );
+          console.log(this.RecordData);
+        //   console.log("下发文件大小", this.RecordData[0].FileSize);
+        // }
       } else {
         this.IndexList.splice(this.IndexList.indexOf(index), 1);
         this.RecordData.splice(this.IndexList.indexOf(index), 1);
         this.removeData.splice(this.IndexList.indexOf(index), 1);
         this.recordboolen = false;
         // console.log(this.RecordData);
+        //录制的文件大小，总大小减去6G处以数组的长度
+        for (var i = 0; i < this.RecordData.length; i++) {
+          this.RecordData[i].FileSize = parseInt(
+            this.RemainHarddiskSize / this.RecordData.length
+          );
+        }
+        console.log("this.RecordData", this.RecordData);
+        // console.log("下发文件大小", this.RecordData[0].FileSize);
       }
     },
 
@@ -805,8 +818,8 @@ export default {
       if (this.recordboolen == true) {
         this.$confirm("Are you sure you want to delete?", {
           //确定要删除吗?
-          confirmButtonText: "Determine",
-          cancelButtonText: "Cancel",
+          confirmButtonText: "ACCEPT",
+          cancelButtonText: "CANCEL",
         })
           .then((_) => {
             //console.log(ids);return false;
@@ -845,10 +858,101 @@ export default {
     },
 
     //页面中的输入框失去焦点事件
-    Blur() {
+    Blur(name, value) {
       //存数据
-      console.log(111);
-      window.localStorage.setItem("recordData", JSON.stringify(this.record));
+      console.log("name", name);
+      console.log("value", value);
+      //RecordRXFrequency判断
+      if (name == "RecordRXFrequency") {
+        if ((value >= 1 && value <= 5000) || value == null) {
+          console.log("行通了");
+
+          //存到浏览器
+          window.localStorage.setItem(
+            "recordData",
+            JSON.stringify(this.record)
+          );
+        } else {
+          console.log("行不通");
+          this.$message({
+            message: "Ranges: 1<=Ranges<=5000", //输入不正确
+            type: "warning",
+            duration: 0,
+            showClose: true,
+          });
+        }
+      }
+
+      //Bits判断
+      if (name == "Bits") {
+        if (value == 8 || value == 16) {
+          console.log("行通了");
+
+          //存到浏览器
+          window.localStorage.setItem(
+            "recordData",
+            JSON.stringify(this.record)
+          );
+        } else {
+          console.log("行不通");
+          this.$message({
+            message: "Ranges: 8 16", //输入不正确
+            type: "warning",
+            duration: 0,
+            showClose: true,
+          });
+        }
+      }
+
+      //Width判断
+      if (name == "Width") {
+        if (
+          value == 8 ||
+          value == 15 ||
+          value == 25 ||
+          value == 50 ||
+          value == 100
+        ) {
+          console.log("行通了");
+
+          //存到浏览器
+          window.localStorage.setItem(
+            "recordData",
+            JSON.stringify(this.record)
+          );
+        } else {
+          console.log("行不通");
+          this.$message({
+            message: "Ranges: 8 15 25 50 100", //输入不正确
+            type: "warning",
+            duration: 0,
+            showClose: true,
+          });
+        }
+      }
+
+      //Width判断
+      if (name == "RXGain") {
+        if (value >= 30 && value <= 70) {
+          console.log("行通了");
+
+          //存到浏览器
+          window.localStorage.setItem(
+            "recordData",
+            JSON.stringify(this.record)
+          );
+        } else {
+          console.log("行不通");
+          this.$message({
+            message: "Ranges: 30<=value<=70", //输入不正确
+            type: "warning",
+            duration: 0,
+            showClose: true,
+          });
+        }
+      }
+
+      // window.localStorage.setItem("recordData", JSON.stringify(this.record));
 
       //取数据
       this.record = JSON.parse(window.localStorage.getItem("recordData"));
@@ -911,6 +1015,9 @@ export default {
             var that = this;
             var outboolen = false;
 
+            console.log("int", int);
+            console.log("out", out);
+
             // //socket请求----
             var ws = new WebSocket("ws://" + this.ws + ":9001");
 
@@ -957,6 +1064,9 @@ export default {
                         duration: 0,
                         showClose: true,
                       });
+                      for (var i = 0; i < that.RecordData.length; i++) {
+                        that.RecordData[i].FileSize = 0;
+                      }
                       break;
                     case 1:
                       that.$message.error({
@@ -968,7 +1078,7 @@ export default {
                     case 2:
                       that.$message({
                         message:
-                          "The card channel ID has been used and can be modified or re added in the edit box!", //板卡板卡通道ID已经被使用，可在编辑框修改或者重新添加
+                          "The card channel ID has been used and can be modified or re added in the edit box!", //板卡通道ID已经被使用，可在编辑框修改或者重新添加
                         type: "warning",
                         duration: 0,
                         showClose: true,
@@ -979,7 +1089,6 @@ export default {
 
                 //关闭TCP连接
                 ws.close();
-                
               };
             }
             //内置存储内置存储内置存储内置存储内置存储内置存储内置存储内置存储
@@ -1047,7 +1156,6 @@ export default {
                 }
                 //关闭TCP连接
                 ws.close();
-                
               };
             }
 
@@ -1074,6 +1182,9 @@ export default {
                         duration: 0,
                         showClose: true,
                       });
+                      for (var i = 0; i < that.RecordData.length; i++) {
+                        that.RecordData[i].FileSize = 0;
+                      }
                       break;
                     case 1:
                       that.$message.error("Recording failed!"); //录制失败
@@ -1217,8 +1328,17 @@ export default {
                 var outboolen = false;
 
                 console.log(1111);
-                console.log(int);
-                // //socket请求----
+                console.log("int", int);
+                console.log(
+                  "intJSON",
+                  JSON.stringify({
+                    cmd: {
+                      APIName: "AddFileInfo",
+                      FileInformations: int,
+                    },
+                  })
+                );
+                //socket请求----
                 var ws = new WebSocket("ws://" + this.ws + ":9001");
                 for (var i = 0; i < data.length; i++) {
                   // console.log(data[i].isUseExDisk);
@@ -1263,6 +1383,9 @@ export default {
                               duration: 0,
                               showClose: true,
                             });
+                            for (var i = 0; i < that.RecordData.length; i++) {
+                              that.RecordData[i].FileSize = 0;
+                            }
                             break;
                           case 1:
                             that.$message.error({
@@ -1285,7 +1408,6 @@ export default {
 
                       //关闭TCP连接
                       ws.close();
-                      
                     };
                   }
                   //内置存储内置存储内置存储内置存储内置存储内置存储内置存储内置存储内置存储
@@ -1372,6 +1494,9 @@ export default {
                               duration: 0,
                               showClose: true,
                             });
+                            for (var i = 0; i < that.RecordData.length; i++) {
+                              that.RecordData[i].FileSize = 0;
+                            }
                             break;
                           case 1:
                             that.$message.error({
@@ -1393,7 +1518,6 @@ export default {
                       }
                       //关闭TCP连接
                       ws.close();
-                      
                     };
                     outboolen == false;
                   }
@@ -1494,8 +1618,6 @@ export default {
   border: none;
   color: gray;
   text-align: center;
-  /* width: 100%;
-  height: 100%; */
 }
 .table td .text {
   outline-color: rgb(37, 141, 222);
@@ -1523,11 +1645,16 @@ export default {
   border: rgb(245, 154, 35) 3px solid;
 }
 .record >>> p .el-button {
-  background-color: rgb(245, 154, 35);
+  background-color: rgb(37,91,150);
   color: white;
   font-size: 1rem;
   margin-left: 50px;
   width: 190px;
+}
+.record >>> .el-button {
+  background-color: rgb(37,91,150);
+  color: white;
+  font-size: 1rem;
 }
 
 /* 这是控制描述信息那列数据 */
@@ -1554,6 +1681,14 @@ export default {
   margin-left: -5%;
   width: 50%;
 }
+.record >>> #acceptFileName {
+  outline-color: rgb(35, 141, 222);
+  border: 1px solid rgb(231, 236, 247);
+  width: 15%;
+  height: 20%;
+  border-radius: 5px;
+}
+
 .record >>> .el-input--suffix .el-input__inner {
   margin-left: 35% !important;
 }

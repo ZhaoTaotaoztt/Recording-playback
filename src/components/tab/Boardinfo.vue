@@ -2,12 +2,19 @@
 <template>
   <div class="boardinfo">
     <div class="sn">
-      <P>WS:&nbsp;<input type="text" name="" id="saveid" v-model="ws" @change="SaveIP"></P>
+      <!-- <P
+        >IP:&nbsp;<input
+          type="text"
+          name=""
+          id="saveid"
+          v-model="ws"
+          @change="SaveIP"
+      /></P> -->
       <P>SN:&nbsp;{{ SN }}</P>
-      <P>BoardInfo</P>
+      <P v-show="isShowTable">BoardInfo</P>
     </div>
 
-    <table>
+    <table v-show="isShowTable">
       <tr>
         <th>Port</th>
         <th>PortStatus</th>
@@ -25,6 +32,7 @@
     </table>
     <p>
       <el-button
+        v-show="isShowTable"
         id="btn"
         class="btn"
         @click="getBoardinfo"
@@ -51,19 +59,25 @@ export default {
       isclick: true, //用来判断提示不要频繁点击的布尔值
       showWarn: false,
       showBoard: false, //是否有权限查看信息
-      ws: "192.168.1.75",//ip地址
+      ws: "192.168.1.75", //ip地址
+      isShowTable: true, //是否显示table信息
     };
   },
   mounted() {
-    var user = JSON.parse(window.localStorage.getItem("user"));
-    console.log(user.username);
-    if (user.username == "admin") {
-      this.showBoard = true;
+    //获取域名
+    console.log("hostname", window.location.hostname);
+    var ws = window.location.hostname;
+    if ((ws = "localhost")) {
+      ws = "192.168.1.75";
+      this.$store.commit("getIP", ws);
+      console.log(this.$store.state.ws);
     } else {
-      return;
+      this.$store.commit("getIP", ws);
+      console.log(this.$store.state.ws);
     }
+
     //socket请求
-    var ws = new WebSocket("ws://"+this.ws+":9001");
+    var ws = new WebSocket("ws://" + this.ws + ":9001");
     ws.onopen = function (e) {
       // console.log(ws.readyState);
       ws.send(
@@ -97,6 +111,16 @@ export default {
       };
     };
     //socket请求
+
+    var user = JSON.parse(window.localStorage.getItem("user"));
+    console.log(user.username);
+    if (user.password == "changeself111111") {
+      this.showBoard = true;
+      this.isShowTable = true;
+    } else {
+      this.isShowTable = false;
+      return;
+    }
   },
   methods: {
     //查询板卡信息
@@ -115,7 +139,7 @@ export default {
         console.log("显示成功");
         //获取boardinfo数据
         //socket请求----
-        var ws = new WebSocket("ws://"+this.ws+":9001");
+        var ws = new WebSocket("ws://" + this.ws + ":9001");
         ws.onopen = function (e) {
           // console.log(ws.readyState);
           ws.send(
@@ -169,11 +193,11 @@ export default {
     //退出登录
     Signout() {
       this.$confirm("Are you sure to close it？", {
-        confirmButtonText: "Determine",
-        cancelButtonText: "Cancel",
+        confirmButtonText: "ACCEPT",
+        cancelButtonText: "CANCEL",
       })
         .then((_) => {
-          this.$store.commit("setUser", null);
+          window.localStorage.removeItem("user");
           this.$router.push("/");
         })
         .catch((err) => {
@@ -181,13 +205,13 @@ export default {
         });
     },
 
-    //存储请求的IP地址
-    SaveIP(){
-      console.log(this.ws);
-      var ws=this.ws
-      this.$store.commit("getIP", ws)
-      console.log(this.$store.state.ws);
-    },
+    // //存储请求的IP地址
+    // SaveIP() {
+    //   console.log(this.ws);
+    //   var ws = this.ws;
+    //   this.$store.commit("getIP", ws);
+    //   console.log(this.$store.state.ws);
+    // },
   },
 };
 </script>
@@ -219,7 +243,7 @@ table td {
   position: relative;
 }
 .boardinfo >>> p .el-button {
-  background-color: rgb(245, 154, 35);
+  background-color: rgb(37,91,150);
   color: white;
   font-size: 1rem;
   margin-left: 50px;
@@ -242,8 +266,8 @@ table td {
   border-radius: 5px;
   border: rgb(245, 124, 0) solid 1px;
 }
-#saveid{
-  outline-color: rgb(35,141,222);
+#saveid {
+  outline-color: rgb(35, 141, 222);
   border: 1px solid rgb(231, 236, 247);
   width: 15%;
   height: 20%;
